@@ -65,6 +65,51 @@ body { font-family: 'Inter', system-ui, sans-serif; color: #334155; }
 .total-badge { background: var(--rojo-suave); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
 .zona-aviso { background-color: #f1f5f9; padding: 12px; border-radius: 12px; font-size: 0.75em; color: #475569; margin-top: 15px; text-align: center; border: 1px dashed #cbd5e1; }
 
+.resumen-menu {
+    margin-bottom: 25px;
+    background: #fff;
+    border-radius: 22px;
+    padding: 20px;
+    border: 2px solid #fde68a;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+.resumen-menu-title {
+    font-weight: 800;
+    margin-bottom: 15px;
+    color: var(--azul-oscuro);
+    text-align: center;
+    text-transform: uppercase;
+}
+.resumen-menu-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.resumen-menu-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    padding: 8px 0;
+}
+.resumen-menu-total {
+    margin-top: 10px;
+    background: var(--rojo-suave);
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 800;
+}
+.resumen-menu-note {
+    margin-top: 12px;
+    font-size: 0.8em;
+    color: #475569;
+    text-align: center;
+}
+
 .datos-cliente { background-color: #f0fdf4; padding: 20px; border-radius: 25px; border: 1px solid #dcfce7; }
 .input-group { margin-bottom: 15px; position: relative; }
 .input-group label { display: block; margin-bottom: 5px; font-size: 0.85em; font-weight: 700; color: #166534; padding-left: 5px; }

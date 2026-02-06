@@ -15,6 +15,24 @@
 </div>
 
 <div class="contenedor">
+    <div class="resumen-menu" id="resumen-menu" style="display:none;">
+        <div class="resumen-menu-title">Resumen del pedido realizado</div>
+        <div id="resumen-menu-items"></div>
+        <div class="resumen-menu-row">
+            <span>Subtotal</span>
+            <strong id="resumen-menu-subtotal">$ 0</strong>
+        </div>
+        <div class="resumen-menu-row">
+            <span>Envío</span>
+            <strong id="resumen-menu-envio">$ 0</strong>
+        </div>
+        <div class="resumen-menu-total">
+            <span>Total</span>
+            <strong id="resumen-menu-total">$ 0</strong>
+        </div>
+        <div class="resumen-menu-note">Revisá tu pedido antes de enviarlo por WhatsApp.</div>
+    </div>
+
     <div id="cargando" style="text-align:center; padding: 40px; color: var(--rojo-toro);">
         <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Cargando menú...
     </div>
@@ -78,7 +96,6 @@
 
 <script>
     const TELEFONO_NEGOCIO = "5493814130520"; 
-    const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv"; 
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycby5-AAAxjPm68aNc6hQ0zk6prVUoGe5TAlWUCbzq3eKHW8_mkZneSZ0GM8Tb5sOExs_/exec";
 
     const COSTO_ENVIO_BASE = 1500; 
@@ -86,99 +103,6 @@
 
     function formatearMoneda(valor) { return `$ ${Number(valor).toLocaleString('es-AR')}`; }
 
-    function toggleCategoria(elemento) {
-        const bloquePadre = elemento.parentElement;
-        const estaActiva = bloquePadre.classList.contains('activa');
-        document.querySelectorAll('.categoria-bloque').forEach(b => b.classList.remove('activa'));
-        if (!estaActiva) {
-            bloquePadre.classList.add('activa');
-            setTimeout(() => { elemento.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
-        }
-    }
-
-    function cambiarCant(id, delta) {
-        const display = document.getElementById(`qty-val-${id}`);
-        let valor = parseInt(display.innerText) + delta;
-        if (valor < 0) valor = 0;
-        if (valor > 9) valor = 9;
-        display.innerText = valor;
-        calcularResumen();
-    }
-
-    async function obtenerMenu() {
-        try {
-            const respuesta = await fetch(URL_CSV);
-            const datosCsv = await respuesta.text();
-            const filas = datosCsv.split("\n").slice(1);
-            const menuAgrupado = {};
-            filas.forEach((fila, indice) => {
-                const columnas = fila.split(",");
-                if(columnas.length >= 5) {
-                    const cat = columnas[1].trim();
-                    if(!menuAgrupado[cat]) menuAgrupado[cat] = [];
-                    menuAgrupado[cat].push({ 
-                        idReal: columnas[0].trim(), nombre: columnas[2].trim(), 
-                        desc: columnas[3].trim(), precio: parseFloat(columnas[4]), 
-                        img: columnas[5]?.trim() || "", catOriginal: cat, idInt: indice
-                    });
-                }
-            });
-            document.getElementById('cargando').style.display = 'none';
-            dibujarMenu(menuAgrupado);
-        } catch (e) { console.error(e); }
-    }
-
-    function dibujarMenu(agrupado) {
-        const contenedor = document.getElementById('contenedor-menu');
-        for (const cat in agrupado) {
-            const esPromo = cat.toUpperCase().includes("PROMO");
-            const div = document.createElement('div');
-            div.className = `categoria-bloque ${esPromo ? 'es-promo' : ''}`;
-            div.innerHTML = `<div class="categoria-header" onclick="toggleCategoria(this)"><span>${cat}</span><i class="fa-solid fa-chevron-down"></i></div><div class="categoria-contenido"></div>`;
-            const cont = div.querySelector('.categoria-contenido');
-            agrupado[cat].forEach(p => {
-                const f = document.createElement('div');
-                f.className = 'producto-fila';
-                f.innerHTML = `
-                    <div class="producto-arriba">
-                        <img src="${p.img}" class="producto-img" onerror="this.src='https://via.placeholder.com/150?text=Toro'">
-                        <div class="producto-info">
-                            <span class="producto-nombre">${p.nombre}</span>
-                            <span class="producto-desc">${p.desc}</span>
-                            <span class="producto-precio">${formatearMoneda(p.precio)}</span>
-                        </div>
-                    </div>
-                    <div class="selector-cantidad">
-                        <button class="btn-qty" onclick="cambiarCant(${p.idInt}, -1)"><i class="fa-solid fa-minus"></i></button>
-                        <span class="qty-num" id="qty-val-${p.idInt}" 
-                              data-idreal="${p.idReal}" data-precio="${p.precio}" 
-                              data-nombre="${p.nombre}" data-promo="${esPromo}" data-cat="${p.catOriginal}">0</span>
-                        <button class="btn-qty" onclick="cambiarCant(${p.idInt}, 1)"><i class="fa-solid fa-plus"></i></button>
-                    </div>`;
-                cont.appendChild(f);
-            });
-            contenedor.appendChild(div);
-        }
-    }
-
-    function calcularResumen() {
-        let subtotal = 0; 
-        let htmlItems = "";
-        document.querySelectorAll('.qty-num').forEach(el => {
-            const cant = parseInt(el.innerText);
-            if(cant > 0) {
-                const sub = cant * parseFloat(el.dataset.precio);
-                subtotal += sub;
-                const prefijo = el.dataset.promo === "true" ? "[PROMO] " : "";
-                htmlItems += `<div class="fila-resumen"><span>x${cant} ${prefijo}${el.dataset.nombre}</span><strong>${formatearMoneda(sub)}</strong></div>`;
-            }
-        });
-        const costoEnvio = (subtotal > 0 && subtotal < MINIMO_ENVIO_GRATIS) ? COSTO_ENVIO_BASE : 0;
-        document.getElementById('lista-resumen').innerHTML = htmlItems;
-        document.getElementById('monto-envio').innerText = (subtotal > 0 && subtotal >= MINIMO_ENVIO_GRATIS) ? "¡GRATIS!" : (subtotal > 0 ? formatearMoneda(costoEnvio) : "$ 0");
-        document.getElementById('monto-total-display').innerText = formatearMoneda(subtotal + costoEnvio);
-        document.getElementById('caja-resumen').style.display = subtotal > 0 ? 'block' : 'none';
-    }
 
     async function enviarPedido() {
         const n = document.getElementById('cust-name').value.trim();
@@ -241,7 +165,61 @@
         window.open(`https://wa.me/${TELEFONO_NEGOCIO}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    window.onload = obtenerMenu;
+    function leerPedidoMenu() {
+        const params = new URLSearchParams(window.location.search);
+        let payload = null;
+        const raw = params.get("pedido");
+        if (raw) {
+            try {
+                payload = JSON.parse(decodeURIComponent(raw));
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        if (!payload) {
+            try {
+                const stored = sessionStorage.getItem("toro_pedido");
+                if (stored) payload = JSON.parse(stored);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        return payload;
+    }
+
+    function renderResumenMenu() {
+        const container = document.getElementById("resumen-menu");
+        const list = document.getElementById("resumen-menu-items");
+        const subtotalEl = document.getElementById("resumen-menu-subtotal");
+        const envioEl = document.getElementById("resumen-menu-envio");
+        const totalEl = document.getElementById("resumen-menu-total");
+        if (!container || !list || !subtotalEl || !envioEl || !totalEl) return;
+
+        const payload = leerPedidoMenu();
+        if (!payload || !Array.isArray(payload.items) || payload.items.length === 0) return;
+
+        list.innerHTML = payload.items.map((item) => `
+            <div class="resumen-menu-item">
+                <span>${item.qty}x ${item.name}</span>
+                <strong>${formatearMoneda(item.subtotal)}</strong>
+            </div>
+        `).join("");
+
+        subtotalEl.innerText = formatearMoneda(payload.subtotal || 0);
+        if ((payload.subtotal || 0) > 0 && (payload.delivery || 0) === 0) {
+            envioEl.innerText = "¡GRATIS!";
+        } else {
+            envioEl.innerText = formatearMoneda(payload.delivery || 0);
+        }
+        totalEl.innerText = formatearMoneda(payload.total || 0);
+        container.style.display = "block";
+    }
+
+    function initPedidos() {
+        renderResumenMenu();
+    }
+
+    window.onload = initPedidos;
 </script>
 </body>
 </html>
