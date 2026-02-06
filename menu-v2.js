@@ -2,7 +2,7 @@ const dataV2 = [
     {
         category: "populares",
         items: [
-            { id: "v2-pop-1", name: "Triple cheese", desc: "Triple medallón, cheddar y salsa.", price: 9200, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=320&q=80" },
+            { id: "v2-pop-1", name: "Triple cheese", desc: "Triple medallón, cheddar y salsa.", price: 9200, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=320&q=80", available: false },
             { id: "v2-pop-2", name: "Combo crispy", desc: "Burger crispy + papas + bebida.", price: 11800, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=320&q=80" },
             { id: "v2-pop-3", name: "Papas cheddar", desc: "Papas con cheddar y verdeo.", price: 5200, img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=320&q=80" }
         ]
@@ -11,7 +11,7 @@ const dataV2 = [
         category: "burgers",
         items: [
             { id: "v2-bur-1", name: "Burger clásica", desc: "Carne, queso y pan brioche.", price: 6900, img: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=320&q=80" },
-            { id: "v2-bur-2", name: "Burger BBQ", desc: "Cebolla caramelizada y BBQ.", price: 7600, img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=320&q=80" },
+            { id: "v2-bur-2", name: "Burger BBQ", desc: "Cebolla caramelizada y BBQ.", price: 7600, img: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?auto=format&fit=crop&w=320&q=80", available: false },
             { id: "v2-bur-3", name: "Burger veggie", desc: "Medallón veggie y alioli.", price: 6400, img: "https://images.unsplash.com/photo-1521305916504-4a1121188589?auto=format&fit=crop&w=320&q=80" }
         ]
     },
@@ -49,19 +49,24 @@ const renderV2 = () => {
         const container = document.querySelector(`[data-category="${section.category}"]`);
         if (!container) return;
         container.innerHTML = section.items.map((item) => `
-            <article class="item">
+            <article class="item ${item.available === false ? "is-out" : ""}">
                 <img src="${item.img}" alt="${item.name}">
+                ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                 <div>
                     <h3>${item.name}</h3>
                     <p>${item.desc}</p>
                     <div class="item-price">${formatV2(item.price)}</div>
                 </div>
                 <div class="item-action">
-                    <div class="qty-controls is-empty" data-qty-wrapper="${item.id}">
-                        <button class="qty-btn" data-action="remove" data-id="${item.id}">QUITAR</button>
-                        <div id="qty-${item.id}" class="qty-value">0</div>
-                        <button class="qty-btn" data-action="add" data-id="${item.id}">AGREGAR</button>
-                    </div>
+                    ${
+                        item.available === false
+                            ? `<div class="qty-controls disabled">Producto no disponible</div>`
+                            : `<div class="qty-controls is-empty" data-qty-wrapper="${item.id}">
+                                <button class="qty-btn" data-action="remove" data-id="${item.id}">QUITAR</button>
+                                <div id="qty-${item.id}" class="qty-value">0</div>
+                                <button class="qty-btn" data-action="add" data-id="${item.id}">AGREGAR</button>
+                            </div>`
+                    }
                 </div>
             </article>
         `).join("");
@@ -101,7 +106,7 @@ const updateCartV2 = () => {
 
 const addItemV2 = (id) => {
     const item = dataV2.flatMap(section => section.items).find((i) => i.id === id);
-    if (!item) return;
+    if (!item || item.available === false) return;
     const current = cartV2.get(id) || { ...item, qty: 0 };
     current.qty += 1;
     cartV2.set(id, current);

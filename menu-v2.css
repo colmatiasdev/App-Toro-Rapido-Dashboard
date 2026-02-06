@@ -249,12 +249,30 @@ body {
     border-radius: 18px;
     border: 1px solid #f1f5f9;
     background: var(--gray-bg);
+    position: relative;
 }
 .item img {
     width: 110px;
     height: 90px;
     border-radius: 12px;
     object-fit: cover;
+}
+.item.is-out img {
+    opacity: 0.5;
+    filter: grayscale(0.2);
+}
+.out-badge {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    background: rgba(15, 23, 42, 0.85);
+    color: white;
+    font-size: 0.65rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .item h3 { margin: 0 0 6px; color: var(--dark-blue); }
 .item p { margin: 0 0 6px; font-size: 0.85em; color: var(--gray-text); }
@@ -274,6 +292,14 @@ body {
     padding: 6px;
     border-radius: 10px;
     border: 1px solid #e2e8f0;
+}
+.qty-controls.disabled {
+    color: var(--gray-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: #f8fafc;
+    border-style: dashed;
+    padding: 10px 12px;
 }
 .qty-btn {
     border: none;
