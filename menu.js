@@ -407,6 +407,7 @@ const loadPromoV2 = async () => {
 };
 
 const loadMenuData = async () => {
+    let usedFallback = false;
     try {
         const response = await fetch(URL_CSV);
         if (!response.ok) throw new Error("No se pudo cargar el CSV.");
@@ -414,24 +415,32 @@ const loadMenuData = async () => {
         const mapped = mapCsvToMenu(csvText);
         if (mapped && mapped.length) {
             window.menuData = mapped;
-            return;
+            return false;
         }
         console.warn("No se pudo mapear el CSV. Se usa el menú de ejemplo.");
+        usedFallback = true;
     } catch (error) {
         console.error(error);
+        usedFallback = true;
     }
     window.menuData = sampleMenuData;
+    return usedFallback;
 };
 
 const initMenu = async () => {
+    const loadingEl = document.getElementById("menu-loading");
+    if (loadingEl) loadingEl.style.display = "block";
     await loadHeaderV2();
     await loadPromoV2();
-    await loadMenuData();
+    const usedFallback = await loadMenuData();
     renderMenu(window.menuData);
     updateCartV2();
     initCategoriesV2();
     initSearchV2();
     initActionsV2();
+    if (loadingEl) loadingEl.style.display = "none";
+    const errorEl = document.getElementById("menu-error");
+    if (errorEl) errorEl.style.display = usedFallback ? "flex" : "none";
 };
 
 initMenu();

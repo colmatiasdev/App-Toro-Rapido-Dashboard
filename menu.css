@@ -15,6 +15,27 @@ body {
     color: #334155;
 }
 
+.menu-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--primary-red);
+    font-weight: 700;
+}
+.menu-error {
+    text-align: center;
+    padding: 18px 16px;
+    margin: 0 20px 10px;
+    background: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fdba74;
+    border-radius: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
 .header-premium {
     position: relative;
     background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.8) 100%), 
