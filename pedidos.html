@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Toro Rápido - Pedidos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="pedidos.css">
+    <link rel="stylesheet" href="footer.css">
 </head>
 <body>
 
@@ -31,13 +33,6 @@
             <strong id="resumen-menu-total">$ 0</strong>
         </div>
         <div class="resumen-menu-note">Revisá tu pedido antes de enviarlo por WhatsApp.</div>
-    </div>
-
-    <div class="qty-notice-card">
-        <i class="fa-solid fa-circle-info" style="color: var(--oro-promo); font-size: 1.2em;"></i>
-        <div class="qty-notice-text">
-            <b>¿Necesitás más de 9 unidades?</b> Seleccioná el máximo y avisamos por WhatsApp al confirmar. ¡Nosotros lo modificamos!
-        </div>
     </div>
 
     <div class="resumen-caja" id="caja-resumen">
@@ -86,6 +81,8 @@
     <a href="confirmacion.html" class="boton-confirmacion">
         <i class="fa-solid fa-circle-check fa-lg"></i> CONFIRMAR PEDIDO
     </a>
+
+    <div id="site-footer"></div>
 </div>
 
 <script>
@@ -211,6 +208,23 @@
 
     function initPedidos() {
         renderResumenMenu();
+    }
+
+    async function cargarPie() {
+        const container = document.getElementById("site-footer");
+        if (!container) return;
+        try {
+            const response = await fetch("footer.html");
+            if (!response.ok) return;
+            container.innerHTML = await response.text();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function initPedidos() {
+        renderResumenMenu();
+        await cargarPie();
     }
 
     window.onload = initPedidos;

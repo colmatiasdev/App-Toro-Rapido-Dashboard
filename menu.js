@@ -234,8 +234,12 @@ const renderMenu = (menuData) => {
                                 <button class="qty-btn" data-action="add" data-id="${item.id}">AGREGAR</button>
                             </div>`
                     }
+                    <div class="qty-max-note" id="qty-note-${item.id}">Máximo 10 unidades</div>
                 </div>
             </article>
+            <div class="item-max-info" id="qty-info-${item.id}">
+                <b>¿Necesitás más de 10 unidades?</b> Seleccioná el máximo y avisamos por WhatsApp al confirmar. ¡Nosotros lo modificamos!
+            </div>
         `).join("");
     });
 };
@@ -243,9 +247,14 @@ const renderMenu = (menuData) => {
 const updateQtyUI = (id, qty) => {
     const value = document.getElementById(`qty-${id}`);
     const wrapper = document.querySelector(`[data-qty-wrapper="${id}"]`);
+    const note = document.getElementById(`qty-note-${id}`);
+    const info = document.getElementById(`qty-info-${id}`);
     if (!value || !wrapper) return;
     value.textContent = qty;
     wrapper.classList.toggle("is-empty", qty === 0);
+    const showMax = qty >= MAX_QTY;
+    if (note) note.style.display = showMax ? "block" : "none";
+    if (info) info.style.display = showMax ? "block" : "none";
 };
 
 const updateCartV2 = () => {
@@ -279,15 +288,29 @@ const findItemById = (id) => {
     return null;
 };
 
+const MAX_QTY = 10;
+
+const updateQtyNotice = () => {
+    const notice = document.getElementById("qty-notice");
+    if (!notice) return;
+    const hasMax = Array.from(cartV2.values()).some((item) => item.qty >= MAX_QTY);
+    notice.style.display = hasMax ? "flex" : "none";
+};
+
 const addItemV2 = (id) => {
     const result = findItemById(id);
     if (!result || result.item.available === false) return;
     const { item, category } = result;
     const current = cartV2.get(id) || { ...item, category, qty: 0 };
+    if (current.qty >= MAX_QTY) {
+        updateQtyNotice();
+        return;
+    }
     current.qty += 1;
     cartV2.set(id, current);
     updateQtyUI(id, current.qty);
     updateCartV2();
+    updateQtyNotice();
 };
 
 const removeItemV2 = (id) => {
@@ -302,6 +325,7 @@ const removeItemV2 = (id) => {
         updateQtyUI(id, current.qty);
     }
     updateCartV2();
+    updateQtyNotice();
 };
 
 const initCategoriesV2 = () => {
@@ -397,6 +421,18 @@ const loadPromoV2 = async () => {
     }
 };
 
+const loadFooter = async () => {
+    const container = document.getElementById("site-footer");
+    if (!container) return;
+    try {
+        const response = await fetch("footer.html");
+        if (!response.ok) return;
+        container.innerHTML = await response.text();
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 const loadMenuData = async () => {
     let usedFallback = false;
     try {
@@ -426,11 +462,13 @@ const initMenu = async () => {
     const usedFallback = await loadMenuData();
     renderMenu(window.menuData);
     updateCartV2();
+    updateQtyNotice();
     initCategoriesV2();
     initActionsV2();
     if (loadingEl) loadingEl.style.display = "none";
     const errorEl = document.getElementById("menu-error");
     if (errorEl) errorEl.style.display = usedFallback ? "flex" : "none";
+    await loadFooter();
 };
 
 initMenu();

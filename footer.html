@@ -1,0 +1,42 @@
+<footer class="pedido-pie">
+    <div class="pie-container">
+        <h2 class="pie-title">Información Útil</h2>
+        <div class="pie-grid">
+            <div class="pie-item">
+                <div class="pie-item-title"><i class="fa-brands fa-instagram"></i> Instagram</div>
+                <a class="pie-link ig-gradient" href="https://instagram.com/ToroRapidoOk" target="_blank">
+                    @ToroRapidoOk
+                </a>
+            </div>
+
+            <div class="pie-item">
+                <div class="pie-item-title"><i class="fa-solid fa-money-bill-wave"></i> Medios de Pago</div>
+                <p class="pie-text">Efectivo • Transferencia • Mercado Pago</p>
+                <a class="pie-link" href="https://www.mercadopago.com.ar" target="_blank">Mercado Pago</a>
+            </div>
+
+            <div class="pie-item">
+                <div class="pie-item-title"><i class="fa-solid fa-motorcycle"></i> Envíos</div>
+                <p class="pie-text">Solo delivery en San Miguel de Tucumán</p>
+                <div class="pie-badges">
+                    <span class="badge-plat" style="border-color: #e31a3d; color: #e31a3d">
+                        <i class="fa-solid fa-bicycle"></i> PedidosYa
+                    </span>
+                    <span class="badge-plat" style="border-color: #ff441f; color: #ff441f">
+                        <i class="fa-solid fa-moped"></i> Rappi
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="pie-copyright">
+            &copy; <span id="footer-year"></span> Toro Rápido - S.M. de Tucumán. Todos los derechos reservados.
+        </div>
+    </div>
+</footer>
+
+<script>
+    (function () {
+        const yearEl = document.getElementById("footer-year");
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+    })();
+</script>

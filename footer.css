@@ -1,0 +1,96 @@
+:root {
+    --footer-bg: #ffffff;
+    --footer-text: #0f172a;
+    --footer-muted: #64748b;
+}
+
+.pedido-pie {
+    background: var(--footer-bg);
+    color: var(--footer-text);
+    padding: 32px 16px 20px;
+    font-family: 'Inter', system-ui, sans-serif;
+    border-top: 2px solid #e11d48;
+}
+
+.pie-container { max-width: 1000px; margin: 24px auto 0; }
+
+.pie-title {
+    text-align: center;
+    font-family: 'Bungee', cursive;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+    color: #0f172a;
+}
+
+.pie-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.pie-card { display: none; }
+.pie-card-header { display: none; }
+
+.pie-item {
+    padding: 12px 4px;
+    border-bottom: 1px solid #e2e8f0;
+}
+.pie-item:last-child { border-bottom: none; }
+
+.pie-item-title {
+    font-weight: 800;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e11d48;
+}
+
+.pie-text { font-size: 0.82rem; color: var(--footer-muted); line-height: 1.5; }
+
+.pie-link {
+    color: #e11d48;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.82rem;
+    display: inline-block;
+    margin-top: 6px;
+}
+
+.ig-gradient {
+    display: inline-block;
+    padding: 6px 14px;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    border-radius: 50px;
+    color: white !important;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.78rem;
+}
+
+.pie-badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+
+.badge-plat {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    border: 1px solid;
+    background: #ffffff;
+}
+
+.pay-icons { font-size: 1.3rem; color: #94a3b8; display: flex; gap: 12px; margin-top: 10px; }
+
+.pie-copyright {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 0.68rem;
+    color: #94a3b8;
+}
+
+@media (min-width: 760px) {
+    .pie-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+}

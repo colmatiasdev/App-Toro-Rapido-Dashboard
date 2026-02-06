@@ -6,6 +6,7 @@
     <title>Estado del Pedido - Toro Rápido</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="confirmacion.css">
+    <link rel="stylesheet" href="footer.css">
 </head>
 <body>
 
@@ -47,5 +48,16 @@
     </a>
 </div>
 
+<div id="site-footer"></div>
+
+<script>
+    fetch("footer.html")
+        .then((res) => (res.ok ? res.text() : ""))
+        .then((html) => {
+            const container = document.getElementById("site-footer");
+            if (container) container.innerHTML = html;
+        })
+        .catch(() => {});
+</script>
 </body>
 </html>

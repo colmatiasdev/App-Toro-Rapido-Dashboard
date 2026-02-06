@@ -236,6 +236,28 @@ body {
 .menu > #menu-sections {
     margin-top: 4px;
 }
+
+.qty-notice-card {
+    margin-top: 12px;
+    background-color: #fefce8;
+    border: 1px solid #fef08a;
+    padding: 16px;
+    border-radius: 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    height: fit-content;
+}
+.qty-notice-card i {
+    color: #fbbf24;
+    font-size: 1.2em;
+    margin-top: 2px;
+}
+.qty-notice-text {
+    font-size: 0.85em;
+    color: #854d0e;
+    line-height: 1.5;
+}
 .menu-section { margin-top: 20px; }
 /* Título de categoría moderno */
 .section-title {
@@ -349,6 +371,25 @@ body {
 }
 .qty-controls.is-empty .qty-value {
     color: var(--gray-text);
+}
+.qty-max-note {
+    display: none;
+    margin-top: 6px;
+    font-size: 0.72rem;
+    color: #b45309;
+    font-weight: 700;
+}
+.item-max-info {
+    display: none;
+    width: 100%;
+    margin: 8px 0 4px;
+    background: #fefce8;
+    border: 1px solid #fef08a;
+    padding: 12px 14px;
+    border-radius: 14px;
+    color: #854d0e;
+    font-size: 0.82rem;
+    line-height: 1.45;
 }
 
 .checkout {
