@@ -5,111 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toro Rápido - Menú</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="menu.css">
 </head>
 <body>
-    <header class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-content">
-            <div class="hero-badge">
-                <i class="fa-solid fa-bolt"></i>
-                Toro Rápido
+    <div id="menu-v2-header"></div>
+
+    <div id="menu-v2-promo"></div>
+
+    <nav class="category-tabs" id="category-tabs-v2">
+        <button class="tab active" data-target="v2-populares">Populares</button>
+        <button class="tab" data-target="v2-burgers">Hamburguesas</button>
+        <button class="tab" data-target="v2-papas">Papas</button>
+        <button class="tab" data-target="v2-bebidas">Bebidas</button>
+        <button class="tab" data-target="v2-postres">Postres</button>
+    </nav>
+
+    <div class="content">
+        <main class="menu">
+            <div class="search-row">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="search" id="search-v2" placeholder="Buscar productos">
+                </div>
+                <button class="filter-btn"><i class="fa-solid fa-sliders"></i> Filtros</button>
             </div>
-            <h1>Leño Plaza Independencia</h1>
-            <p>Parrilla y minutas • Envío rápido • Pedidos por WhatsApp</p>
-            <div class="hero-info">
-                <div class="info-pill">
-                    <i class="fa-solid fa-star"></i>
-                    4.7
-                </div>
-                <div class="info-pill">
-                    <i class="fa-regular fa-clock"></i>
-                    35-45 min
-                </div>
-                <div class="info-pill">
-                    <i class="fa-solid fa-motorcycle"></i>
-                    $1.500 envío
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <div class="page">
-        <nav class="category-tabs" id="category-tabs">
-            <button class="tab active" data-target="cat-populares">Populares</button>
-            <button class="tab" data-target="cat-parrilla">Parrilla</button>
-            <button class="tab" data-target="cat-minutas">Minutas</button>
-            <button class="tab" data-target="cat-sandwiches">Sándwiches</button>
-            <button class="tab" data-target="cat-bebidas">Bebidas</button>
-        </nav>
-
-        <main class="layout">
-            <section class="menu" id="menu">
-                <div class="menu-header">
-                    <h2>Menú</h2>
-                    <div class="menu-search">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="search" id="search" placeholder="Buscar en el menú...">
-                    </div>
-                </div>
-
-                <div class="menu-section" id="cat-populares">
-                    <div class="section-title">Populares</div>
-                    <div class="items-grid" data-category="populares"></div>
-                </div>
-
-                <div class="menu-section" id="cat-parrilla">
-                    <div class="section-title">Parrilla</div>
-                    <div class="items-grid" data-category="parrilla"></div>
-                </div>
-
-                <div class="menu-section" id="cat-minutas">
-                    <div class="section-title">Minutas</div>
-                    <div class="items-grid" data-category="minutas"></div>
-                </div>
-
-                <div class="menu-section" id="cat-sandwiches">
-                    <div class="section-title">Sándwiches</div>
-                    <div class="items-grid" data-category="sandwiches"></div>
-                </div>
-
-                <div class="menu-section" id="cat-bebidas">
-                    <div class="section-title">Bebidas</div>
-                    <div class="items-grid" data-category="bebidas"></div>
-                </div>
+            <section class="menu-section" id="v2-populares">
+                <div class="section-title">Populares</div>
+                <div class="items-list" data-category="populares"></div>
             </section>
 
-            <aside class="summary">
-                <div class="summary-card">
-                    <div class="summary-title">Tu pedido</div>
-                    <div id="cart-items" class="summary-items">
-                        <div class="summary-empty">Todavía no agregaste productos.</div>
-                    </div>
-                    <div class="summary-totals">
-                        <div class="row">
-                            <span>Subtotal</span>
-                            <strong id="subtotal">$ 0</strong>
-                        </div>
-                        <div class="row">
-                            <span>Envío</span>
-                            <strong id="delivery">$ 0</strong>
-                        </div>
-                        <div class="row total">
-                            <span>Total</span>
-                            <strong id="total">$ 0</strong>
-                        </div>
-                    </div>
-                    <button class="summary-btn" id="confirm-btn">
-                        <i class="fa-solid fa-circle-check"></i>
-                        Confirmar pedido
-                    </button>
-                    <div class="summary-note">Sujeto a confirmación de zona.</div>
-                </div>
-            </aside>
+            <section class="menu-section" id="v2-burgers">
+                <div class="section-title">Hamburguesas</div>
+                <div class="items-list" data-category="burgers"></div>
+            </section>
+
+            <section class="menu-section" id="v2-papas">
+                <div class="section-title">Papas</div>
+                <div class="items-list" data-category="papas"></div>
+            </section>
+
+            <section class="menu-section" id="v2-bebidas">
+                <div class="section-title">Bebidas</div>
+                <div class="items-list" data-category="bebidas"></div>
+            </section>
+
+            <section class="menu-section" id="v2-postres">
+                <div class="section-title">Postres</div>
+                <div class="items-list" data-category="postres"></div>
+            </section>
         </main>
+
+        <aside class="checkout">
+            <div class="checkout-card" id="resumen-pedido">
+                <div class="checkout-title">Tu pedido</div>
+                <div id="v2-cart" class="checkout-items">
+                    <div class="checkout-empty">Agregá productos para ver el resumen.</div>
+                </div>
+                <div class="checkout-totals">
+                    <div class="row">
+                        <span>Subtotal</span>
+                        <strong id="v2-subtotal">$ 0</strong>
+                    </div>
+                    <div class="row">
+                        <span>Envío</span>
+                        <strong id="v2-envio">$ 0</strong>
+                    </div>
+                    <div class="row total">
+                        <span>Total</span>
+                        <strong id="v2-total">$ 0</strong>
+                    </div>
+                </div>
+                <button class="checkout-btn" id="v2-confirm">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Confirmar pedido
+                </button>
+                <div class="checkout-note">Confirmamos zona de entrega por WhatsApp.</div>
+            </div>
+        </aside>
     </div>
 
-    <a class="floating-cart" href="confirmacion.html">
+    <a class="floating-checkout" href="#resumen-pedido">
         <i class="fa-solid fa-basket-shopping"></i>
         Ver pedido
     </a>
