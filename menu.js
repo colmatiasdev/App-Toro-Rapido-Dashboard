@@ -1,4 +1,7 @@
-const dataV2 = [
+const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv";
+const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x120?text=Toro";
+
+const sampleMenuData = [
     {
         category: "populares",
         items: [
@@ -43,14 +46,173 @@ const deliveryV2 = 1500;
 const freeFromV2 = 25000;
 
 const formatV2 = (value) => `$ ${Number(value).toLocaleString("es-AR")}`;
+const normalizeKey = (value) => value
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+const slugify = (value) => normalizeKey(value).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "categoria";
+const cleanText = (value) => (value ?? "").toString().trim();
 
-const renderV2 = () => {
-    dataV2.forEach((section) => {
-        const container = document.querySelector(`[data-category="${section.category}"]`);
-        if (!container) return;
-        container.innerHTML = section.items.map((item) => `
+const parseCsv = (text) => {
+    const rows = [];
+    let row = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"') {
+            if (inQuotes && next === '"') {
+                current += '"';
+                i += 1;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === "," && !inQuotes) {
+            row.push(current);
+            current = "";
+        } else if ((char === "\n" || char === "\r") && !inQuotes) {
+            if (char === "\r" && next === "\n") {
+                i += 1;
+            }
+            row.push(current);
+            if (row.some((cell) => cell.trim() !== "")) {
+                rows.push(row);
+            }
+            row = [];
+            current = "";
+        } else {
+            current += char;
+        }
+    }
+
+    if (current.length || row.length) {
+        row.push(current);
+        if (row.some((cell) => cell.trim() !== "")) {
+            rows.push(row);
+        }
+    }
+
+    return rows;
+};
+
+const parsePrice = (value) => {
+    const raw = cleanText(value);
+    if (!raw) return 0;
+    let normalized = raw.replace(/[^\d,.-]/g, "");
+    normalized = normalized.replace(/\./g, "").replace(",", ".");
+    const parsed = Number.parseFloat(normalized);
+    return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const parseAvailability = (agotadoValue, stockValue) => {
+    const agotadoRaw = normalizeKey(agotadoValue || "");
+    const stockRaw = normalizeKey(stockValue || "");
+
+    if (agotadoRaw === "si") return false;
+    if (agotadoRaw === "no") return true;
+
+    if (stockRaw) {
+        const amount = Number.parseFloat(stockRaw);
+        if (!Number.isNaN(amount)) return amount > 0;
+    }
+
+    return true;
+};
+
+const mapCsvToMenu = (csvText) => {
+    const rows = parseCsv(csvText);
+    if (rows.length < 2) return null;
+
+    const headers = rows.shift().map((header) => normalizeKey(header));
+    const findIndex = (candidates) => headers.findIndex((header) => candidates.includes(header));
+
+    const idxCategory = findIndex(["categoria", "categorias", "category", "cat", "rubro", "tipo"]);
+    const idxName = findIndex(["producto", "nombre", "product", "name", "titulo", "item"]);
+    const idxDesc = findIndex(["descripcion", "desc", "detalle", "detalleproducto", "descripcionproducto"]);
+    const idxPrice = findIndex(["precio", "price", "valor", "importe", "costo"]);
+    const idxImg = findIndex(["imagen", "img", "image", "foto", "url", "urlimagen", "imagenurl"]);
+    const idxAgotado = findIndex(["productoagotado", "agotado"]);
+    const idxStock = findIndex(["stock"]);
+    const idxId = findIndex(["idproducto", "idprod", "id", "codigo", "sku"]);
+    const idxOrder = findIndex(["orden", "order", "posicion", "position"]);
+
+    if (idxCategory === -1 || idxName === -1 || idxPrice === -1) {
+        console.warn("Faltan columnas requeridas en el CSV: categoria, nombre y precio.");
+        return null;
+    }
+
+    const grouped = new Map();
+    rows.forEach((row, index) => {
+        const category = cleanText(row[idxCategory]) || "Otros";
+        const name = cleanText(row[idxName]);
+        if (!name) return;
+
+        const desc = idxDesc === -1 ? "" : cleanText(row[idxDesc]);
+        const price = parsePrice(row[idxPrice]);
+        const img = idxImg === -1 ? "" : cleanText(row[idxImg]);
+        const agotadoValue = idxAgotado === -1 ? "" : row[idxAgotado];
+        const stockValue = idxStock === -1 ? "" : row[idxStock];
+        const available = parseAvailability(agotadoValue, stockValue);
+        const rawId = idxId === -1 ? "" : cleanText(row[idxId]);
+        const orderValue = idxOrder === -1 ? "" : cleanText(row[idxOrder]);
+        const order = orderValue === "" ? Number.POSITIVE_INFINITY : Number.parseFloat(orderValue);
+        const id = rawId || `${slugify(category)}-${index}`;
+
+        if (!grouped.has(category)) grouped.set(category, []);
+        grouped.get(category).push({
+            id,
+            name,
+            desc,
+            price,
+            img: img || PLACEHOLDER_IMAGE,
+            available,
+            order
+        });
+    });
+
+    return Array.from(grouped.entries()).map(([category, items]) => ({
+        category,
+        items: items.sort((a, b) => {
+            if (a.order !== b.order) return a.order - b.order;
+            return a.name.localeCompare(b.name, "es");
+        })
+    }));
+};
+
+const renderMenu = (menuData) => {
+    const tabsContainer = document.getElementById("category-tabs");
+    const sectionsContainer = document.getElementById("menu-sections");
+    if (!tabsContainer || !sectionsContainer) return;
+
+    tabsContainer.innerHTML = "";
+    sectionsContainer.innerHTML = "";
+
+    menuData.forEach((section, index) => {
+        const sectionId = `cat-${slugify(section.category)}`;
+        const tab = document.createElement("button");
+        tab.className = `tab${index === 0 ? " active" : ""}`;
+        tab.dataset.target = sectionId;
+        tab.textContent = section.category;
+        tabsContainer.appendChild(tab);
+
+        const sectionEl = document.createElement("section");
+        sectionEl.className = "menu-section";
+        sectionEl.id = sectionId;
+        sectionEl.innerHTML = `
+            <div class="section-title">${section.category}</div>
+            <div class="items-list" data-category="${sectionId}"></div>
+        `;
+        sectionsContainer.appendChild(sectionEl);
+
+        const list = sectionEl.querySelector(".items-list");
+        list.innerHTML = section.items.map((item) => `
             <article class="item ${item.available === false ? "is-out" : ""}">
-                <img src="${item.img}" alt="${item.name}">
+                <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}">
                 ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                 <div>
                     <h3>${item.name}</h3>
@@ -105,7 +267,7 @@ const updateCartV2 = () => {
 };
 
 const addItemV2 = (id) => {
-    const item = dataV2.flatMap(section => section.items).find((i) => i.id === id);
+    const item = window.menuData?.flatMap(section => section.items).find((i) => i.id === id);
     if (!item || item.available === false) return;
     const current = cartV2.get(id) || { ...item, qty: 0 };
     current.qty += 1;
@@ -129,7 +291,7 @@ const removeItemV2 = (id) => {
 };
 
 const initCategoriesV2 = () => {
-    const buttons = document.querySelectorAll(".tab");
+    const buttons = document.querySelectorAll("#category-tabs .tab");
     buttons.forEach((btn) => {
         btn.addEventListener("click", () => {
             const target = document.getElementById(btn.dataset.target);
@@ -137,7 +299,7 @@ const initCategoriesV2 = () => {
         });
     });
 
-    const sections = Array.from(document.querySelectorAll(".menu-section"));
+    const sections = Array.from(document.querySelectorAll("#menu-sections .menu-section"));
     const onScroll = () => {
         const top = window.scrollY + 140;
         let activeId = sections[0]?.id;
@@ -201,10 +363,32 @@ const loadPromoV2 = async () => {
     }
 };
 
-loadHeaderV2();
-loadPromoV2();
-renderV2();
-updateCartV2();
-initCategoriesV2();
-initSearchV2();
-initActionsV2();
+const loadMenuData = async () => {
+    try {
+        const response = await fetch(URL_CSV);
+        if (!response.ok) throw new Error("No se pudo cargar el CSV.");
+        const csvText = await response.text();
+        const mapped = mapCsvToMenu(csvText);
+        if (mapped && mapped.length) {
+            window.menuData = mapped;
+            return;
+        }
+        console.warn("No se pudo mapear el CSV. Se usa el menú de ejemplo.");
+    } catch (error) {
+        console.error(error);
+    }
+    window.menuData = sampleMenuData;
+};
+
+const initMenu = async () => {
+    await loadHeaderV2();
+    await loadPromoV2();
+    await loadMenuData();
+    renderMenu(window.menuData);
+    updateCartV2();
+    initCategoriesV2();
+    initSearchV2();
+    initActionsV2();
+};
+
+initMenu();
