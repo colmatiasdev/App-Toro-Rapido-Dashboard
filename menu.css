@@ -233,56 +233,34 @@ body {
     padding: 20px;
     box-shadow: 0 10px 30px rgba(15,23,42,0.08);
 }
-.search-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
+.menu > #menu-sections {
+    margin-top: 4px;
 }
-.search-box {
-    position: relative;
-    flex: 1;
-}
-.search-box i {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-text);
-}
-.search-box input {
-    width: 100%;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 10px 12px 10px 38px;
-    outline: none;
-}
-.filter-btn {
-    border: none;
-    background: #f1f5f9;
+.menu-section { margin-top: 20px; }
+/* Título de categoría moderno */
+.section-title {
+    background: white;
+    padding: 18px 20px;
+    font-weight: 800;
+    font-size: 1.3rem;
     color: var(--dark-blue);
-    padding: 10px 12px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
+    border-left: 6px solid var(--primary-red);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    z-index: 10;
 }
 
-.menu-section { margin-top: 20px; }
-.section-title { font-weight: 800; color: var(--dark-blue); margin-bottom: 12px; }
-.menu-section.section-promo .section-title {
-    color: #7c2d12;
-    background: linear-gradient(90deg, rgba(251, 191, 36, 0.35), rgba(251, 191, 36, 0.15));
-    padding: 8px 14px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid rgba(251, 191, 36, 0.7);
-    box-shadow: 0 8px 16px rgba(251, 191, 36, 0.25);
+/* Estilo exclusivo para PROMOS */
+.section-title.title-promo {
+    background: linear-gradient(90deg, #fffbeb 0%, #ffffff 100%);
+    color: #92400e;
+    border-left: 6px solid #fbbf24; /* Color Oro */
 }
-.menu-section.section-promo .section-title::before {
-    content: "👑";
-    font-size: 1.05em;
+
+.section-title.title-promo i {
+    color: #fbbf24;
+    margin-right: 10px;
+    filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.5));
 }
 .items-list { display: grid; gap: 12px; }
 .item {

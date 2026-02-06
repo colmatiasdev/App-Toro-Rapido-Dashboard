@@ -193,7 +193,7 @@ const renderMenu = (menuData) => {
     sectionsContainer.innerHTML = "";
 
     menuData.forEach((section, index) => {
-        const isPromo = normalizeKey(section.category).includes("promo");
+        const isPromo = section.category.toLowerCase().includes("promo");
         const sectionId = `cat-${slugify(section.category)}`;
         const tab = document.createElement("button");
         tab.className = `tab${isPromo ? " tab-promo" : ""}${index === 0 ? " active" : ""}`;
@@ -206,7 +206,10 @@ const renderMenu = (menuData) => {
         sectionEl.className = `menu-section${isPromo ? " section-promo" : ""}`;
         sectionEl.id = sectionId;
         sectionEl.innerHTML = `
-            <div class="section-title">${section.category}</div>
+            <div class="section-title ${isPromo ? 'title-promo' : ''}">
+                ${isPromo ? '<i class="fa-solid fa-crown"></i>' : ''}
+                ${section.category}
+            </div>
             <div class="items-list" data-category="${sectionId}"></div>
         `;
         sectionsContainer.appendChild(sectionEl);
@@ -327,18 +330,6 @@ const initCategoriesV2 = () => {
     onScroll();
 };
 
-const initSearchV2 = () => {
-    const search = document.getElementById("search-v2");
-    if (!search) return;
-    search.addEventListener("input", (event) => {
-        const query = event.target.value.toLowerCase();
-        document.querySelectorAll(".item").forEach((card) => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(query) ? "grid" : "none";
-        });
-    });
-};
-
 const initActionsV2 = () => {
     document.addEventListener("click", (event) => {
         const button = event.target.closest(".qty-btn");
@@ -436,7 +427,6 @@ const initMenu = async () => {
     renderMenu(window.menuData);
     updateCartV2();
     initCategoriesV2();
-    initSearchV2();
     initActionsV2();
     if (loadingEl) loadingEl.style.display = "none";
     const errorEl = document.getElementById("menu-error");
