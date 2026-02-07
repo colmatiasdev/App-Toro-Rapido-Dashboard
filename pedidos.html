@@ -88,11 +88,11 @@
 </div>
 
 <script>
-    const TELEFONO_NEGOCIO = "5493814130520"; 
+    const TELEFONO_NEGOCIO = window.APP_CONFIG?.telefonoNegocio || "5493814130520"; 
     const URL_APPS_SCRIPT = window.APP_CONFIG?.appsScriptUrl || "https://script.google.com/macros/s/AKfycbzllzUCk1UqUV08XINHmy6Omvcl6JZ8_jRYY8k1WS2N_Kgnyec_mEp9CdVUdhrafC_B/exec";
 
-    const COSTO_ENVIO_BASE = 1500; 
-    const MINIMO_ENVIO_GRATIS = 25000;
+    const COSTO_ENVIO_BASE = Number(window.APP_CONFIG?.costoEnvioBase) || 1500; 
+    const MONTO_MINIMO_ENVIO_GRATIS = Number(window.APP_CONFIG?.montoMinimoEnvioGratis) || 25000;
 
     function formatearMoneda(valor) { return `$ ${Number(valor).toLocaleString('es-AR')}`; }
 
@@ -127,7 +127,7 @@
         if(subtotal === 0) { alert("❌ Selecciona productos antes de enviar."); return; }
 
         document.getElementById('overlay-carga').style.display = 'flex';
-        const costoEnvio = payload.delivery ?? (subtotal >= MINIMO_ENVIO_GRATIS ? 0 : COSTO_ENVIO_BASE);
+        const costoEnvio = payload.delivery ?? (subtotal >= MONTO_MINIMO_ENVIO_GRATIS ? 0 : COSTO_ENVIO_BASE);
         const ahora = new Date();
         const idPedido = "PED-" + ahora.getTime();
 

@@ -42,8 +42,9 @@ const sampleMenuData = [
 ];
 
 const cartV2 = new Map();
-const deliveryV2 = 1500;
-const freeFromV2 = 25000;
+const TELEFONO_NEGOCIO = window.APP_CONFIG?.telefonoNegocio || "5493814130520";
+const deliveryV2 = Number(window.APP_CONFIG?.costoEnvioBase) || 1500;
+const freeFromV2 = Number(window.APP_CONFIG?.montoMinimoEnvioGratis) || 25000;
 
 const formatV2 = (value) => `$ ${Number(value).toLocaleString("es-AR")}`;
 const normalizeKey = (value) => value

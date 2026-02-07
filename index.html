@@ -134,7 +134,7 @@
             font-size: 0.9rem;
         }
 
-        .info-section {
+        .info-section-mensaje {
             padding: 80px 20px;
             background: white;
             color: var(--toro-dark);
@@ -153,6 +153,86 @@
             max-width: 700px;
             margin: 0 auto;
         }
+
+        .social-section {
+            padding: 60px 20px;
+            background: #f8fafc;
+        }
+        .social-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            display: grid;
+            gap: 16px;
+        }
+        .social-icon {
+            font-size: 2rem;
+            color: var(--toro-red);
+        }
+        .social-icon.whatsapp-icon {
+            color: #25d366;
+        }
+        .social-title {
+            font-family: 'Bungee', cursive;
+            font-size: 1.2rem;
+            color: var(--toro-dark);
+        }
+        .social-card {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.82rem;
+            box-shadow: 0 10px 24px rgba(220, 39, 67, 0.3);
+            width: fit-content;
+            margin: 0 auto;
+        }
+        .whatsapp-card {
+            background: #25d366;
+            box-shadow: 0 10px 24px rgba(37, 211, 102, 0.3);
+        }
+        .delivery-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+        .delivery-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+            align-items: center;
+            justify-items: center;
+            text-align: center;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+        }
+        .delivery-icon {
+            font-size: 2rem;
+        }
+        .delivery-title {
+            font-weight: 800;
+            color: var(--toro-dark);
+        }
+        .delivery-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: white;
+        }
+        .delivery-btn.pedidosya { background: #e31a3d; }
+        .delivery-btn.rappi { background: #ff441f; }
 
         .index-footer {
             padding: 36px 20px 28px;
@@ -195,8 +275,10 @@
             .hero-content p { font-size: 0.95rem; }
             .hero-btns { flex-direction: column; }
             .btn-primary, .btn-secondary { width: 100%; text-align: center; }
-            .info-section { padding: 50px 16px; }
+            .info-section-mensaje { padding: 50px 16px; }
             .info-header h2 { font-size: 1.4rem; }
+            .social-section { padding: 40px 16px; }
+            .social-card { width: fit-content; }
             .index-footer { padding: 28px 16px 22px; }
             .footer-title { font-size: 0.9rem; }
         }
@@ -222,12 +304,85 @@
     </div>
 </section>
 
-<section id="info" class="info-section">
+<section id="info" class="info-section-mensaje">
     <div class="info-container">
         <div class="info-header">
             <h2>Pasión por la Comida Real</h2>
             <p>En Toro Rápido no solo cocinamos, creamos experiencias de sabor con ingredientes frescos de Tucumán.</p>
         </div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-brands fa-instagram"></i></div>
+        <div class="social-title">Seguinos en Instagram</div>
+        <a class="social-card" id="ig-link" href="#" target="_blank">
+            <span id="ig-name">@Instagram</span>
+        </a>
+    </div>
+</section>
+
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon whatsapp-icon"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="social-title">Contactanos por WhatsApp</div>
+        <a class="social-card whatsapp-card" id="wsp-link" href="#" target="_blank">
+            <span id="wsp-text">Escribinos por WhatsApp</span>
+        </a>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-store"></i></div>
+        <div class="social-title">Encontranos en plataformas de delivery</div>
+        <div class="delivery-grid">
+            <div class="delivery-card">
+                <div class="delivery-icon" style="color:#e31a3d;"><i class="fa-solid fa-bicycle"></i></div>
+                <div class="delivery-title">PedidosYa</div>
+                <a class="delivery-btn pedidosya" id="pedidosya-link" href="#" target="_blank">Ver en PedidosYa</a>
+            </div>
+            <div class="delivery-card">
+                <div class="delivery-icon" style="color:#ff441f;"><i class="fa-solid fa-moped"></i></div>
+                <div class="delivery-title">Rappi</div>
+                <a class="delivery-btn rappi" id="rappi-link" href="#" target="_blank">Ver en Rappi</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="social-title">Horario de atención</div>
+        <div class="footer-meta">Todos los días de 21:00 a 01:30 hs (incluidos feriados).</div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+        <div class="social-title">Medios de pago</div>
+        <div class="footer-meta">Pagá como prefieras:</div>
+        <div class="footer-meta">Efectivo • Transferencia</div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-motorcycle"></i></div>
+        <div class="social-title">Envío</div>
+        <div class="footer-meta">Solo delivery en San Miguel de Tucumán.</div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+        <div class="social-title">Entrega rápida</div>
+        <div class="footer-meta">Coordinamos el envío apenas confirmes.</div>
     </div>
 </section>
 
@@ -250,6 +405,22 @@
         slides[currentSlide].classList.add('active');
     }
     setInterval(nextSlide, 5000);
+
+    const igConfig = window.APP_CONFIG?.instagram || {};
+    const igLink = document.getElementById("ig-link");
+    const igName = document.getElementById("ig-name");
+    if (igLink) igLink.href = igConfig.url || "#";
+    if (igName) igName.textContent = igConfig.name ? `@${igConfig.name}` : "@Instagram";
+
+    const wspLink = document.getElementById("wsp-link");
+    const wspNumber = window.APP_CONFIG?.telefonoNegocio || "";
+    if (wspLink) wspLink.href = wspNumber ? `https://wa.me/${wspNumber}` : "#";
+    if (wspLink) wspLink.setAttribute("aria-label", "Escribinos por WhatsApp");
+
+    const pedidosYaLink = document.getElementById("pedidosya-link");
+    if (pedidosYaLink) pedidosYaLink.href = window.APP_CONFIG?.plataformas?.pedidosYa || "#";
+    const rappiLink = document.getElementById("rappi-link");
+    if (rappiLink) rappiLink.href = window.APP_CONFIG?.plataformas?.rappi || "#";
 
 </script>
 </body>
