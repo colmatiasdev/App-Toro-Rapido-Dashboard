@@ -457,7 +457,23 @@ body {
 
 @media (max-width: 640px) {
     .item { grid-template-columns: 1fr; }
-    .item img { width: 100%; height: 160px; }
+    .item img { width: 100%; height: 140px; }
     .item-action { align-items: flex-end; }
     .qty-controls { flex-wrap: wrap; }
+}
+
+@media (max-width: 600px) {
+    .header-premium { padding: 16px 14px 22px; border-radius: 0 0 24px 24px; }
+    .logo-circle { width: 56px; height: 56px; font-size: 1.6rem; }
+    .header-title { font-size: 1.6rem; }
+    .header-title span { font-size: 0.85rem; letter-spacing: 3px; }
+    .location-tag { font-size: 0.78rem; padding: 4px 10px; }
+    .badge-modern { padding: 6px 10px; font-size: 0.7rem; }
+    .category-tabs { padding: 10px 12px; gap: 8px; }
+    .tab { padding: 8px 14px; font-size: 0.85em; }
+    .content { padding: 12px; gap: 16px; }
+    .menu { padding: 16px; border-radius: 20px; }
+    .checkout-card { padding: 16px; border-radius: 20px; }
+    .checkout-btn { height: 48px; font-size: 0.95em; }
+    .floating-checkout { bottom: 14px; right: 14px; padding: 10px 14px; font-size: 0.85em; }
 }
