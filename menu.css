@@ -214,6 +214,7 @@ body {
     align-items: center;
     justify-content: center;
     line-height: 1;
+    position: relative;
 }
 .tab-promo {
     border: 1px solid rgba(251, 191, 36, 0.4);
@@ -477,8 +478,26 @@ body {
     .header-title span { font-size: 0.8rem; letter-spacing: 2px; }
     .location-tag { font-size: 0.74rem; padding: 4px 8px; }
     .badge-modern { padding: 5px 9px; font-size: 0.68rem; }
-    .category-tabs { padding: 8px 10px; gap: 6px; }
+    .category-tabs {
+        padding: 8px 10px;
+        gap: 6px;
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+        scroll-snap-type: x mandatory;
+    }
     .tab { padding: 6px 10px; font-size: 0.78em; max-width: 140px; height: 32px; }
+    .tab { scroll-snap-align: start; }
+    .tab.active::after {
+        content: "";
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: -6px;
+        height: 3px;
+        border-radius: 999px;
+        background: var(--primary-red);
+    }
     .content { padding: 10px; gap: 14px; }
     .menu { padding: 14px; border-radius: 18px; }
     .item { padding: 10px; }
