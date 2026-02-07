@@ -37,9 +37,12 @@
 
     <div class="social-section">
         <p class="social-title">¿Ya nos sigues?</p>
-        <a href="https://instagram.com/ToroRapidoOk" target="_blank" class="instagram-link">
-            <i class="fa-brands fa-instagram fa-lg"></i> @ToroRapidoOk
-        </a>
+        <div class="instagram-row">
+            <i class="fa-brands fa-instagram fa-lg instagram-icon"></i>
+            <a href="#" target="_blank" class="instagram-link" id="ig-link">
+                <span id="ig-name">@ToroRapidoOk</span>
+            </a>
+        </div>
     </div>
 
     <a href="index.html" class="btn-back">
@@ -47,5 +50,13 @@
     </a>
 </div>
 
+<script src="config.js"></script>
+<script>
+    const igConfig = window.APP_CONFIG?.instagram || {};
+    const igLink = document.getElementById("ig-link");
+    const igName = document.getElementById("ig-name");
+    if (igLink) igLink.href = igConfig.url || "#";
+    if (igName) igName.textContent = igConfig.name ? `@${igConfig.name}` : "@ToroRapidoOk";
+</script>
 </body>
 </html>

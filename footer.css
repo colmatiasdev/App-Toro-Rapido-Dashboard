@@ -48,6 +48,13 @@
     color: #e11d48;
 }
 
+.pie-item-center { text-align: center; }
+.pie-item-center .pie-item-title { justify-content: center; }
+.pie-item-center .pie-badges { justify-content: center; }
+.pie-item-center { order: 2; }
+
+.pie-item-order-first { order: 1; }
+
 .pie-text { font-size: 0.82rem; color: var(--footer-muted); line-height: 1.5; }
 
 .pie-link {
@@ -88,6 +95,7 @@
     .pie-grid {
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     }
+    .pie-item-center { grid-column: 1 / -1; }
 }
 
 @media (max-width: 600px) {
