@@ -202,13 +202,22 @@ body {
     font-size: 0.95em;
     max-width: none;
     height: 40px;
-    background: linear-gradient(90deg, rgba(225, 29, 72, 0.12), rgba(225, 29, 72, 0.04));
-    color: var(--dark-blue);
-    border: 1px solid rgba(225, 29, 72, 0.25);
-    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    background: linear-gradient(90deg, #ff5f7e, #e11d48);
+    color: #ffffff;
+    border: 1px solid rgba(225, 29, 72, 0.6);
+    box-shadow: 0 12px 24px rgba(225, 29, 72, 0.35);
     border-radius: 999px;
     letter-spacing: 0.3px;
+    gap: 8px;
 }
+.tab.active i { font-size: 0.9em; }
+.tab.active span { display: inline-block; }
+.tab.active.tab-promo {
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+    border-color: rgba(245, 158, 11, 0.7);
+    box-shadow: 0 12px 24px rgba(245, 158, 11, 0.35);
+}
+.tab.active.tab-promo i { color: #fff7ed; }
 .tab {
     border: none;
     background: white;

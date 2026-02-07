@@ -313,16 +313,6 @@
     </div>
 </section>
 
-<section class="social-section">
-    <div class="social-container">
-        <div class="social-icon"><i class="fa-brands fa-instagram"></i></div>
-        <div class="social-title">Seguinos en Instagram</div>
-        <a class="social-card" id="ig-link" href="#" target="_blank">
-            <span id="ig-name">@Instagram</span>
-        </a>
-    </div>
-</section>
-
 
 <section class="social-section">
     <div class="social-container">
@@ -405,12 +395,6 @@
         slides[currentSlide].classList.add('active');
     }
     setInterval(nextSlide, 5000);
-
-    const igConfig = window.APP_CONFIG?.instagram || {};
-    const igLink = document.getElementById("ig-link");
-    const igName = document.getElementById("ig-name");
-    if (igLink) igLink.href = igConfig.url || "#";
-    if (igName) igName.textContent = igConfig.name ? `@${igConfig.name}` : "@Instagram";
 
     const wspLink = document.getElementById("wsp-link");
     const wspNumber = window.APP_CONFIG?.telefonoNegocio || "";

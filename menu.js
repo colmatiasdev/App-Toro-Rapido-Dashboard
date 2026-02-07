@@ -200,7 +200,8 @@ const renderMenu = (menuData) => {
         tab.className = `tab${isPromo ? " tab-promo" : ""}${index === 0 ? " active" : ""}`;
         tab.dataset.target = sectionId;
         tab.dataset.promo = isPromo ? "true" : "false";
-        tab.textContent = section.category;
+        const tabLabel = isPromo ? "PROMOCIONES" : section.category;
+        tab.innerHTML = `${isPromo ? '<i class="fa-solid fa-crown"></i>' : ''}<span>${tabLabel}</span>`;
         tabsContainer.appendChild(tab);
 
         const sectionEl = document.createElement("section");

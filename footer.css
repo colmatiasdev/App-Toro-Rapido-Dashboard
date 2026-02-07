@@ -59,16 +59,6 @@
     margin-top: 6px;
 }
 
-.ig-gradient {
-    display: inline-block;
-    padding: 6px 14px;
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    border-radius: 50px;
-    color: white !important;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.78rem;
-}
 
 .pie-badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 
