@@ -436,6 +436,7 @@ const loadFooter = async () => {
         const response = await fetch("footer.html");
         if (!response.ok) return;
         container.innerHTML = await response.text();
+        window.applyFooterConfig?.();
     } catch (error) {
         console.error(error);
     }

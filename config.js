@@ -2,8 +2,8 @@ window.APP_CONFIG = {
     maxProductos: 10,
     googleSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv",
     instagram: {
-        name: "ToroRapidoOk",
-        url: "https://instagram.com/ToroRapidoOk"
+        name: "tororapido.delivery",
+        url: "https://www.instagram.com/tororapido.delivery/"
     },
     plataformas: {
         pedidosYa: "https://www.pedidosya.com.ar",

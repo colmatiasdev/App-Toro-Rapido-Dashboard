@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="footer.css">
     <script src="config.js"></script>
+    <script src="footer.js"></script>
     <style>
         :root {
             --primary-red: #e11d48;
@@ -169,6 +170,7 @@
         .then((html) => {
             const container = document.getElementById("site-footer");
             if (container) container.innerHTML = html;
+            window.applyFooterConfig?.();
         })
         .catch(() => {});
 </script>

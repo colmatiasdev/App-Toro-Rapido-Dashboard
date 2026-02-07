@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="pedidos.css">
     <link rel="stylesheet" href="footer.css">
     <script src="config.js"></script>
+    <script src="footer.js"></script>
 </head>
 <body>
 
@@ -223,6 +224,7 @@
             const response = await fetch("footer.html");
             if (!response.ok) return;
             container.innerHTML = await response.text();
+            window.applyFooterConfig?.();
         } catch (e) {
             console.error(e);
         }
