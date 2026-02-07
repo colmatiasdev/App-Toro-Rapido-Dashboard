@@ -118,8 +118,6 @@ body { font-family: 'Inter', system-ui, sans-serif; color: #334155; }
 .input-group i { position: absolute; left: 18px; top: 35px; color: #166534; font-size: 1.1em; }
 
 .boton-pedido { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: var(--whatsapp-color); color: white; height: 65px; border-radius: 18px; border: none; font-size: 1.1em; font-weight: 800; margin-top: 20px; box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2); cursor: pointer; }
-.boton-confirmacion { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; background: var(--rojo-toro); color: white; height: 60px; border-radius: 18px; text-decoration: none; font-size: 1.05em; font-weight: 800; margin-top: 12px; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.22); transition: 0.25s; }
-.boton-confirmacion:hover { transform: translateY(-2px); box-shadow: 0 14px 26px rgba(225, 29, 72, 0.3); }
 
 
 #overlay-carga { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }

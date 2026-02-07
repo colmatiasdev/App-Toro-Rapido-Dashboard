@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="pedidos.css">
     <link rel="stylesheet" href="footer.css">
+    <script src="config.js"></script>
 </head>
 <body>
 
@@ -54,40 +55,36 @@
     </div>
 
     <div class="datos-cliente">
-        <div style="font-weight: 800; color: #166534; margin-bottom: 15px; font-size: 1em; text-align: center;">📍 DATOS DE ENTREGA</div>
+        <div style="font-weight: 800; color: #166534; margin-bottom: 15px; font-size: 1em; text-align: center;"><i class="fa-solid fa-truck-fast"></i> DATOS DE ENTREGA</div>
         
         <div class="input-group">
             <label>Nombre de quien recibe:</label>
             <i class="fa-solid fa-user"></i>
-            <input type="text" id="cust-name" class="input-field" placeholder="Ej: Juan Pérez">
+            <input type="text" id="cust-name" class="input-field" placeholder="Ej: Juan Pérez" value="María Cabrera">
         </div>
 
         <div class="input-group">
             <label>WhatsApp:</label>
             <i class="fa-solid fa-phone"></i>
-            <input type="tel" id="cust-phone" class="input-field" placeholder="Ej: 3814556677">
+            <input type="tel" id="cust-phone" class="input-field" placeholder="Ej: 3814556677" value="3813434720">
         </div>
 
         <div class="input-group">
             <label>Domicilio:</label>
             <i class="fa-solid fa-location-dot"></i>
-            <input type="text" id="cust-address" class="input-field" placeholder="Calle, número, barrio...">
+            <input type="text" id="cust-address" class="input-field" placeholder="Calle, número, piso y depto..." value="San Martín 742, Piso 2, Depto B">
         </div>
     </div>
 
     <button onclick="enviarPedido()" class="boton-pedido">
         <i class="fa-brands fa-whatsapp fa-xl"></i> ENVIAR POR WHATSAPP
     </button>
-    <a href="confirmacion.html" class="boton-confirmacion">
-        <i class="fa-solid fa-circle-check fa-lg"></i> CONFIRMAR PEDIDO
-    </a>
-
     <div id="site-footer"></div>
 </div>
 
 <script>
     const TELEFONO_NEGOCIO = "5493814130520"; 
-    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycby5-AAAxjPm68aNc6hQ0zk6prVUoGe5TAlWUCbzq3eKHW8_mkZneSZ0GM8Tb5sOExs_/exec";
+    const URL_APPS_SCRIPT = window.APP_CONFIG?.appsScriptUrl || "https://script.google.com/macros/s/AKfycbzllzUCk1UqUV08XINHmy6Omvcl6JZ8_jRYY8k1WS2N_Kgnyec_mEp9CdVUdhrafC_B/exec";
 
     const COSTO_ENVIO_BASE = 1500; 
     const MINIMO_ENVIO_GRATIS = 25000;
@@ -101,34 +98,30 @@
         const d = document.getElementById('cust-address').value.trim();
         if(!n || !d || !w) { alert("⚠️ Por favor, completa tus datos de entrega."); return; }
 
-        let productosParaSheet = [];
-        let itemsWhatsApp = ""; 
-        let subtotal = 0;
+        const payload = leerPedidoMenu();
+        if (!payload || !Array.isArray(payload.items) || payload.items.length === 0) {
+            alert("❌ No encontramos productos del menú. Volvé a seleccionar tu pedido.");
+            return;
+        }
 
-        document.querySelectorAll('.qty-num').forEach(el => {
-            const cant = parseInt(el.innerText);
-            if(cant > 0) {
-                const precio = parseFloat(el.dataset.precio);
-                const itemSub = cant * precio;
-                subtotal += itemSub;
-                const prefijoWA = el.dataset.promo === "true" ? "[PROMO] " : "";
-                itemsWhatsApp += `- (x${cant}) ${prefijoWA}${el.dataset.nombre} ${formatearMoneda(itemSub)}\n`;
-                
-                productosParaSheet.push({
-                    categoria: el.dataset.cat,
-                    idproducto: el.dataset.idreal, 
-                    producto: el.dataset.nombre,
-                    precio: precio,
-                    cantidad: cant,
-                    subtotal: itemSub
-                });
-            }
-        });
+        const productosParaSheet = payload.items.map((item) => ({
+            categoria: item.category || "",
+            idproducto: item.id,
+            producto: item.name,
+            precio: item.price,
+            cantidad: item.qty,
+            subtotal: item.subtotal
+        }));
 
+        const itemsWhatsApp = payload.items.map((item) => {
+            return `- (x${item.qty}) ${item.name} ${formatearMoneda(item.subtotal)}`;
+        }).join("\n");
+
+        const subtotal = payload.subtotal || 0;
         if(subtotal === 0) { alert("❌ Selecciona productos antes de enviar."); return; }
 
         document.getElementById('overlay-carga').style.display = 'flex';
-        const costoEnvio = subtotal >= MINIMO_ENVIO_GRATIS ? 0 : COSTO_ENVIO_BASE;
+        const costoEnvio = payload.delivery ?? (subtotal >= MINIMO_ENVIO_GRATIS ? 0 : COSTO_ENVIO_BASE);
         const ahora = new Date();
         const idPedido = "PED-" + ahora.getTime();
 

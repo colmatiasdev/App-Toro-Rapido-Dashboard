@@ -4,9 +4,7 @@
         <div class="pie-grid">
             <div class="pie-item">
                 <div class="pie-item-title"><i class="fa-brands fa-instagram"></i> Instagram</div>
-                <a class="pie-link ig-gradient" href="https://instagram.com/ToroRapidoOk" target="_blank">
-                    @ToroRapidoOk
-                </a>
+                <a class="pie-link ig-gradient" id="footer-ig" href="#" target="_blank"></a>
             </div>
 
             <div class="pie-item">
@@ -19,12 +17,12 @@
                 <div class="pie-item-title"><i class="fa-solid fa-motorcycle"></i> Envíos</div>
                 <p class="pie-text">Solo delivery en San Miguel de Tucumán</p>
                 <div class="pie-badges">
-                    <span class="badge-plat" style="border-color: #e31a3d; color: #e31a3d">
+                    <a class="badge-plat pie-badge-link" id="footer-pedidosya" href="#" target="_blank" style="border-color: #e31a3d; color: #e31a3d">
                         <i class="fa-solid fa-bicycle"></i> PedidosYa
-                    </span>
-                    <span class="badge-plat" style="border-color: #ff441f; color: #ff441f">
+                    </a>
+                    <a class="badge-plat pie-badge-link" id="footer-rappi" href="#" target="_blank" style="border-color: #ff441f; color: #ff441f">
                         <i class="fa-solid fa-moped"></i> Rappi
-                    </span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -38,5 +36,18 @@
     (function () {
         const yearEl = document.getElementById("footer-year");
         if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+        const config = window.APP_CONFIG || {};
+        const ig = config.instagram || {};
+        const igLink = document.getElementById("footer-ig");
+        if (igLink) {
+            igLink.href = ig.url || "#";
+            igLink.textContent = ig.name ? `@${ig.name}` : "@Instagram";
+        }
+
+        const pedidosYa = document.getElementById("footer-pedidosya");
+        if (pedidosYa) pedidosYa.href = config.plataformas?.pedidosYa || "#";
+        const rappi = document.getElementById("footer-rappi");
+        if (rappi) rappi.href = config.plataformas?.rappi || "#";
     })();
 </script>

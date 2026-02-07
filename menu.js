@@ -1,4 +1,4 @@
-const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv";
+const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv";
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x120?text=Toro";
 
 const sampleMenuData = [
@@ -288,7 +288,7 @@ const findItemById = (id) => {
     return null;
 };
 
-const MAX_QTY = 10;
+const MAX_QTY = Number(window.APP_CONFIG?.maxProductos) || 10;
 
 const addItemV2 = (id) => {
     const result = findItemById(id);
