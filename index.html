@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toro Rápido - Carta</title>
+    <title>Toro Rápido - Inicio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="footer.css">
@@ -11,176 +11,246 @@
     <script src="footer.js"></script>
     <style>
         :root {
-            --primary-red: #e11d48;
-            --soft-red: #fff1f2;
-            --dark-blue: #1e293b;
-            --gray-bg: #f8fafc;
-            --light-green: #f0fdf4;
+            --toro-red: #e11d48;
+            --toro-dark: #0f172a;
+            --toro-white: #ffffff;
         }
 
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: #f1f5f9;
-            color: #334155;
             margin: 0;
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #ffffff;
+            color: var(--toro-dark);
+        }
+
+        .hero-carousel {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            background: var(--toro-dark);
+        }
+
+        .carousel-container {
+            height: 100%;
+            width: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            transform: scale(1.05);
+        }
+
+        .slide.active {
+            opacity: 0.65;
+            transform: scale(1);
+        }
+
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            text-align: center;
             padding: 20px;
+            z-index: 10;
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(2px);
         }
 
-        .page-container {
-            max-width: 520px;
-            width: 100%;
-            background: white;
-            padding: 40px 30px;
-            border-radius: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-            text-align: center;
+        .hero-content h1 {
+            font-family: 'Bungee', cursive;
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .hero-content p {
+            color: rgba(255,255,255,0.92);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 26px;
         }
 
         .brand-badge {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: var(--soft-red);
-            color: var(--primary-red);
-            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 8px 16px;
             border-radius: 50px;
             font-weight: 800;
-            font-size: 0.85em;
-            margin-bottom: 18px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        h1 { color: var(--dark-blue); font-size: 1.8em; margin-bottom: 8px; }
-        p { color: #64748b; line-height: 1.5; margin-bottom: 24px; font-size: 0.95em; }
-
-        .info-grid {
-            display: grid;
-            gap: 14px;
-            margin: 28px 0 35px;
-        }
-
-        .info-card {
+        .hero-btns {
             display: flex;
-            align-items: center;
-            gap: 14px;
-            background: var(--gray-bg);
-            padding: 16px;
-            border-radius: 18px;
-            border: 1px solid #e2e8f0;
-            text-align: left;
-        }
-
-        .info-card i {
-            font-size: 1.2em;
-            color: var(--primary-red);
-            width: 28px;
-            text-align: center;
-        }
-
-        .info-text b {
-            display: block;
-            color: var(--dark-blue);
-            font-size: 0.95em;
-            margin-bottom: 2px;
-        }
-
-        .info-text span {
-            font-size: 0.85em;
-            color: #64748b;
-            line-height: 1.3;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn-primary {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--primary-red);
+            background: var(--toro-red);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: 0.3s;
+            box-shadow: 0 8px 25px rgba(225, 29, 72, 0.4);
+            font-size: 0.9rem;
+        }
+
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(225, 29, 72, 0.6); }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
             color: white;
             padding: 14px 28px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 0.95em;
-            transition: 0.3s;
-            box-shadow: 0 8px 18px rgba(225, 29, 72, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(225, 29, 72, 0.35);
+        .info-section {
+            padding: 80px 20px;
+            background: white;
+            color: var(--toro-dark);
         }
 
-        .note {
-            margin-top: 18px;
-            font-size: 0.85em;
+        .info-container { max-width: 1000px; margin: 0 auto; text-align: center; }
+
+        .info-header h2 {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            font-family: 'Bungee', cursive;
+        }
+
+        .info-header p {
+            color: #64748b;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .index-footer {
+            padding: 36px 20px 28px;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            gap: 14px;
+            text-align: center;
+        }
+        .footer-title {
+            font-family: 'Bungee', cursive;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .footer-link {
+            color: var(--toro-red);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .footer-meta {
             color: #94a3b8;
+            font-size: 0.75rem;
         }
 
         @media (max-width: 600px) {
-            body { padding: 12px; }
-            .page-container { padding: 28px 20px; border-radius: 24px; }
-            h1 { font-size: 1.5em; }
-            .info-card { padding: 12px; border-radius: 14px; }
-            .btn-primary { width: 100%; justify-content: center; }
+            .hero-carousel { height: 92vh; }
+            .hero-content h1 { font-size: 2rem; }
+            .hero-content p { font-size: 0.95rem; }
+            .hero-btns { flex-direction: column; }
+            .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+            .info-section { padding: 50px 16px; }
+            .info-header h2 { font-size: 1.4rem; }
+            .index-footer { padding: 28px 16px 22px; }
+            .footer-title { font-size: 0.9rem; }
         }
     </style>
 </head>
 <body>
-
-<div class="page-container">
-    <div class="brand-badge">
-        <i class="fa-solid fa-bolt"></i> Toro Rápido
+<section class="hero-carousel">
+    <div class="carousel-container" id="carousel">
+        <div class="slide active" style="background-image: url('portada1.jpeg')"></div>
+        <div class="slide" style="background-image: url('portada2.jpeg')"></div>
     </div>
 
-    <h1>Bienvenido a nuestra carta</h1>
-    <p>Elegí tu pedido y confirmá en segundos. Te avisamos por WhatsApp cuando esté en camino.</p>
-
-    <div class="info-grid">
-        <div class="info-card">
-            <i class="fa-solid fa-clock"></i>
-            <div class="info-text">
-                <b>Entrega rápida</b>
-                <span>Coordinamos el envío apenas confirmes.</span>
-            </div>
-        </div>
-        <div class="info-card">
-            <i class="fa-solid fa-wallet"></i>
-            <div class="info-text">
-                <b>Pagá como prefieras</b>
-                <span>Efectivo o transferencia.</span>
-            </div>
-        </div>
-        <div class="info-card">
-            <i class="fa-solid fa-bell"></i>
-            <div class="info-text">
-                <b>Notificaciones</b>
-                <span>Te contactamos por WhatsApp.</span>
+    <div class="hero-overlay">
+        <div class="hero-content">
+            <span class="brand-badge"><i class="fa-solid fa-bolt"></i> Toro Rápido</span>
+            <h1>Sabor que golpea fuerte</h1>
+            <p>Las mejores burgers y sándwiches de Tucumán, directo a tu puerta.</p>
+            <div class="hero-btns">
+                <a href="menu.html" class="btn-primary">Realiza tu pedido</a>
+                <a href="#info" class="btn-secondary">Conocenos</a>
             </div>
         </div>
     </div>
+</section>
 
-    <a href="menu.html" class="btn-primary">
-        <i class="fa-solid fa-basket-shopping"></i> Realiza tu pedido
-    </a>
-    <div class="note">Podés volver a esta pantalla cuando quieras.</div>
-    <div id="site-footer"></div>
-</div>
+<section id="info" class="info-section">
+    <div class="info-container">
+        <div class="info-header">
+            <h2>Pasión por la Comida Real</h2>
+            <p>En Toro Rápido no solo cocinamos, creamos experiencias de sabor con ingredientes frescos de Tucumán.</p>
+        </div>
+    </div>
+</section>
+
+<footer class="index-footer">
+    <div class="footer-container">
+        <h2 class="footer-title">Toro Rápido</h2>
+        <div class="footer-meta">San Miguel de Tucumán.</div>
+        <div class="footer-meta">© 2026  Todos los derechos reservados.</div>
+    </div>
+</footer>
 
 <script>
     try { sessionStorage.removeItem("toro_pedido"); } catch (e) {}
-    fetch("footer.html")
-        .then((res) => (res.ok ? res.text() : ""))
-        .then((html) => {
-            const container = document.getElementById("site-footer");
-            if (container) container.innerHTML = html;
-            window.applyFooterConfig?.();
-        })
-        .catch(() => {});
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    function nextSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide + 1) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }
+    setInterval(nextSlide, 5000);
+
 </script>
 </body>
 </html>
