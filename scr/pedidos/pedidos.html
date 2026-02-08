@@ -19,7 +19,7 @@
 </div>
 
 <div class="contenedor">
-    <a href="../menu/menu.html" class="boton-volver-menu" onclick="sessionStorage.setItem('toro_scroll_resumen','1')">
+    <a href="../menu-simple/menu-simple.html" class="boton-volver-menu" onclick="sessionStorage.setItem('toro_scroll_resumen','1')">
         <i class="fa-solid fa-pen-to-square"></i> Modificar pedido
     </a>
 
@@ -152,10 +152,10 @@
             sessionStorage.removeItem("toro_pedido");
         } catch (e) { console.error(e); }
 
-        let msg = `*TORO RÁPIDO - DELIVERY*\n_ID: ${idPedido}_\n\n*Cliente* ${n}\n*Domicilio:* ${d}\n*WSP:* ${w}\n\n*Detalle del Pedido*\n${itemsWhatsApp}`;
+        let msg = `*TORO RÁPIDO - DELIVERY*\n_ID: ${idPedido}_\n\n*Cliente* ${nombre}\n*Domicilio:* ${direccion}\n*WSP:* ${whatsapp}\n\n*Detalle del Pedido*\n${itemsWhatsApp}`;
         msg += `\n\n*SUBTOTAL:* ${formatearMoneda(subtotal)}`;
         msg += `\n*ENVÍO:* ${costoEnvio === 0 ? "¡GRATIS!" : formatearMoneda(costoEnvio)}`;
-        msg += `\n*TOTAL:* ${formatearMoneda(subtotal + costoEnvio)}\n\n_⚠️ Sujeto a confirmación de zona._`;
+        msg += `\n*TOTAL:* ${formatearMoneda(subtotal + costoEnvio)}\n\n_Sujeto a confirmación de zona._`;
 
         document.getElementById('overlay-carga').style.display = 'none';
         window.open(`https://wa.me/${TELEFONO_NEGOCIO}?text=${encodeURIComponent(msg)}`, '_blank');

@@ -516,7 +516,7 @@ const loadHeaderV2 = async () => {
     const container = document.getElementById("menu-v2-header");
     if (!container) return;
     try {
-        const response = await fetch("menu-header.html");
+        const response = await fetch("menu-simple-header.html");
         if (!response.ok) return;
         container.innerHTML = await response.text();
     } catch (error) {
@@ -528,7 +528,7 @@ const loadPromoV2 = async () => {
     const container = document.getElementById("menu-v2-promo");
     if (!container) return;
     try {
-        const response = await fetch("menu-promo.html");
+        const response = await fetch("menu-simple-promo.html");
         if (!response.ok) return;
         container.innerHTML = await response.text();
     } catch (error) {
