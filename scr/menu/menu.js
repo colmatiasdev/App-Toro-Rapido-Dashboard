@@ -1,4 +1,6 @@
 const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv";
+const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
+const MENU_SHEET_NAME = window.APP_CONFIG?.menuSheetName || "menu-toro-rapido-web";
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x120?text=Toro";
 
 const sampleMenuData = [
@@ -45,6 +47,8 @@ const cartV2 = new Map();
 const TELEFONO_NEGOCIO = window.APP_CONFIG?.telefonoNegocio || "5493814130520";
 const deliveryV2 = Number(window.APP_CONFIG?.costoEnvioBase) || 1500;
 const freeFromV2 = Number(window.APP_CONFIG?.montoMinimoEnvioGratis) || 25000;
+let categoriesObserver = null;
+let scrollHandler = null;
 
 const formatV2 = (value) => `$ ${Number(value).toLocaleString("es-AR")}`;
 const normalizeKey = (value) => value
@@ -125,6 +129,71 @@ const parseAvailability = (agotadoValue, stockValue) => {
     return true;
 };
 
+const parseEnabled = (value) => {
+    const clean = cleanText(value).toUpperCase();
+    if (!clean) return true;
+    if (clean === "SI") return true;
+    if (clean === "NO") return false;
+    const raw = normalizeKey(value || "");
+    if (raw === "si") return true;
+    if (raw === "no") return false;
+    return !["0", "false", "inactivo", "deshabilitado"].includes(raw);
+};
+
+const rowsToObjects = (headers, rows) => rows.map((row) => {
+    const obj = {};
+    headers.forEach((header, idx) => {
+        obj[header] = row[idx];
+    });
+    return obj;
+});
+
+const mapRowsToMenu = (rows) => {
+    const getValue = (row, candidates) => {
+        const found = candidates.find((key) => row[key] !== undefined);
+        return found ? row[found] : "";
+    };
+
+    const grouped = new Map();
+    rows.forEach((row, index) => {
+        const category = cleanText(getValue(row, ["Categoria", "categoria", "Category", "category", "cat", "rubro", "tipo"])) || "Otros";
+        const name = cleanText(getValue(row, ["Producto", "producto", "Nombre", "nombre", "item", "titulo"]));
+        if (!name) return;
+        const desc = cleanText(getValue(row, ["Descripcion", "descripcion", "desc", "detalle", "detalleproducto"]));
+        const price = parsePrice(getValue(row, ["Precio", "precio", "price", "valor", "importe", "costo"]));
+        const img = cleanText(getValue(row, ["Imagen", "imagen", "img", "image", "foto", "url", "urlimagen", "imagenurl"]));
+        const agotadoValue = getValue(row, ["Producto Agotado", "productoagotado", "Agotado", "agotado"]);
+        const stockValue = getValue(row, ["stock", "Stock"]);
+        const available = parseAvailability(agotadoValue, stockValue);
+        const rawId = cleanText(getValue(row, ["idproducto", "IdProducto", "ID", "id", "codigo", "sku"]));
+        const orderValue = cleanText(getValue(row, ["orden", "Orden", "order", "posicion", "position"]));
+        const order = orderValue === "" ? Number.POSITIVE_INFINITY : Number.parseFloat(orderValue);
+        const enabledValue = getValue(row, ["habilitado", "Habilitado", "activo", "visible", "mostrar"]);
+        const enabled = parseEnabled(enabledValue);
+        const id = rawId || `${slugify(category)}-${index}`;
+        if (!enabled) return;
+
+        if (!grouped.has(category)) grouped.set(category, []);
+        grouped.get(category).push({
+            id,
+            name,
+            desc,
+            price,
+            img: img || PLACEHOLDER_IMAGE,
+            available,
+            order
+        });
+    });
+
+    return Array.from(grouped.entries()).map(([category, items]) => ({
+        category,
+        items: items.sort((a, b) => {
+            if (a.order !== b.order) return a.order - b.order;
+            return a.name.localeCompare(b.name, "es");
+        })
+    }));
+};
+
 const mapCsvToMenu = (csvText) => {
     const rows = parseCsv(csvText);
     if (rows.length < 2) return null;
@@ -141,6 +210,7 @@ const mapCsvToMenu = (csvText) => {
     const idxStock = findIndex(["stock"]);
     const idxId = findIndex(["idproducto", "idprod", "id", "codigo", "sku"]);
     const idxOrder = findIndex(["orden", "order", "posicion", "position"]);
+    const idxEnabled = findIndex(["habilitado", "activo", "visible", "mostrar"]);
 
     if (idxCategory === -1 || idxName === -1 || idxPrice === -1) {
         console.warn("Faltan columnas requeridas en el CSV: categoria, nombre y precio.");
@@ -163,7 +233,10 @@ const mapCsvToMenu = (csvText) => {
         const orderValue = idxOrder === -1 ? "" : cleanText(row[idxOrder]);
         const order = orderValue === "" ? Number.POSITIVE_INFINITY : Number.parseFloat(orderValue);
         const id = rawId || `${slugify(category)}-${index}`;
+        const enabledValue = idxEnabled === -1 ? "" : row[idxEnabled];
+        const enabled = parseEnabled(enabledValue);
 
+        if (!enabled) return;
         if (!grouped.has(category)) grouped.set(category, []);
         grouped.get(category).push({
             id,
@@ -190,10 +263,12 @@ const renderMenu = (menuData) => {
     const sectionsContainer = document.getElementById("menu-sections");
     if (!tabsContainer || !sectionsContainer) return;
 
+    const filteredMenu = (menuData || []).filter((section) => Array.isArray(section.items) && section.items.length);
+
     const tabsFragment = document.createDocumentFragment();
     const sectionsFragment = document.createDocumentFragment();
 
-    menuData.forEach((section, index) => {
+    filteredMenu.forEach((section, index) => {
         const isPromo = section.category.toLowerCase().includes("promo");
         const sectionId = `cat-${slugify(section.category)}`;
 
@@ -336,6 +411,15 @@ const removeItemV2 = (id) => {
 };
 
 const initCategoriesV2 = () => {
+    if (categoriesObserver) {
+        categoriesObserver.disconnect();
+        categoriesObserver = null;
+    }
+    if (scrollHandler) {
+        window.removeEventListener("scroll", scrollHandler);
+        scrollHandler = null;
+    }
+
     const buttons = document.querySelectorAll("#category-tabs .tab");
     buttons.forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -355,7 +439,7 @@ const initCategoriesV2 = () => {
     };
 
     if ("IntersectionObserver" in window) {
-        const observer = new IntersectionObserver((entries) => {
+        categoriesObserver = new IntersectionObserver((entries) => {
             const visible = entries
                 .filter((entry) => entry.isIntersecting)
                 .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -364,10 +448,10 @@ const initCategoriesV2 = () => {
             }
         }, { rootMargin: "-140px 0px -60% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] });
 
-        sections.forEach((section) => observer.observe(section));
+        sections.forEach((section) => categoriesObserver.observe(section));
     } else {
         let ticking = false;
-        const onScroll = () => {
+        scrollHandler = () => {
             if (ticking) return;
             ticking = true;
             requestAnimationFrame(() => {
@@ -380,8 +464,8 @@ const initCategoriesV2 = () => {
                 ticking = false;
             });
         };
-        window.addEventListener("scroll", onScroll, { passive: true });
-        onScroll();
+        window.addEventListener("scroll", scrollHandler, { passive: true });
+        scrollHandler();
     }
 };
 
@@ -475,13 +559,49 @@ const loadFooter = async () => {
     }
 };
 
+const fetchCsvMenuData = async () => {
+    const sep = URL_CSV.includes("?") ? "&" : "?";
+    const response = await fetch(`${URL_CSV}${sep}_ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("No se pudo cargar el CSV.");
+    const csvText = await response.text();
+    return mapCsvToMenu(csvText);
+};
+
+const fetchMenuData = async () => {
+    if (MENU_SCRIPT_URL) {
+        try {
+            const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
+            const response = await fetch(`${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(MENU_SHEET_NAME)}&_ts=${Date.now()}`, { cache: "no-store" });
+            if (!response.ok) throw new Error("No se pudo cargar desde Apps Script.");
+            const text = await response.text();
+            let payload = null;
+            try { payload = JSON.parse(text); } catch (e) {}
+            if (Array.isArray(payload)) {
+                const mapped = mapRowsToMenu(payload);
+                if (mapped && mapped.length) return mapped;
+            }
+            if (payload && Array.isArray(payload.rows) && Array.isArray(payload.headers)) {
+                const mapped = mapRowsToMenu(rowsToObjects(payload.headers, payload.rows));
+                if (mapped && mapped.length) return mapped;
+            }
+            if (payload && Array.isArray(payload.data)) {
+                const mapped = mapRowsToMenu(payload.data);
+                if (mapped && mapped.length) return mapped;
+            }
+            throw new Error("Respuesta Apps Script inválida.");
+        } catch (error) {
+            console.warn("Apps Script sin datos. Se intenta CSV.", error);
+        }
+    }
+
+    if (!URL_CSV) throw new Error("No hay URL de Google Sheet configurada.");
+    return fetchCsvMenuData();
+};
+
 const loadMenuData = async () => {
     let usedFallback = false;
     try {
-        const response = await fetch(URL_CSV);
-        if (!response.ok) throw new Error("No se pudo cargar el CSV.");
-        const csvText = await response.text();
-        const mapped = mapCsvToMenu(csvText);
+        const mapped = await fetchMenuData();
         if (mapped && mapped.length) {
             window.menuData = mapped;
             return false;
@@ -532,6 +652,26 @@ const initMenu = async () => {
     const errorEl = document.getElementById("menu-error");
     if (errorEl) errorEl.style.display = usedFallback ? "flex" : "none";
     await loadFooter();
+
+    // Reintento corto para evitar caché del CSV en primer ingreso
+    setTimeout(async () => {
+        try {
+            const refreshed = await fetchMenuData();
+            if (refreshed && refreshed.length) {
+                const current = JSON.stringify(window.menuData || []);
+                const next = JSON.stringify(refreshed);
+                if (current !== next) {
+                    window.menuData = refreshed;
+                    renderMenu(window.menuData);
+                    restoreCartFromStorage();
+                    initCategoriesV2();
+                    updateCartV2();
+                }
+            }
+        } catch (error) {
+            console.warn(error);
+        }
+    }, 1800);
 
     try {
         if (sessionStorage.getItem("toro_scroll_resumen") === "1") {

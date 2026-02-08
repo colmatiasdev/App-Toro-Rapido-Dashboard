@@ -56,13 +56,54 @@ const parseCsv = (text) => {
     return rows;
 };
 
+const getMaxOrder = (rows, idxOrder) => {
+    let max = 0;
+    rows.forEach((row) => {
+        const value = cleanText(row[idxOrder]);
+        const num = Number.parseFloat(value);
+        if (!Number.isNaN(num)) max = Math.max(max, num);
+    });
+    return max;
+};
+
+const setAutoOrder = async () => {
+    const input = document.getElementById("orden-input");
+    if (!input) return;
+    input.value = "";
+    if (!URL_CSV) return;
+    try {
+        const response = await fetch(URL_CSV);
+        if (!response.ok) return;
+        const csvText = await response.text();
+        const rows = parseCsv(csvText);
+        if (rows.length < 2) return;
+        const headers = rows.shift().map((header) => normalizeKey(header));
+        const idxOrder = headers.findIndex((h) => ["orden", "order", "posicion", "position"].includes(h));
+        if (idxOrder === -1) return;
+        const maxOrder = getMaxOrder(rows, idxOrder);
+        input.value = maxOrder + 1;
+    } catch (error) {
+        console.error(error);
+    }
+};
+
+const setAutoId = () => {
+    const input = document.getElementById("idproducto-input");
+    if (!input) return;
+    input.value = `PROD-${Date.now()}`;
+};
+
 const setFormMode = (mode) => {
     const formMode = document.getElementById("form-mode");
     const submitBtn = document.getElementById("submit-btn");
     const cancelBtn = document.getElementById("cancel-edit");
+    const uploadBlock = document.getElementById("upload-image-block");
+    const changeBtn = document.getElementById("change-image-btn");
     if (formMode) formMode.value = mode;
     if (submitBtn) submitBtn.textContent = mode === "edit" ? "Actualizar" : "Guardar";
     if (cancelBtn) cancelBtn.style.display = mode === "edit" ? "inline-flex" : "none";
+    if (uploadBlock) uploadBlock.style.display = mode === "edit" ? "none" : "grid";
+    if (changeBtn) changeBtn.style.display = mode === "edit" ? "inline-flex" : "none";
 };
 
 const setDebug = (message) => {
@@ -77,6 +118,21 @@ const setDebug = (message) => {
     box.textContent = message;
 };
 
+let currentImageUrl = "";
+
+const setImagePreview = (url) => {
+    const wrapper = document.getElementById("image-preview");
+    const img = document.getElementById("image-preview-img");
+    if (!wrapper || !img) return;
+    if (!url) {
+        wrapper.style.display = "none";
+        img.src = "";
+        return;
+    }
+    wrapper.style.display = "grid";
+    img.src = url;
+};
+
 const fillForm = (item) => {
     const form = document.getElementById("add-item-form");
     if (!form) return;
@@ -86,10 +142,11 @@ const fillForm = (item) => {
     form.querySelector('[name="producto"]').value = item.name || "";
     form.querySelector('[name="descripcion"]').value = item.desc || "";
     form.querySelector('[name="precio"]').value = item.price || "";
-    form.querySelector('[name="imagen"]').value = item.image || "";
     form.querySelector('[name="esdestacado"]').value = item.destacado ? item.destacado.toUpperCase() : "NO";
     form.querySelector('[name="productoagotado"]').value = item.agotado || "NO";
     form.querySelector('[name="stock"]').value = item.stock || "";
+    currentImageUrl = item.image || "";
+    setImagePreview(currentImageUrl);
 };
 
 const loadForEdit = async (id) => {
@@ -143,6 +200,8 @@ const initForm = () => {
         form?.reset();
         const fileInput = document.getElementById("imagen-file");
         if (fileInput) fileInput.value = "";
+        setImagePreview("");
+        currentImageUrl = "";
         setFormMode("create");
     });
 
@@ -157,7 +216,7 @@ const initForm = () => {
         const formMode = document.getElementById("form-mode")?.value || "create";
         const data = new FormData(form);
         const fileInput = document.getElementById("imagen-file");
-        let imageUrl = cleanText(data.get("imagen"));
+        let imageUrl = "";
         if (fileInput?.files?.[0]) {
             const file = fileInput.files[0];
             const base64 = await new Promise((resolve, reject) => {
@@ -167,8 +226,13 @@ const initForm = () => {
                 reader.readAsDataURL(file);
             });
             imageUrl = base64;
+            setImagePreview(base64);
+        }
+        if (!imageUrl && formMode === "edit") {
+            imageUrl = currentImageUrl;
         }
 
+        const isCreate = formMode !== "edit";
         const payload = {
             action: formMode === "edit" ? "update" : "create",
             sheetName: MENU_SHEET_NAME,
@@ -181,7 +245,9 @@ const initForm = () => {
             Imagen: imageUrl,
             "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
             "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
-            stock: cleanText(data.get("stock"))
+            stock: cleanText(data.get("stock")),
+            habilitado: isCreate ? "SI" : undefined,
+            Habilitado: isCreate ? "SI" : undefined
         };
 
         if (!payload.Categoria || !payload.Producto || !payload.Precio) {
@@ -202,6 +268,8 @@ const initForm = () => {
             alert(formMode === "edit" ? "Ítem enviado para actualizar." : "Ítem enviado para crear.");
             form.reset();
             if (fileInput) fileInput.value = "";
+            setImagePreview("");
+            currentImageUrl = "";
             setFormMode("create");
         } catch (error) {
             console.error(error);
@@ -220,7 +288,27 @@ document.addEventListener("DOMContentLoaded", () => {
             initForm();
             setFormMode("create");
             const id = new URLSearchParams(window.location.search).get("id");
-            if (id) loadForEdit(id);
+            if (id) {
+                loadForEdit(id);
+            } else {
+                setAutoId();
+                setAutoOrder();
+            }
+            const fileInput = document.getElementById("imagen-file");
+            const uploadBtn = document.getElementById("upload-image-btn");
+            const changeBtn = document.getElementById("change-image-btn");
+            uploadBtn?.addEventListener("click", () => fileInput?.click());
+            changeBtn?.addEventListener("click", () => fileInput?.click());
+            fileInput?.addEventListener("change", () => {
+                const file = fileInput.files?.[0];
+                if (!file) {
+                    setImagePreview("");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => setImagePreview(reader.result);
+                reader.readAsDataURL(file);
+            });
         })
         .catch(() => {
             initForm();

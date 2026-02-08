@@ -84,6 +84,17 @@ const parseAvailability = (agotadoValue, stockValue) => {
     return true;
 };
 
+const parseEnabled = (value) => {
+    const clean = cleanText(value).toUpperCase();
+    if (!clean) return true;
+    if (clean === "SI") return true;
+    if (clean === "NO") return false;
+    const raw = normalizeKey(value || "");
+    if (raw === "si") return true;
+    if (raw === "no") return false;
+    return !["0", "false", "inactivo", "deshabilitado"].includes(raw);
+};
+
 const loadMenu = async () => {
     const tbody = document.getElementById("menu-body");
     if (!tbody) return;
@@ -93,7 +104,8 @@ const loadMenu = async () => {
     }
 
     try {
-        const response = await fetch(URL_CSV);
+        const sep = URL_CSV.includes("?") ? "&" : "?";
+        const response = await fetch(`${URL_CSV}${sep}_ts=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) throw new Error("CSV no disponible");
         const csvText = await response.text();
         const rows = parseCsv(csvText);
@@ -112,6 +124,7 @@ const loadMenu = async () => {
         const idxStock = findIndex(["stock"]);
         const idxId = findIndex(["idproducto", "idprod", "id", "codigo", "sku"]);
         const idxOrder = findIndex(["orden", "order", "posicion", "position"]);
+        const idxEnabled = findIndex(["habilitado", "activo", "visible", "mostrar"]);
         const idxDesc = findIndex(["descripcion", "desc", "detalle", "detalleproducto", "descripcionproducto"]);
         const idxImg = findIndex(["imagen", "img", "image", "foto", "url", "urlimagen", "imagenurl"]);
         const idxDestacado = findIndex(["esdestacado", "destacado"]);
@@ -128,6 +141,8 @@ const loadMenu = async () => {
             const desc = idxDesc === -1 ? "" : cleanText(row[idxDesc]);
             const image = idxImg === -1 ? "" : cleanText(row[idxImg]);
             const destacado = idxDestacado === -1 ? "" : cleanText(row[idxDestacado]);
+            const enabledValue = idxEnabled === -1 ? "" : row[idxEnabled];
+            const enabled = parseEnabled(enabledValue);
             return {
                 order: order === "" ? index + 1 : order,
                 id,
@@ -138,9 +153,10 @@ const loadMenu = async () => {
                 agotado: available ? "NO" : "SI",
                 desc,
                 image,
-                destacado
+                destacado,
+                enabled
             };
-        }).filter((row) => row.name);
+        }).filter((row) => row.name && row.enabled);
 
         state.rows = mapped;
         tbody.innerHTML = mapped.map((item, idx) => `
@@ -158,7 +174,7 @@ const loadMenu = async () => {
                 </td>
                 <td class="actions">
                     <button class="action-btn" data-action="edit" data-index="${idx}">Editar</button>
-                    <button class="action-btn danger" data-action="delete" data-index="${idx}">Borrar</button>
+                    <button class="action-btn danger" data-action="delete" data-index="${idx}">Deshabilitar</button>
                 </td>
             </tr>
         `).join("");
@@ -194,22 +210,28 @@ const initTableActions = () => {
                 alert("Este ítem no tiene ID. No se puede borrar.");
                 return;
             }
-            if (!confirm(`¿Eliminar ${item.name}?`)) return;
+            if (!confirm(`¿Deshabilitar ${item.name}?`)) return;
             try {
                 await fetch(MENU_SCRIPT_URL, {
                     method: "POST",
                     mode: "no-cors",
                     body: JSON.stringify({
-                        action: "delete",
+                        action: "update",
                         sheetName: MENU_SHEET_NAME,
-                        idproducto: item.id
+                        idproducto: item.id,
+                        habilitado: "NO",
+                        Habilitado: "NO"
                     })
                 });
-                alert("Ítem eliminado.");
+                alert("Ítem deshabilitado.");
+                const rowEl = btn.closest("tr");
+                if (rowEl) rowEl.remove();
+                state.rows.splice(index, 1);
                 loadMenu();
+                setTimeout(() => loadMenu(), 1200);
             } catch (error) {
                 console.error(error);
-                alert("No se pudo eliminar el ítem.");
+                alert("No se pudo deshabilitar el ítem.");
             }
         }
     });
