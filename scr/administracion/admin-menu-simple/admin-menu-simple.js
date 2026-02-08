@@ -1,6 +1,6 @@
 const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "";
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
-const MENU_SHEET_NAME = window.APP_CONFIG?.menuSheetName || "menu-toro-rapido-web";
+const MENU_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
 
 const state = {
     rows: []

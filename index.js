@@ -1,6 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
     try { sessionStorage.removeItem("toro_pedido"); } catch (e) {}
 
+    const config = window.APP_CONFIG || {};
+    const menuActivo = config.menuActivo || "menu-simple";
+    const container = document.getElementById("hero-btns-menu");
+
+    if (config.debug && Array.isArray(config.menuVersiones) && config.menuVersiones.length > 0 && container) {
+        const label = (id) => id.split("-").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+        container.innerHTML = config.menuVersiones.map((id) =>
+            `<a href="scr/${id}/${id}.html" class="btn-primary btn-menu-version">Realiza tu pedido (${label(id)})</a>`
+        ).join("");
+    } else if (container) {
+        const linkMenu = document.getElementById("link-menu-activo");
+        if (linkMenu) linkMenu.href = `scr/${menuActivo}/${menuActivo}.html`;
+    }
+
     const slides = Array.from(document.querySelectorAll(".slide"));
     const randomInt = (max) => {
         if (max <= 0) return 0;

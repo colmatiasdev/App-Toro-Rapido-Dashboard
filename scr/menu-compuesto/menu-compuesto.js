@@ -1,6 +1,6 @@
-const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv";
+const URL_CSV = window.APP_CONFIG?.googleSheetUrlMenuCompuesto || window.APP_CONFIG?.googleSheetUrl || "";
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
-const MENU_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
+const MENU_SHEET_NAME = window.APP_CONFIG?.menuCompuestoSheetName || "menu-toro-rapido-web-compuesto";
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x120?text=Toro";
 
 const sampleMenuData = [
@@ -160,15 +160,15 @@ const mapRowsToMenu = (rows) => {
         const name = cleanText(getValue(row, ["Producto", "producto", "Nombre", "nombre", "item", "titulo"]));
         if (!name) return;
         const desc = cleanText(getValue(row, ["Descripcion", "descripcion", "desc", "detalle", "detalleproducto"]));
-        const price = parsePrice(getValue(row, ["Precio", "precio", "price", "valor", "importe", "costo"]));
+        const price = parsePrice(getValue(row, ["Precio Actual", "Precio actual", "precioactual", "Precio", "precio", "price", "valor", "importe", "costo"]));
         const img = cleanText(getValue(row, ["Imagen", "imagen", "img", "image", "foto", "url", "urlimagen", "imagenurl"]));
         const agotadoValue = getValue(row, ["Producto Agotado", "productoagotado", "Agotado", "agotado"]);
         const stockValue = getValue(row, ["stock", "Stock"]);
         const available = parseAvailability(agotadoValue, stockValue);
-        const rawId = cleanText(getValue(row, ["idproducto", "IdProducto", "ID", "id", "codigo", "sku"]));
+        const rawId = cleanText(getValue(row, ["idproducto", "IdProducto", "idmenu-normal", "idmenunormal", "ID", "id", "codigo", "sku"]));
         const orderValue = cleanText(getValue(row, ["orden", "Orden", "order", "posicion", "position"]));
         const order = orderValue === "" ? Number.POSITIVE_INFINITY : Number.parseFloat(orderValue);
-        const enabledValue = getValue(row, ["habilitado", "Habilitado", "activo", "visible", "mostrar"]);
+        const enabledValue = getValue(row, ["Habilitado", "habilitado", "activo", "visible", "mostrar"]);
         const enabled = parseEnabled(enabledValue);
         const id = rawId || `${slugify(category)}-${index}`;
         if (!enabled) return;
@@ -204,11 +204,11 @@ const mapCsvToMenu = (csvText) => {
     const idxCategory = findIndex(["categoria", "categorias", "category", "cat", "rubro", "tipo"]);
     const idxName = findIndex(["producto", "nombre", "product", "name", "titulo", "item"]);
     const idxDesc = findIndex(["descripcion", "desc", "detalle", "detalleproducto", "descripcionproducto"]);
-    const idxPrice = findIndex(["precio", "price", "valor", "importe", "costo"]);
+    const idxPrice = findIndex(["precioactual", "precio", "price", "valor", "importe", "costo"]);
     const idxImg = findIndex(["imagen", "img", "image", "foto", "url", "urlimagen", "imagenurl"]);
     const idxAgotado = findIndex(["productoagotado", "agotado"]);
     const idxStock = findIndex(["stock"]);
-    const idxId = findIndex(["idproducto", "idprod", "id", "codigo", "sku"]);
+    const idxId = findIndex(["idproducto", "idprod", "idmenunormal", "id", "codigo", "sku"]);
     const idxOrder = findIndex(["orden", "order", "posicion", "position"]);
     const idxEnabled = findIndex(["habilitado", "activo", "visible", "mostrar"]);
 
@@ -516,7 +516,7 @@ const loadHeaderV2 = async () => {
     const container = document.getElementById("menu-v2-header");
     if (!container) return;
     try {
-        const response = await fetch("menu-simple-header.html");
+        const response = await fetch("menu-compuesto-header.html");
         if (!response.ok) return;
         container.innerHTML = await response.text();
     } catch (error) {
@@ -528,7 +528,7 @@ const loadPromoV2 = async () => {
     const container = document.getElementById("menu-v2-promo");
     if (!container) return;
     try {
-        const response = await fetch("menu-simple-promo.html");
+        const response = await fetch("menu-compuesto-promo.html");
         if (!response.ok) return;
         container.innerHTML = await response.text();
     } catch (error) {

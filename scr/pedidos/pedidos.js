@@ -148,6 +148,9 @@ async function cargarPie() {
 }
 
 async function initPedidos() {
+    const menuActivo = window.APP_CONFIG?.menuActivo || "menu-simple";
+    const linkModificar = document.getElementById("link-modificar-pedido");
+    if (linkModificar) linkModificar.href = `../${menuActivo}/${menuActivo}.html`;
     renderResumenMenu();
     await cargarPie();
 }
