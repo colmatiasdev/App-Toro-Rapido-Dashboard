@@ -4,6 +4,11 @@ const MENU_SHEET_NAME = window.APP_CONFIG?.menuCompuestoSheetName || "menu-toro-
 const MENU_DETALLE_SHEET_NAME = window.APP_CONFIG?.menuCompuestoDetalleSheetName || "menu-compuesto-detalle";
 const URL_CSV_DETALLE = window.APP_CONFIG?.googleSheetUrlMenuCompuestoDetalle || "";
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x120?text=Toro";
+/** Imagen de respaldo cuando falla la carga (SVG inline, no depende de red) */
+const IMG_FALLBACK = "data:image/svg+xml," + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120" viewBox="0 0 160 120"><rect fill="#e2e8f0" width="160" height="120"/><rect x="52" y="36" width="56" height="44" rx="4" fill="none" stroke="#94a3b8" stroke-width="2"/><circle cx="80" cy="52" r="6" fill="#94a3b8"/><path d="M52 80l12-16 10 12 14-18 18 22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="102" text-anchor="middle" fill="#64748b" font-size="11" font-family="system-ui,sans-serif">Sin imagen</text></svg>'
+);
+if (typeof window !== "undefined") window.__MENU_IMG_FALLBACK = IMG_FALLBACK;
 
 /** Valores de Tipo Menu que indican ítem con sub-items desde menu-compuesto-detalle */
 const TIPO_MENU_COMPUESTO = ["MENU-COMPUESTO", "MENU-COMPUE"];
@@ -372,14 +377,14 @@ const renderOneItem = (item) => {
             <li class="sub-item ${sub.available === false ? "sub-item-out" : ""}">
                 ${sub.quantity > 0 ? `<span class="sub-qty">${sub.quantity}x</span>` : ""}
                 <span class="sub-name">${sub.name}</span>
-                ${sub.priceTotal > 0 ? `<span class="sub-price">${formatV2(sub.priceTotal)}</span>` : sub.priceUnit > 0 ? `<span class="sub-price">${formatV2(sub.priceUnit)} u.</span>` : ""}
+                ${sub.available === false ? `<span class="sub-item-agotado">AGOTADO</span>` : ""}
             </li>`
             )
             .join("");
         return `
             <article class="item item-compuesto ${item.available === false ? "is-out" : ""}">
                 <div class="item-compuesto-header">
-                    <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}">
+                    <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
                     ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                     <div class="item-compuesto-info">
                         <h3>${item.name}</h3>
@@ -402,7 +407,7 @@ const renderOneItem = (item) => {
 
     return `
             <article class="item ${item.available === false ? "is-out" : ""}">
-                <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}">
+                <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
                 ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                 <div>
                     <h3>${item.name}</h3>
@@ -763,13 +768,15 @@ const fetchDetalleData = async () => {
     return null;
 };
 
-/** Asigna subItems a cada ítem con Tipo Menu = MENU-COMPUESTO según idmenu-variable */
+/** Asigna subItems a cada ítem con Tipo Menu = MENU-COMPUESTO según idmenu-variable. Si algún subítem no está disponible, el ítem maestro queda no disponible. */
 const mergeDetalleIntoMenu = (menuSections, detalleMap) => {
     if (!detalleMap || !menuSections) return;
     menuSections.forEach((section) => {
         (section.items || []).forEach((item) => {
             if (isTipoMenuCompuesto(item.tipoMenu) && item.idmenuVariable) {
                 item.subItems = detalleMap.get(item.idmenuVariable) || [];
+                const algunoAgotado = item.subItems.some((sub) => sub.available === false);
+                if (algunoAgotado) item.available = false;
             }
         });
     });

@@ -2,6 +2,10 @@ const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "https://docs.google.com/sp
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
 const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x120?text=Toro";
+const IMG_FALLBACK = "data:image/svg+xml," + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120" viewBox="0 0 160 120"><rect fill="#e2e8f0" width="160" height="120"/><rect x="52" y="36" width="56" height="44" rx="4" fill="none" stroke="#94a3b8" stroke-width="2"/><circle cx="80" cy="52" r="6" fill="#94a3b8"/><path d="M52 80l12-16 10 12 14-18 18 22" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text x="80" y="102" text-anchor="middle" fill="#64748b" font-size="11" font-family="system-ui,sans-serif">Sin imagen</text></svg>'
+);
+if (typeof window !== "undefined") window.__MENU_IMG_FALLBACK = IMG_FALLBACK;
 
 const sampleMenuData = [
     {
@@ -294,7 +298,7 @@ const renderMenu = (menuData) => {
         const list = sectionEl.querySelector(".items-list");
         list.innerHTML = section.items.map((item) => `
             <article class="item ${item.available === false ? "is-out" : ""}">
-                <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}">
+                <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
                 ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                 <div>
                     <h3>${item.name}</h3>
