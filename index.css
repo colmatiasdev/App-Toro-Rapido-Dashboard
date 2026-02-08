@@ -143,6 +143,27 @@ body {
     min-width: 3em;
 }
 
+.floating-countdown {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(245, 158, 11, 0.95);
+    color: #1c1917;
+    padding: 10px 16px;
+    border-radius: 12px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.1rem;
+}
+.floating-countdown i {
+    color: #1c1917;
+}
+
 .hero-abierto[data-estado="cerrado"] {
     border-color: rgba(185, 28, 28, 0.5);
     background: rgba(0, 0, 0, 0.4);

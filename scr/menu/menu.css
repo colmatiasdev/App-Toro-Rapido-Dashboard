@@ -712,6 +712,30 @@ body {
     text-align: center;
 }
 
+.floating-countdown {
+    position: fixed;
+    top: 16px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(245, 158, 11, 0.95);
+    color: #1c1917;
+    padding: 10px 16px;
+    border-radius: 12px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.1rem;
+}
+.floating-countdown i {
+    font-size: 1rem;
+}
+.floating-countdown .floating-countdown-time {
+    min-width: 2.8em;
+}
+
 .floating-checkout {
     position: fixed;
     bottom: 20px;
