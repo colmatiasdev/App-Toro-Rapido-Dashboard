@@ -37,6 +37,8 @@ window.APP_CONFIG = {
     minutosAntesCierre: 30,
     /** Minutos antes del cierre para mostrar la cuenta regresiva (MM:SS) flotante. Ej: 10 = mostrar contador cuando falten 10 min o menos. */
     minutosCuentaRegresiva: 10,
+    /** Horas antes de la apertura en las que se permite hacer reserva (estando cerrado). Ej: 2 = puede reservar si faltan 2 h o menos para abrir. */
+    horasAntesAperturaParaReserva: 2,
     /** URL CSV de la hoja menu-compuesto-detalle (opcional). Si no está, se usa solo Apps Script. */
     googleSheetUrlMenuCompuestoDetalle: "",
     costoEnvioBase: 1500,

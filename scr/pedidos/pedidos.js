@@ -89,14 +89,18 @@ async function enviarPedido() {
         console.error(e);
     }
 
-    let msg = `*TORO RÁPIDO - DELIVERY*\n_ID: ${idPedido}_\n\n*Cliente* ${nombre}\n*Domicilio:* ${direccion}\n*WSP:* ${whatsapp}\n\n*Detalle del Pedido*\n${itemsWhatsApp}`;
+    const params = new URLSearchParams(window.location.search);
+    const esReserva = params.get("reserva") === "1";
+    let msg = esReserva
+        ? `*TORO RÁPIDO - RESERVA*\n_El pedido será preparado para cuando abramos el local._\n_ID: ${idPedido}_\n\n*Cliente* ${nombre}\n*Domicilio:* ${direccion}\n*WSP:* ${whatsapp}\n\n*Detalle del Pedido*\n${itemsWhatsApp}`
+        : `*TORO RÁPIDO - DELIVERY*\n_ID: ${idPedido}_\n\n*Cliente* ${nombre}\n*Domicilio:* ${direccion}\n*WSP:* ${whatsapp}\n\n*Detalle del Pedido*\n${itemsWhatsApp}`;
     msg += `\n\n*SUBTOTAL:* ${formatearMoneda(subtotal)}`;
     msg += `\n*ENVÍO:* ${costoEnvio === 0 ? "¡GRATIS!" : formatearMoneda(costoEnvio)}`;
     msg += `\n*TOTAL:* ${formatearMoneda(subtotal + costoEnvio)}\n\n_Sujeto a confirmación de zona._`;
 
     document.getElementById("overlay-carga").style.display = "none";
     window.open(`https://wa.me/${TELEFONO_NEGOCIO}?text=${encodeURIComponent(msg)}`, "_blank");
-    window.location.href = "../confirmacion/confirmacion.html";
+    window.location.href = esReserva ? "../confirmacion/confirmacion.html?reserva=1" : "../confirmacion/confirmacion.html";
 }
 
 function renderResumenMenu() {
@@ -150,7 +154,20 @@ async function cargarPie() {
 async function initPedidos() {
     const menuActivo = window.APP_CONFIG?.menuActivo || "menu-simple";
     const linkModificar = document.getElementById("link-modificar-pedido");
-    if (linkModificar) linkModificar.href = `../${menuActivo}/${menuActivo}.html`;
+    if (linkModificar) {
+        const path = window.location.pathname || "";
+        const dir = path.replace(/\/[^/]*$/, "");
+        const parentDir = dir ? dir.replace(/\/[^/]*$/, "") : "";
+        if (parentDir) {
+            linkModificar.href = parentDir + "/menu/" + menuActivo + "/" + menuActivo + ".html";
+        } else {
+            linkModificar.href = "../menu/" + menuActivo + "/" + menuActivo + ".html";
+        }
+    }
+    const params = new URLSearchParams(window.location.search);
+    const esReserva = params.get("reserva") === "1";
+    const bannerReserva = document.getElementById("pedidos-banner-reserva");
+    if (bannerReserva) bannerReserva.style.display = esReserva ? "block" : "none";
     renderResumenMenu();
     await cargarPie();
 }

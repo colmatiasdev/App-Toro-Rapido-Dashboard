@@ -17,6 +17,10 @@
 </div>
 
 <div class="contenedor">
+    <div id="pedidos-banner-reserva" class="pedidos-banner-reserva" style="display:none;">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>Estás realizando una <strong>reserva</strong>. El pedido será preparado para cuando abramos el local.</span>
+    </div>
     <a id="link-modificar-pedido" href="../menu/menu-simple/menu-simple.html" class="boton-volver-menu" onclick="sessionStorage.setItem('toro_scroll_resumen','1')">
         <i class="fa-solid fa-pen-to-square"></i> Modificar pedido
     </a>
@@ -77,6 +81,22 @@
             <i class="fa-solid fa-location-dot"></i>
             <input type="text" id="cust-address" class="input-field" placeholder="Calle, número, piso y depto..." value="San Martín 742, Piso 2, Depto B">
         </div>
+    </div>
+
+    <div class="aviso-legal-pedido" aria-label="Cláusula de descargo y términos">
+        <p class="aviso-resumen"><strong>IMPORTANTE:</strong> El detalle del pedido está sujeto a revisión. Rige la carta vigente del local ante cualquier anomalía. Al enviar por WhatsApp aceptás los términos indicados a continuación.</p>
+        <details class="aviso-details">
+            <summary class="aviso-summary">
+                <span class="aviso-leer-mas">Leer más</span>
+                <span class="aviso-leer-menos">Leer menos</span>
+            </summary>
+            <div class="aviso-texto-completo">
+                <p><strong>Cláusula de descargo y términos aceptados al enviar el pedido por WhatsApp</strong></p>
+                <p>El detalle del pedido —cantidad, descripción de ítems, precios y totales— queda sujeto a revisión y confirmación por el establecimiento. El texto generado por esta aplicación y enviado por WhatsApp tiene carácter meramente informativo y de buena fe; puede ser modificado por el usuario antes o después de su envío y <strong>no constituye oferta vinculante, propuesta contractual ni documento con valor legal</strong>. Prevalece como única referencia válida y obligatoria la carta y los precios vigentes del local al momento de la confirmación del pedido por parte del comercio.</p>
+                <p>El establecimiento <strong>no se responsabiliza</strong> por discrepancias, errores, omisiones o reclamaciones derivadas de alteraciones del mensaje, de su interpretación o de la utilización de medios electrónicos o de terceros. Al utilizar el botón «Enviar por WhatsApp» el usuario declara conocer y aceptar en forma expresa estos términos y condiciones en su totalidad, para todos los efectos legales que correspondan.</p>
+                <p><em>Sin perjuicio de los derechos que las leyes de defensa del consumidor no permitan renunciar, el uso de esta funcionalidad implica la aceptación de las limitaciones aquí indicadas.</em></p>
+            </div>
+        </details>
     </div>
 
     <button onclick="enviarPedido()" class="boton-pedido">

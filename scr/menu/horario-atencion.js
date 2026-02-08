@@ -253,10 +253,12 @@
         const proxima = getProximaApertura(byDay);
         const mostrarAbreEn = proxima && proxima.minutosDesdeAhora <= minutosAntesApertura;
         const horaStr = proxima ? `${String(proxima.hora).padStart(2, "0")}:${String(proxima.minuto).padStart(2, "0")}` : "";
+        const horasReserva = Math.max(0, Number(global.APP_CONFIG?.horasAntesAperturaParaReserva) || 2);
+        const puedeReservar = proxima && proxima.minutosDesdeAhora <= horasReserva * 60;
         if (mostrarAbreEn) {
-            return { abierto: false, tipo: "cerrado-abre-en", mensaje: `El local abre a las ${horaStr}`, horaApertura: horaStr };
+            return { abierto: false, tipo: "cerrado-abre-en", mensaje: `El local abre a las ${horaStr}`, horaApertura: horaStr, puedeReservar };
         }
-        return { abierto: false, tipo: "cerrado", mensaje: "Cerrado por el momento" };
+        return { abierto: false, tipo: "cerrado", mensaje: "Cerrado por el momento", puedeReservar: !!puedeReservar };
     }
 
     global.HorarioAtencion = {

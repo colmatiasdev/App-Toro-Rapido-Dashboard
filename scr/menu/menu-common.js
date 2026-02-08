@@ -367,8 +367,33 @@ const initActionsV2 = () => {
         const payload = { createdAt: new Date().toISOString(), items, subtotal, delivery, total };
         const encoded = encodeURIComponent(JSON.stringify(payload));
         try { sessionStorage.setItem("toro_pedido", JSON.stringify(payload)); } catch (error) { console.warn(error); }
-        window.location.href = `../../pedidos/pedidos.html?pedido=${encoded}`;
+        const reservaParam = window.__menuPuedeReservar ? "&reserva=1" : "";
+        window.location.href = `../../pedidos/pedidos.html?pedido=${encoded}${reservaParam}`;
     });
+};
+
+/** Muestra u oculta el modo reserva en el botón y la alerta del resumen. */
+const applyReservaUI = (reserva) => {
+    const btn = document.getElementById("v2-confirm");
+    const note = document.querySelector(".checkout-note");
+    let alertaReserva = document.getElementById("menu-resumen-alerta-reserva");
+    if (reserva && btn) {
+        btn.innerHTML = "<i class=\"fa-solid fa-calendar-check\"></i> Realizar reserva";
+        btn.classList.add("checkout-btn-reserva");
+        if (!alertaReserva) {
+            alertaReserva = document.createElement("div");
+            alertaReserva.id = "menu-resumen-alerta-reserva";
+            alertaReserva.className = "menu-resumen-alerta-reserva";
+            alertaReserva.innerHTML = "<i class=\"fa-solid fa-info-circle\"></i><span>Estás realizando una <strong>reserva</strong>. El pedido será preparado para cuando abramos el local.</span>";
+            if (note && note.parentNode) note.parentNode.insertBefore(alertaReserva, note);
+            else btn.parentNode.appendChild(alertaReserva);
+        }
+        alertaReserva.style.display = "";
+    } else if (btn) {
+        btn.innerHTML = "<i class=\"fa-solid fa-circle-check\"></i> Realizar pedido";
+        btn.classList.remove("checkout-btn-reserva");
+        if (alertaReserva) alertaReserva.style.display = "none";
+    }
 };
 
 const loadHeaderV2 = async () => {
@@ -430,15 +455,31 @@ const initHorarioAlertaMenu = async () => {
                 html = `<div class="menu-horario-alerta menu-horario-pronto-cierre"><i class="fa-solid fa-exclamation-triangle"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-amber">Local ABIERTO</span></div>`;
             }
         } else if (tipo === "cerrado-abre-en") {
-            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-clock"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>`;
+            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-clock"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>
+<div class="menu-cerrado-info"><i class="fa-solid fa-circle-info"></i><div class="menu-cerrado-info-text"><strong>Podés ver el menú las 24 hs</strong><span>Recorré la carta cuando quieras para conocer productos, precios y detalles. Cuando estemos abiertos, ya sabés qué pedir.</span></div></div>`;
         } else {
-            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-store"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>`;
+            html = `<div class="menu-horario-alerta menu-horario-cerrado"><i class="fa-solid fa-store"></i><span>${estado.mensaje}</span><span class="menu-horario-badge menu-horario-badge-red">Local CERRADO</span></div>
+<div class="menu-cerrado-info"><i class="fa-solid fa-circle-info"></i><div class="menu-cerrado-info-text"><strong>Podés ver el menú las 24 hs</strong><span>Recorré la carta cuando quieras para conocer productos, precios y detalles. Cuando estemos abiertos, ya sabés qué pedir.</span></div></div>`;
         }
         wrap.innerHTML = html;
         wrap.style.display = "";
     };
     renderAlerta("menu-horario-alerta-portada");
     renderAlerta("menu-horario-alerta-resumen");
+
+    window.__menuPuedeReservar = estado.puedeReservar === true;
+    applyReservaUI(estado.puedeReservar === true);
+
+    let floatingCerradoEl = document.getElementById("menu-floating-cerrado");
+    if (floatingCerradoEl) floatingCerradoEl.remove();
+    const esCerrado = estado.tipo === "cerrado" || estado.tipo === "cerrado-abre-en";
+    if (esCerrado) {
+        floatingCerradoEl = document.createElement("div");
+        floatingCerradoEl.id = "menu-floating-cerrado";
+        floatingCerradoEl.className = "floating-cerrado";
+        floatingCerradoEl.innerHTML = `<i class="fa-solid fa-store"></i><span class="floating-cerrado-texto">${estado.mensaje}</span><span class="floating-cerrado-badge">Local CERRADO</span>`;
+        document.body.appendChild(floatingCerradoEl);
+    }
 
     let floatingCountdownEl = document.getElementById("menu-floating-countdown");
     if (floatingCountdownEl) floatingCountdownEl.remove();
