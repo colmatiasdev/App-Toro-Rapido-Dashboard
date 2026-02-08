@@ -307,11 +307,19 @@ body {
     background: var(--gray-bg);
     position: relative;
 }
-.item img {
+.item img,
+.item .item-img {
     width: 110px;
     height: 90px;
     border-radius: 12px;
     object-fit: cover;
+    background: #e2e8f0;
+}
+.item img.img-error,
+.item .item-img.img-error {
+    object-fit: contain;
+    padding: 8px;
+    background: #f1f5f9;
 }
 .item.is-out img {
     opacity: 0.5;

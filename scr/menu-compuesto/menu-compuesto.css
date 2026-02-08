@@ -303,11 +303,19 @@ body {
     background: var(--gray-bg);
     position: relative;
 }
-.item img {
+.item img,
+.item .item-img {
     width: 110px;
     height: 90px;
     border-radius: 12px;
     object-fit: cover;
+    background: #e2e8f0;
+}
+.item img.img-error,
+.item .item-img.img-error {
+    object-fit: contain;
+    padding: 8px;
+    background: #f1f5f9;
 }
 .item.is-out img {
     opacity: 0.5;
@@ -350,6 +358,13 @@ body {
 .item-compuesto .item-compuesto-header img {
     width: 90px;
     height: 72px;
+    object-fit: cover;
+    background: #e2e8f0;
+}
+.item-compuesto .item-compuesto-header img.img-error {
+    object-fit: contain;
+    padding: 6px;
+    background: #f1f5f9;
 }
 .item-compuesto .item-compuesto-info {
     min-width: 0;
@@ -392,8 +407,16 @@ body {
     color: var(--dark-blue);
 }
 .item-compuesto-detalle .sub-item.sub-item-out {
-    opacity: 0.65;
+    opacity: 0.75;
     text-decoration: line-through;
+}
+.item-compuesto-detalle .sub-item-agotado {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #b91c1c;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 6px;
 }
 .item-compuesto-detalle .sub-qty {
     font-weight: 700;
