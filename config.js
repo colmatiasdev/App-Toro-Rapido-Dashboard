@@ -1,6 +1,6 @@
 window.APP_CONFIG = {
     /** true: en index se muestran botones por cada versión de menú para pruebas */
-    debug: true,
+    debug: false,
     /** Versiones de menú disponibles (usado cuando debug es true) */
     menuVersiones: ["menu-simple", "menu-compuesto"],
     /** Menú público activo cuando debug es false */
