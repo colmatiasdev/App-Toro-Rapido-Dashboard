@@ -322,27 +322,30 @@ let heroCountdownInterval = null;
 const startHeroCountdown = () => {
     if (heroCountdownInterval) clearInterval(heroCountdownInterval);
     heroCountdownInterval = setInterval(() => {
-        const el = document.querySelector(".hero-countdown[data-end-ms]");
-        if (!el) {
+        const els = document.querySelectorAll(".hero-countdown[data-end-ms]");
+        if (!els.length) {
             if (heroCountdownInterval) clearInterval(heroCountdownInterval);
             return;
         }
-        const endMs = Number(el.getAttribute("data-end-ms"));
+        const endMs = Number(els[0].getAttribute("data-end-ms"));
         const rest = (endMs - Date.now()) / 1000;
+        const text = rest <= 0 ? "00:00" : `${String(Math.floor(rest / 60)).padStart(2, "0")}:${String(Math.floor(rest % 60)).padStart(2, "0")}`;
+        els.forEach((el) => {
+            el.textContent = text;
+            if (rest <= 0) el.removeAttribute("data-end-ms");
+        });
         if (rest <= 0) {
-            el.textContent = "00:00";
-            el.removeAttribute("data-end-ms");
+            const fl = document.getElementById("hero-floating-countdown");
+            if (fl) fl.remove();
             if (heroCountdownInterval) clearInterval(heroCountdownInterval);
-        } else {
-            const m = Math.floor(rest / 60);
-            const s = Math.floor(rest % 60);
-            el.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
         }
     }, 1000);
 };
 
 /** Actualiza el bloque hero "Local ABIERTO / CERRADO" según si estamos en horario de atención. Si está cerrado y hay byDay, puede mostrar "El local abre a las HH:MM" dentro del margen config. Si está abierto y faltan pocos min para cerrar, alerta para que realice el pedido. */
 const updateHeroEstadoLocal = (abierto, byDay) => {
+    const floatingEl = document.getElementById("hero-floating-countdown");
+    if (floatingEl) floatingEl.remove();
     const el = document.getElementById("hero-estado-local");
     if (!el) return;
     if (abierto) {
@@ -350,7 +353,8 @@ const updateHeroEstadoLocal = (abierto, byDay) => {
         const minHastaCierre = byDay ? getMinutosHastaCierre(byDay) : null;
         const segHastaCierre = byDay ? getSegundosHastaCierre(byDay) : null;
         const alertaCierre = minHastaCierre != null && minHastaCierre <= minutosAntesCierre;
-        const umbralCountdownSeg = 10 * 60;
+        const minutosCuentaRegresiva = Math.max(0, Number(window.APP_CONFIG?.minutosCuentaRegresiva) || 10);
+        const umbralCountdownSeg = minutosCuentaRegresiva * 60;
         const mostrarCountdown = alertaCierre && segHastaCierre != null && segHastaCierre > 0 && segHastaCierre <= umbralCountdownSeg;
         if (alertaCierre) {
             el.setAttribute("data-estado", "abierto-pronto-cierre");
@@ -361,6 +365,11 @@ const updateHeroEstadoLocal = (abierto, byDay) => {
                 const initial = `${pad(m)}:${pad(s)}`;
                 const endMs = Date.now() + segHastaCierre * 1000;
                 el.innerHTML = `<i class="fa-solid fa-exclamation-triangle"></i><span class="hero-abierto-texto">Pedí antes del cierre</span><span class="hero-countdown" data-end-ms="${endMs}">${initial}</span><span class="hero-abierto-badge hero-cierre-pronto-badge">Local ABIERTO</span>`;
+                const fl = document.createElement("div");
+                fl.id = "hero-floating-countdown";
+                fl.className = "floating-countdown";
+                fl.innerHTML = `<i class="fa-solid fa-clock"></i><span class="hero-countdown" data-end-ms="${endMs}">${initial}</span>`;
+                document.body.appendChild(fl);
                 startHeroCountdown();
             } else {
                 const texto = minHastaCierre <= 0 ? "Cerramos ya" : `¡Quedan ${minHastaCierre} min! Pedí antes del cierre`;

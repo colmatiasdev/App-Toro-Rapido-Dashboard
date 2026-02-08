@@ -402,7 +402,8 @@ const loadResumenV2 = async () => {
     } catch (error) { console.error(error); }
 };
 
-const MENU_COUNTDOWN_UMBRAL_SEG = 10 * 60;
+/** Minutos desde config para activar la cuenta regresiva (por defecto 10). */
+const getMinutosCuentaRegresiva = () => Math.max(0, Number(window.APP_CONFIG?.minutosCuentaRegresiva) || 10);
 
 /** Rellena las alertas de horario (portada y resumen) con la misma lógica que index: minutos antes de apertura/cierre. */
 const initHorarioAlertaMenu = async () => {
@@ -410,7 +411,8 @@ const initHorarioAlertaMenu = async () => {
     const byDay = await window.HorarioAtencion.fetchHorarioByDay();
     const estado = window.HorarioAtencion.getEstadoHorario(byDay);
     const seg = estado.segundosHastaCierre != null ? estado.segundosHastaCierre : 0;
-    const mostrarCountdown = estado.tipo === "abierto-pronto-cierre" && seg > 0 && seg <= MENU_COUNTDOWN_UMBRAL_SEG;
+    const umbralSeg = getMinutosCuentaRegresiva() * 60;
+    const mostrarCountdown = estado.tipo === "abierto-pronto-cierre" && seg > 0 && seg <= umbralSeg;
     const endMs = mostrarCountdown ? Date.now() + seg * 1000 : 0;
 
     const renderAlerta = (containerId) => {
@@ -438,7 +440,16 @@ const initHorarioAlertaMenu = async () => {
     renderAlerta("menu-horario-alerta-portada");
     renderAlerta("menu-horario-alerta-resumen");
 
+    let floatingCountdownEl = document.getElementById("menu-floating-countdown");
+    if (floatingCountdownEl) floatingCountdownEl.remove();
     if (mostrarCountdown) {
+        const initial = window.HorarioAtencion.formatCountdown(seg);
+        floatingCountdownEl = document.createElement("div");
+        floatingCountdownEl.id = "menu-floating-countdown";
+        floatingCountdownEl.className = "floating-countdown";
+        floatingCountdownEl.innerHTML = `<i class="fa-solid fa-clock"></i><span class="floating-countdown-time menu-horario-countdown" data-end-ms="${endMs}">${initial}</span>`;
+        document.body.appendChild(floatingCountdownEl);
+
         if (window._menuHorarioCountdownInterval) clearInterval(window._menuHorarioCountdownInterval);
         window._menuHorarioCountdownInterval = setInterval(() => {
             const els = document.querySelectorAll(".menu-horario-countdown[data-end-ms]");
@@ -450,6 +461,8 @@ const initHorarioAlertaMenu = async () => {
                 if (rest <= 0) {
                     el.textContent = "00:00";
                     el.removeAttribute("data-end-ms");
+                    const fl = document.getElementById("menu-floating-countdown");
+                    if (fl) fl.remove();
                 } else {
                     anyActive = true;
                     el.textContent = window.HorarioAtencion.formatCountdown(rest);

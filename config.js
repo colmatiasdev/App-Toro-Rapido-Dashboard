@@ -35,6 +35,8 @@ window.APP_CONFIG = {
     minutosAntesApertura: 20,
     /** Minutos antes del cierre para alertar "¡Pedí antes del cierre!" cuando está abierto. Ej: 30 = avisar cuando falten 30 min o menos. */
     minutosAntesCierre: 30,
+    /** Minutos antes del cierre para mostrar la cuenta regresiva (MM:SS) flotante. Ej: 10 = mostrar contador cuando falten 10 min o menos. */
+    minutosCuentaRegresiva: 10,
     /** URL CSV de la hoja menu-compuesto-detalle (opcional). Si no está, se usa solo Apps Script. */
     googleSheetUrlMenuCompuestoDetalle: "",
     costoEnvioBase: 1500,
