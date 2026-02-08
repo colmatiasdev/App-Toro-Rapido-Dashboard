@@ -384,11 +384,14 @@ const renderOneItem = (item) => {
         return `
             <article class="item item-compuesto ${item.available === false ? "is-out" : ""}">
                 <div class="item-compuesto-header">
-                    <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
+                    <a href="../producto/producto.html?id=${encodeURIComponent(item.id)}" class="item-img-link producto-ver-detalle" data-id="${encodeURIComponent(item.id)}" aria-label="Ver detalle de ${(item.name || "").replace(/"/g, "&quot;")}">
+                        <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
+                    </a>
                     ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                     <div class="item-compuesto-info">
                         <h3>${item.name}</h3>
                         ${item.desc ? `<p>${item.desc}</p>` : ""}
+                        <a href="../producto/producto.html?id=${encodeURIComponent(item.id)}" class="link-ver-detalle producto-ver-detalle" data-id="${encodeURIComponent(item.id)}"><i class="fa-solid fa-up-right-from-square"></i> Ver detalle</a>
                         <div class="item-price">${formatV2(item.price)}</div>
                     </div>
                     <div class="item-action">
@@ -407,11 +410,14 @@ const renderOneItem = (item) => {
 
     return `
             <article class="item ${item.available === false ? "is-out" : ""}">
-                <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
+                <a href="../producto/producto.html?id=${encodeURIComponent(item.id)}" class="item-img-link producto-ver-detalle" data-id="${encodeURIComponent(item.id)}" aria-label="Ver detalle de ${(item.name || "").replace(/"/g, "&quot;")}">
+                    <img src="${item.img || PLACEHOLDER_IMAGE}" alt="${item.name}" class="item-img" onerror="this.onerror=null;this.classList.add('img-error');this.src=window.__MENU_IMG_FALLBACK">
+                </a>
                 ${item.available === false ? `<span class="out-badge">AGOTADO</span>` : ""}
                 <div>
                     <h3>${item.name}</h3>
                     <p>${item.desc}</p>
+                    <a href="../producto/producto.html?id=${encodeURIComponent(item.id)}" class="link-ver-detalle producto-ver-detalle" data-id="${encodeURIComponent(item.id)}"><i class="fa-solid fa-up-right-from-square"></i> Ver detalle</a>
                     <div class="item-price">${formatV2(item.price)}</div>
                 </div>
                 <div class="item-action">
@@ -491,8 +497,28 @@ const updateCartV2 = () => {
             const isPromo = (item.category || "").toLowerCase().includes("promo");
             const row = document.createElement("div");
             row.className = `checkout-item${isPromo ? " item-promo" : ""}`;
-            const label = `${item.qty}x ${isPromo ? "[PROMO] " : ""}${item.name}`;
-            row.innerHTML = `<span>${label}</span><strong>${formatV2(item.qty * item.price)}</strong>`;
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "checkout-item-remove";
+            btn.dataset.id = item.id;
+            if (item.qty > 1) {
+                btn.setAttribute("aria-label", "Quitar una unidad");
+                btn.title = "Quitar una unidad";
+                btn.innerHTML = "<i class=\"fa-solid fa-circle-minus\"></i>";
+            } else {
+                btn.setAttribute("aria-label", "Quitar del pedido");
+                btn.title = "Quitar del pedido";
+                btn.innerHTML = "<i class=\"fa-solid fa-circle-xmark\"></i>";
+            }
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "checkout-item-label";
+            labelSpan.textContent = `${item.qty}x ${isPromo ? "[PROMO] " : ""}${item.name}`;
+            const strong = document.createElement("strong");
+            strong.className = "checkout-item-price";
+            strong.textContent = formatV2(item.qty * item.price);
+            row.appendChild(btn);
+            row.appendChild(labelSpan);
+            row.appendChild(strong);
             container.appendChild(row);
         });
     }
@@ -511,7 +537,37 @@ const updateCartV2 = () => {
     if (envioRow) {
         envioRow.classList.toggle("envio-gratis", isGratis);
     }
+    const leyendaEl = document.getElementById("menu-envio-leyenda");
+    if (leyendaEl) {
+        if (subtotal > 0 && subtotal < freeFromV2) {
+            const faltante = freeFromV2 - subtotal;
+            leyendaEl.innerHTML = `Si sumás productos por ${formatV2(faltante)} o más de ese valor. El envío es <strong>GRATIS</strong>.`;
+            leyendaEl.style.display = "block";
+        } else {
+            leyendaEl.style.display = "none";
+        }
+    }
     document.getElementById("v2-total").textContent = formatV2(total);
+
+    try {
+        const items = Array.from(cartV2.values()).map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            qty: item.qty,
+            subtotal: item.qty * item.price,
+            category: item.category || ""
+        }));
+        const subtotalVal = items.reduce((acc, item) => acc + item.subtotal, 0);
+        const deliveryVal = subtotalVal > 0 && subtotalVal < freeFromV2 ? deliveryV2 : 0;
+        sessionStorage.setItem("toro_pedido", JSON.stringify({
+            createdAt: new Date().toISOString(),
+            items,
+            subtotal: subtotalVal,
+            delivery: deliveryVal,
+            total: subtotalVal + deliveryVal
+        }));
+    } catch (e) {}
 };
 
 const findItemById = (id) => {
@@ -547,6 +603,14 @@ const removeItemV2 = (id) => {
         cartV2.set(id, current);
         updateQtyUI(id, current.qty);
     }
+    updateCartV2();
+};
+
+/** Quita el ítem por completo del pedido (todas las unidades) desde el resumen */
+const removeItemLineV2 = (id) => {
+    if (!cartV2.has(id)) return;
+    cartV2.delete(id);
+    updateQtyUI(id, 0);
     updateCartV2();
 };
 
@@ -609,11 +673,37 @@ const initCategoriesV2 = () => {
     }
 };
 
+const APPLY_ADD_KEY = "toro_add_product_id";
+const PRODUCTO_DETALLE_KEY = "toro_producto_detalle";
+
 const initActionsV2 = () => {
     document.addEventListener("click", (event) => {
+        const linkDetalle = event.target.closest(".producto-ver-detalle");
+        if (linkDetalle) {
+            event.preventDefault();
+            const id = linkDetalle.dataset.id ? decodeURIComponent(linkDetalle.dataset.id) : "";
+            const result = id ? findItemById(id) : null;
+            if (result) {
+                const payload = {
+                    item: { id: result.item.id, name: result.item.name, desc: result.item.desc || "", price: result.item.price, img: result.item.img || "", available: result.item.available, subItems: result.item.subItems || [] },
+                    category: result.category,
+                    returnMenu: "compuesto"
+                };
+                try { sessionStorage.setItem(PRODUCTO_DETALLE_KEY, JSON.stringify(payload)); } catch (e) {}
+            }
+            window.location.href = linkDetalle.href || "../producto/producto.html?id=" + encodeURIComponent(id);
+            return;
+        }
         const button = event.target.closest(".qty-btn");
         if (button?.dataset.action === "add") addItemV2(button.dataset.id);
         if (button?.dataset.action === "remove") removeItemV2(button.dataset.id);
+        const btnRemove = event.target.closest(".checkout-item-remove");
+        if (btnRemove?.dataset.id) {
+            const id = btnRemove.dataset.id;
+            const current = cartV2.get(id);
+            if (current && current.qty > 1) removeItemV2(id);
+            else removeItemLineV2(id);
+        }
     });
 
     const confirm = document.getElementById("v2-confirm");
@@ -831,6 +921,14 @@ const initMenu = async () => {
     const usedFallback = await loadMenuData();
     renderMenu(window.menuData);
     restoreCartFromStorage();
+    try {
+        const addId = sessionStorage.getItem(APPLY_ADD_KEY);
+        if (addId) {
+            sessionStorage.removeItem(APPLY_ADD_KEY);
+            const res = findItemById(addId);
+            if (res && res.item.available !== false) addItemV2(addId);
+        }
+    } catch (e) {}
     updateCartV2();
     initCategoriesV2();
     initActionsV2();

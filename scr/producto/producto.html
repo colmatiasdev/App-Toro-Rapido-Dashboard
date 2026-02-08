@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toro Rápido - Detalle del producto</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="producto.css">
+    <link rel="stylesheet" href="../footer/footer.css">
+    <script src="../../config.js"></script>
+    <script src="../footer/footer.js"></script>
+</head>
+<body>
+    <header class="producto-header">
+        <a class="back-btn" href="#" id="producto-volver">
+            <i class="fa-solid fa-chevron-left"></i>
+        </a>
+        <span class="producto-header-title">Detalle</span>
+    </header>
+
+    <main class="producto-main" id="producto-main">
+        <div id="producto-loading" class="producto-loading">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Cargando...</p>
+        </div>
+        <div id="producto-error" class="producto-error" style="display:none;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <p>No encontramos este producto.</p>
+            <a class="producto-btn producto-btn-secondary" href="../../index.html">Ir al inicio</a>
+        </div>
+        <article id="producto-content" class="producto-content" style="display:none;">
+            <div class="producto-image-wrap">
+                <img id="producto-image" class="producto-image" src="" alt="">
+                <span id="producto-badge" class="producto-badge" style="display:none;">AGOTADO</span>
+            </div>
+            <div class="producto-body">
+                <h1 id="producto-name" class="producto-name"></h1>
+                <p id="producto-desc" class="producto-desc"></p>
+                <div id="producto-incluye" class="producto-incluye" style="display:none;">
+                    <h3 class="producto-incluye-title">Incluye</h3>
+                    <ul id="producto-incluye-list" class="producto-incluye-list"></ul>
+                </div>
+                <div class="producto-price-wrap">
+                    <span id="producto-price" class="producto-price"></span>
+                </div>
+                <div class="producto-actions">
+                    <a class="producto-btn producto-btn-primary" href="#" id="producto-agregar">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                        Agregar al pedido
+                    </a>
+                    <a class="producto-btn producto-btn-secondary" href="#" id="producto-volver-menu">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        Volver al menú
+                    </a>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <div id="site-footer"></div>
+
+    <script src="producto.js"></script>
+</body>
+</html>
