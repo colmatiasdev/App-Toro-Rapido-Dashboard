@@ -92,6 +92,11 @@ body {
     font-family: inherit;
     background: #fff;
 }
+.admin-form input[readonly] {
+    background: #f1f5f9;
+    color: #475569;
+    cursor: not-allowed;
+}
 .primary-btn {
     border: none;
     background: var(--toro-dark);
@@ -115,6 +120,19 @@ body {
 }
 .form-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .hint { grid-column: 1 / -1; font-size: 0.78rem; color: var(--toro-muted); }
+.field-hint { display: block; margin-top: 4px; font-size: 0.75rem; color: var(--toro-muted); }
+.edit-hint { font-size: 0.9rem; color: var(--toro-muted); margin-bottom: 8px; }
+.edit-not-found { font-size: 0.9rem; color: #b91c1c; background: #fef2f2; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
+.edit-not-found a { color: #1d4ed8; text-decoration: underline; }
+.validation-errors {
+    font-size: 0.9rem; color: #b91c1c; background: #fef2f2; padding: 12px 14px; border-radius: 8px; margin-bottom: 12px;
+    border: 1px solid #fecaca;
+}
+.validation-errors ul { margin: 8px 0 0 0; padding-left: 20px; }
+.validation-errors li { margin: 4px 0; }
+.admin-form input.invalid, .admin-form select.invalid {
+    border-color: #e11d48; background: #fff5f5;
+}
 .script-debug {
     margin-top: 12px;
     padding: 10px 12px;
@@ -148,6 +166,8 @@ body {
     padding: 6px 10px;
     cursor: pointer;
     font-size: 0.72rem;
+    text-decoration: none;
+    display: inline-block;
 }
 .action-btn.danger {
     border-color: #fecaca;

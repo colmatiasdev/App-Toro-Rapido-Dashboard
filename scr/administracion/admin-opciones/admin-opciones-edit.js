@@ -1,5 +1,6 @@
+// Módulo de edición de opciones: lee y actualiza registros en la misma hoja que admin-opciones-crear (opciones-base).
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
-const SHEET_NAME = window.APP_CONFIG?.menuOpcionesSheetName || "opciones-base";
+const SHEET_NAME = window.APP_CONFIG?.menuOpcionesSheetName || "opciones-base"; // Misma hoja donde se crean las opciones
 
 const normalizeKey = (value) => (value ?? "")
     .toString()
@@ -37,7 +38,7 @@ const rowsFromSheetData = (data) => {
 const fetchOpcionesList = async () => {
     if (!MENU_SCRIPT_URL) return [];
     const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
-    const url = `${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(SHEET_NAME)}&_ts=${Date.now()}`;
+    const url = `${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(SHEET_NAME)}&_ts=${Date.now()}`; // Lee de opciones-base
     try {
         const response = await fetch(url, { cache: "no-store" });
         if (!response.ok) return [];
@@ -133,46 +134,85 @@ const validateForm = (form) => {
     else if (idopciones.length > VALIDATION.idOpcionesMaxLen) {
         errors.push({ field: "idopciones", message: "ID Opciones no puede superar " + VALIDATION.idOpcionesMaxLen + " caracteres." });
     }
-
     if (!grupo) errors.push({ field: "grupo", message: "Grupo es obligatorio." });
     else if (grupo.length > VALIDATION.grupoMaxLen) {
         errors.push({ field: "grupo", message: "Grupo no puede superar " + VALIDATION.grupoMaxLen + " caracteres." });
     }
-
     if (tipo !== "uno" && tipo !== "varios") {
         errors.push({ field: "tipo", message: "Tipo debe ser \"uno\" o \"varios\"." });
     }
-
     if (obligatorio !== "NO" && obligatorio !== "SI") {
         errors.push({ field: "obligatorio", message: "Obligatorio debe ser \"SI\" o \"NO\"." });
     }
-
     if (!opcion) errors.push({ field: "opcion", message: "Nombre de la Opción es obligatorio." });
     else if (opcion.length > VALIDATION.nombreOpcionMaxLen) {
         errors.push({ field: "opcion", message: "Nombre de la Opción no puede superar " + VALIDATION.nombreOpcionMaxLen + " caracteres." });
     }
-
     if (Number.isNaN(recargo) || recargo < 0) {
         errors.push({ field: "recargo", message: "Recargo debe ser un número mayor o igual a 0." });
     } else if (recargo > VALIDATION.recargoMax) {
         errors.push({ field: "recargo", message: "Recargo no puede superar " + VALIDATION.recargoMax + "." });
     }
-
     return { valid: errors.length === 0, errors };
 };
 
-const loadForEdit = async () => {
-    const params = new URLSearchParams(window.location.search);
-    const idopciones = params.get("idopciones") ?? "";
-    const grupo = params.get("grupo") ?? "";
-    const opcion = params.get("opcion") ?? "";
-    if (!idopciones && !grupo && !opcion) return false;
+const STORAGE_KEY = "opcionesEdit";
+
+const getEditParams = () => {
+    try {
+        const stored = sessionStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            sessionStorage.removeItem(STORAGE_KEY);
+            const data = JSON.parse(stored);
+            return {
+                idopciones: data.idopciones ?? "",
+                grupo: data.grupo ?? "",
+                opcion: data.opcion ?? ""
+            };
+        }
+    } catch (e) {
+        console.warn("Error leyendo sessionStorage", e);
+    }
+    let search = window.location.search;
+    if (!search && window.location.hash && window.location.hash.indexOf("=") >= 0) {
+        search = "?" + window.location.hash.replace(/^#/, "");
+    }
+    const params = new URLSearchParams(search || "");
+    return {
+        idopciones: params.get("idopciones") ?? params.get("idproducto") ?? "",
+        grupo: params.get("grupo") ?? "",
+        opcion: params.get("opcion") ?? ""
+    };
+};
+
+let editKey = { idopciones: "", grupo: "", opcion: "" };
+
+const loadRecordAndShowForm = async () => {
+    const params = getEditParams();
+    const idopciones = params.idopciones ?? "";
+    const grupo = params.grupo ?? "";
+    const opcion = params.opcion ?? "";
 
     const hint = document.getElementById("edit-loading-hint");
-    if (hint) { hint.textContent = "Cargando datos para editar..."; hint.style.display = "block"; }
+    const notFoundMsg = document.getElementById("edit-not-found-msg");
+    const form = document.getElementById("opcion-form");
+
+    if (!idopciones && !grupo && !opcion) {
+        if (hint) hint.style.display = "none";
+        if (notFoundMsg) {
+            notFoundMsg.innerHTML = "Faltan parámetros para editar. <a href=\"admin-opciones.html\">Volver al listado de opciones</a>.";
+            notFoundMsg.style.display = "block";
+        }
+        if (form) form.style.display = "none";
+        return;
+    }
+
+    if (hint) { hint.textContent = "Cargando datos del registro..."; hint.style.display = "block"; }
+    if (notFoundMsg) notFoundMsg.style.display = "none";
 
     const rows = await fetchOpcionesList();
     fillGrupoDatalist(rows);
+
     const idNorm = cleanText(idopciones);
     const grupoNorm = cleanText(grupo);
     const opcionNorm = cleanText(opcion);
@@ -184,18 +224,21 @@ const loadForEdit = async () => {
     });
 
     if (hint) hint.style.display = "none";
-    const notFoundMsg = document.getElementById("edit-not-found-msg");
-    if (!row) {
-        if ((idopciones || grupo || opcion) && notFoundMsg) {
-            notFoundMsg.style.display = "block";
-            notFoundMsg.textContent = "No se encontró esta opción en la hoja opciones-base. Puede que haya sido eliminada.";
-        }
-        return false;
-    }
-    if (notFoundMsg) notFoundMsg.style.display = "none";
 
-    const form = document.getElementById("opcion-form");
-    if (!form) return false;
+    if (!row) {
+        if (notFoundMsg) {
+            notFoundMsg.innerHTML = "No se encontró esta opción en la hoja opciones-base. Puede que haya sido eliminada. <a href=\"admin-opciones.html\">Volver al listado</a>.";
+            notFoundMsg.style.display = "block";
+        }
+        if (form) form.style.display = "none";
+        return;
+    }
+
+    if (notFoundMsg) notFoundMsg.style.display = "none";
+    if (!form) return;
+
+    editKey = { idopciones: idNorm, grupo: grupoNorm, opcion: opcionNorm };
+
     form.querySelector('[name="idopciones"]').value = cleanText(getValue(row, ["ID Opciones", "idopciones", "idproducto"]));
     form.querySelector('[name="grupo"]').value = cleanText(getValue(row, ["Grupo", "grupo"]));
     form.querySelector('[name="tipo"]').value = (cleanText(getValue(row, ["Tipo", "tipo"])) || "uno").toLowerCase();
@@ -204,18 +247,10 @@ const loadForEdit = async () => {
     const rec = getValue(row, ["Recargo", "recargo"]);
     form.querySelector('[name="recargo"]').value = rec !== "" ? Number(rec) || 0 : 0;
 
-    document.getElementById("form-mode").value = "edit";
-    const submitBtn = document.getElementById("submit-btn");
-    if (submitBtn) submitBtn.textContent = "Actualizar";
-    const titleEl = document.getElementById("form-title-text");
-    if (titleEl) titleEl.textContent = "Editar opción";
-    const headerDesc = document.getElementById("form-header-desc");
-    if (headerDesc) headerDesc.textContent = "Modificá los datos de la opción. Se actualiza en la hoja opciones-base.";
-    const pageTitle = document.getElementById("page-title");
-    if (pageTitle) pageTitle.textContent = "Editar opción - Toro Rápido";
-    const footerHint = document.getElementById("form-footer-hint");
-    if (footerHint) footerHint.textContent = "Hoja: opciones-base.";
-    return true;
+    const idInput = document.getElementById("id-opciones-input");
+    if (idInput) idInput.readOnly = true;
+
+    form.style.display = "";
 };
 
 const initForm = () => {
@@ -234,30 +269,25 @@ const initForm = () => {
         }
         setDebug("Enviando...");
 
-        const formMode = document.getElementById("form-mode")?.value || "create";
         const data = new FormData(form);
         const idopciones = cleanText(data.get("idopciones"));
         const grupo = cleanText(data.get("grupo"));
         const opcion = cleanText(data.get("opcion"));
 
         const payload = {
-            action: formMode === "edit" ? "update" : "create",
-            sheetName: SHEET_NAME,
+            action: "update",
+            sheetName: SHEET_NAME, // Actualiza en opciones-base (misma hoja que crear)
             idopciones: idopciones,
             "ID Opciones": idopciones,
             Grupo: grupo,
             Tipo: (cleanText(data.get("tipo")) || "uno").toLowerCase(),
             Obligatorio: (cleanText(data.get("obligatorio")) || "NO").toUpperCase(),
             Opcion: opcion,
-            Recargo: cleanText(data.get("recargo")) || "0"
+            Recargo: cleanText(data.get("recargo")) || "0",
+            idopcionesOld: editKey.idopciones || idopciones,
+            grupoOld: editKey.grupo || grupo,
+            opcionOld: editKey.opcion || opcion
         };
-
-        if (formMode === "edit") {
-            const params = new URLSearchParams(window.location.search);
-            payload.idopcionesOld = params.get("idopciones") ?? idopciones;
-            payload.grupoOld = params.get("grupo") ?? grupo;
-            payload.opcionOld = params.get("opcion") ?? opcion;
-        }
 
         try {
             await fetch(MENU_SCRIPT_URL, {
@@ -267,7 +297,7 @@ const initForm = () => {
                 body: JSON.stringify(payload)
             });
             setDebug("Enviado. Revisá el Sheet.");
-            alert(formMode === "edit" ? "Opción enviada para actualizar." : "Opción enviada para crear.");
+            alert("Opción actualizada.");
             window.location.href = "admin-opciones.html";
         } catch (error) {
             console.error(error);
@@ -277,34 +307,7 @@ const initForm = () => {
     });
 };
 
-const generateNextIdOpciones = (rows) => {
-    const idKeys = ["ID Opciones", "idopciones"];
-    let maxNum = 0;
-    for (const r of rows) {
-        const raw = cleanText(getValue(r, idKeys));
-        const match = /^OPC-?(\d+)$/i.exec(raw);
-        if (match) maxNum = Math.max(maxNum, parseInt(match[1], 10));
-    }
-    return "OPC-" + String(maxNum + 1).padStart(3, "0");
-};
-
-const setCreateModeId = async () => {
-    const input = document.getElementById("id-opciones-input");
-    if (!input) return;
-    input.readOnly = true;
-    const rows = await fetchOpcionesList();
-    fillGrupoDatalist(rows);
-    input.value = generateNextIdOpciones(rows);
-};
-
 document.addEventListener("DOMContentLoaded", async () => {
     initForm();
-    const isEdit = await loadForEdit();
-    if (isEdit) {
-        const input = document.getElementById("id-opciones-input");
-        if (input) input.readOnly = true;
-    } else {
-        document.getElementById("form-mode").value = "create";
-        await setCreateModeId();
-    }
+    await loadRecordAndShowForm();
 });

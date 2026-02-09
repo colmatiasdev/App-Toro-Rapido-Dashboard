@@ -5,7 +5,7 @@
  */
 
 // ========== doGet: listar cualquier hoja por nombre ==========
-// Parámetros: sheetName. Ejemplo: ?sheetName=HORARARIO-TORO-RAPIDO o ?action=list&sheetName=menu-toro-rapido-web-simple
+// Parámetros: sheetName. Ejemplo: ?sheetName=HORARARIO-TORO-RAPIDO o ?action=list&sheetName=opciones-base
 // Respuesta OK: { headers: [...], rows: [[...], ...] }
 // Respuesta error: { result: "error", error: "..." } — el front también reconoce data.error
 function doGet(e) {
@@ -54,8 +54,10 @@ function doPost(e) {
 
     if (action === "update") {
       var rowIndex = -1;
-      if (data.idproductoOld !== undefined || data.grupoOld !== undefined || data.opcionOld !== undefined) {
-        rowIndex = findRowOpciones(sheet, headers, data.idproductoOld, data.grupoOld, data.opcionOld);
+      // Hoja opciones-base: buscar por idopcionesOld (o idproductoOld) + grupoOld + opcionOld.
+      var idOld = data.idopcionesOld !== undefined ? data.idopcionesOld : data.idproductoOld;
+      if (idOld !== undefined || data.grupoOld !== undefined || data.opcionOld !== undefined) {
+        rowIndex = findRowOpciones(sheet, headers, idOld, data.grupoOld, data.opcionOld);
       } else {
         rowIndex = findRowById(sheet, headers, data);
       }
@@ -63,7 +65,7 @@ function doPost(e) {
       for (var i = 0; i < headers.length; i++) {
         var key = findKeyInsensitive(data, headers[i]);
         if (key !== null && key !== "sheetName" && key !== "action" &&
-            key !== "idproductoOld" && key !== "grupoOld" && key !== "opcionOld") {
+            key !== "idopcionesOld" && key !== "idproductoOld" && key !== "grupoOld" && key !== "opcionOld") {
           sheet.getRange(rowIndex, i + 1).setValue(data[key] !== undefined ? data[key] : "");
         }
       }
@@ -90,12 +92,13 @@ function doPost(e) {
 function findRowById(sheet, headers, idProductoOrData) {
   var idValue;
   if (typeof idProductoOrData === "object") {
-    idValue = idProductoOrData.idproducto || idProductoOrData["idmenu-unico"] || idProductoOrData.idmenuunico;
+    idValue = idProductoOrData.idproducto || idProductoOrData.idopciones || idProductoOrData["idmenu-unico"] || idProductoOrData.idmenuunico;
   } else {
     idValue = idProductoOrData;
   }
   if (!idValue) return -1;
   var idCol = findHeaderIndex(headers, "idproducto");
+  if (idCol === -1) idCol = findHeaderIndex(headers, "idopciones");
   if (idCol === -1) idCol = findHeaderIndex(headers, "idmenu-unico");
   if (idCol === -1) idCol = findHeaderIndex(headers, "idmenuunico");
   if (idCol === -1) return -1;
@@ -107,9 +110,11 @@ function findRowById(sheet, headers, idProductoOrData) {
   return -1;
 }
 
-// Busca fila en hoja de opciones por (idproducto, Grupo, Opcion)
+// Busca fila en hoja de opciones (opciones-base) por ID Opciones + Grupo + Opcion.
+// La columna ID puede llamarse "ID Opciones", "idopciones" o "idproducto" en la hoja.
 function findRowOpciones(sheet, headers, idproducto, grupo, opcion) {
   var colId = findHeaderIndex(headers, "idproducto");
+  if (colId === -1) colId = findHeaderIndex(headers, "idopciones");
   var colGrupo = findHeaderIndex(headers, "grupo");
   var colOpcion = findHeaderIndex(headers, "opcion");
   if (colId === -1 || colGrupo === -1 || colOpcion === -1) return -1;

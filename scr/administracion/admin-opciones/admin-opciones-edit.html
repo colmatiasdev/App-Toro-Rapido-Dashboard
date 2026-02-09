@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">Agregar opción - Toro Rápido</title>
+    <title>Editar opción - Toro Rápido</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
@@ -14,39 +14,39 @@
     <div id="admin-header-slot"></div>
     <main class="admin-menu">
         <header class="admin-header">
-            <p id="form-header-desc">Agregá una nueva opción. Se guarda en la hoja opciones-base.</p>
+            <p id="form-header-desc">Modificá los datos de la opción en la hoja <strong>opciones-base</strong> de Google Sheet (la misma donde se crean con Agregar opción). Los valores actuales se cargan desde esa hoja; cambiá lo que quieras y guardá o cancelá.</p>
         </header>
 
         <section class="admin-card">
             <div class="card-title">
-                <i class="fa-solid fa-circle-plus"></i> <span id="form-title-text">Agregar opción</span>
+                <i class="fa-solid fa-pen-to-square"></i> <span id="form-title-text">Editar opción</span>
             </div>
-            <p id="edit-loading-hint" class="edit-hint" style="display: none;"></p>
+            <p id="edit-loading-hint" class="edit-hint" style="display: none;">Cargando datos del registro...</p>
             <p id="edit-not-found-msg" class="edit-not-found" style="display: none;"></p>
             <div id="form-validation-errors" class="validation-errors" role="alert" style="display: none;"></div>
-            <form class="admin-form" id="opcion-form" novalidate>
-                <input type="hidden" name="mode" id="form-mode" value="create">
+            <form class="admin-form" id="opcion-form" novalidate style="display: none;">
+                <input type="hidden" name="mode" id="form-mode" value="edit">
                 <label>
                     <span class="label-title">ID Opciones <span class="req">*</span></span>
-                    <input type="text" name="idopciones" id="id-opciones-input" placeholder="Se genera al cargar" required readonly>
+                    <input type="text" name="idopciones" id="id-opciones-input" required readonly>
                 </label>
                 <label>
                     <span class="label-title">Grupo <span class="req">*</span></span>
                     <input type="text" name="grupo" id="grupo-input" list="grupo-datalist" placeholder="Elegí uno o escribí uno nuevo" autocomplete="off">
                     <datalist id="grupo-datalist"></datalist>
-                    <span class="field-hint">Se cargan los grupos existentes de la hoja; podés elegir uno o escribir un grupo nuevo.</span>
+                    <span class="field-hint">Podés elegir un grupo existente o escribir uno nuevo.</span>
                 </label>
                 <label>
                     <span class="label-title">Tipo <span class="req">*</span></span>
                     <select name="tipo">
-                        <option value="uno" selected>uno (elegir una)</option>
+                        <option value="uno">uno (elegir una)</option>
                         <option value="varios">varios (elegir varias)</option>
                     </select>
                 </label>
                 <label>
                     <span class="label-title">Obligatorio <span class="req">*</span></span>
                     <select name="obligatorio">
-                        <option value="NO" selected>NO</option>
+                        <option value="NO">NO</option>
                         <option value="SI">SI</option>
                     </select>
                 </label>
@@ -59,10 +59,10 @@
                     <input type="number" name="recargo" placeholder="0" min="0" value="0">
                 </label>
                 <div class="form-actions">
-                    <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
-                    <a href="admin-opciones.html" class="secondary-btn">Cancelar</a>
+                    <button type="submit" class="primary-btn" id="submit-btn">Actualizar</button>
+                    <a href="admin-opciones.html" class="secondary-btn">Cancelar edición</a>
                 </div>
-                <span class="hint" id="form-footer-hint">ID Opciones se genera automáticamente al agregar. Hoja: opciones-base.</span>
+                <span class="hint" id="form-footer-hint">Los cambios se guardan en la hoja <strong>opciones-base</strong> (misma que usa Agregar opción). Al cancelar volvés al listado sin guardar.</span>
             </form>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
         </section>
@@ -78,6 +78,6 @@
 
     <script src="../../../config.js"></script>
     <script src="../admin-common.js"></script>
-    <script src="admin-opciones-crear.js"></script>
+    <script src="admin-opciones-edit.js"></script>
 </body>
 </html>
