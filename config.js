@@ -49,8 +49,8 @@ window.APP_CONFIG = {
     menuCompuestoDetalleSheetName: "menu-compuesto-detalle",
     /** URL CSV de la hoja menu-compuesto-detalle (opcional). Si está vacío, se usa solo Apps Script. */
     googleSheetUrlMenuCompuestoDetalle: "",
-    /** Nombre de la hoja de opciones/agregados por producto. Columnas: idproducto, Grupo, Tipo, Obligatorio, Opcion, Recargo. Ver docs/MENU_OPCIONES_SHEET.md */
-    menuOpcionesSheetName: "menu-opciones",
+    /** Nombre de la hoja de opciones/agregados por producto (ej. "menu-opciones" o "opciones-base"). Columnas: idproducto, Grupo, Tipo, Obligatorio, Opcion, Recargo. Ver docs/MENU_OPCIONES_SHEET.md */
+    menuOpcionesSheetName: "opciones-base",
 
     // ========== HORARIO DE ATENCIÓN ==========
     /** Nombre de la hoja de horarios en el Sheet. Columnas: IDHORARIO, DIA, HORA DESDE, MINUTO DESDE, HORA HASTA, MINUTO HASTA. DIA: Lunes, Martes, etc. Horas 0-23, minutos 0-59. */

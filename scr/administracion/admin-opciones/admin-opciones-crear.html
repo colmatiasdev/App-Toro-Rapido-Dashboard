@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar opción - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="admin-opciones.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>Alta o edición de una opción para un producto (mismo ID que en la hoja del menú).</p>
+        </header>
+
+        <section class="admin-card">
+            <div class="card-title">
+                <i class="fa-solid fa-circle-plus"></i> <span id="form-title-text">Agregar opción</span>
+            </div>
+            <form class="admin-form" id="opcion-form">
+                <input type="hidden" name="mode" id="form-mode" value="create">
+                <label>
+                    <span class="label-title">ID Producto <span class="req">*</span></span>
+                    <input type="text" name="idproducto" placeholder="BUR-01" required>
+                </label>
+                <label>
+                    <span class="label-title">Grupo <span class="req">*</span></span>
+                    <input type="text" name="grupo" placeholder="Aderezo, Tamaño, Agregados extra">
+                </label>
+                <label>
+                    <span class="label-title">Tipo <span class="req">*</span></span>
+                    <select name="tipo">
+                        <option value="uno" selected>uno (elegir una)</option>
+                        <option value="varios">varios (elegir varias)</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="label-title">Obligatorio <span class="req">*</span></span>
+                    <select name="obligatorio">
+                        <option value="NO" selected>NO</option>
+                        <option value="SI">SI</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="label-title">Opción <span class="req">*</span></span>
+                    <input type="text" name="opcion" placeholder="Mayonesa, Grande, Huevo">
+                </label>
+                <label>
+                    <span class="label-title">Recargo ($)</span>
+                    <input type="number" name="recargo" placeholder="0" min="0" value="0">
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
+                    <a href="admin-opciones.html" class="secondary-btn">Cancelar</a>
+                </div>
+                <span class="hint">ID Producto debe coincidir con el de la hoja del menú (simple o compuesto).</span>
+            </form>
+            <div class="script-debug" id="script-debug" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../../config.js"></script>
+    <script src="../admin-common.js"></script>
+    <script src="admin-opciones-crear.js"></script>
+</body>
+</html>
