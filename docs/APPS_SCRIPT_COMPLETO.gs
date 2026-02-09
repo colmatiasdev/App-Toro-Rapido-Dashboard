@@ -8,6 +8,7 @@
 // Parámetros: sheetName. Ejemplo: ?sheetName=HORARARIO-TORO-RAPIDO o ?action=list&sheetName=opciones-base
 // Respuesta OK: { headers: [...], rows: [[...], ...] }
 // Respuesta error: { result: "error", error: "..." } — el front también reconoce data.error
+// Usa la fila 1 para determinar cuántas columnas leer (así no se pierden columnas si solo hay datos en la primera).
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -15,11 +16,35 @@ function doGet(e) {
     var sheet = ss.getSheetByName(sheetName);
     if (!sheet) return jsonOut({ result: "error", error: "Hoja no encontrada: " + sheetName });
 
-    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var maxCols = sheet.getMaxColumns();
+    var headerRow = sheet.getRange(1, 1, 1, maxCols).getValues()[0];
+    var numCols = 0;
+    for (var c = 0; c < headerRow.length; c++) {
+      var v = headerRow[c];
+      if (v !== null && v !== undefined && String(v).trim() !== "") numCols = c + 1;
+    }
+    if (numCols === 0) numCols = 1;
+    numCols = Math.max(numCols, sheet.getLastColumn());
+
+    var headers = [];
+    for (var i = 0; i < numCols; i++) {
+      var h = headerRow[i];
+      headers.push(h != null && String(h).trim() !== "" ? String(h).trim() : "Columna" + (i + 1));
+    }
+
     var lastRow = sheet.getLastRow();
-    var rows = lastRow > 1
-      ? sheet.getRange(2, 1, lastRow, sheet.getLastColumn()).getValues()
-      : [];
+    var rows = [];
+    if (lastRow > 1) {
+      var rawRows = sheet.getRange(2, 1, lastRow, numCols).getValues();
+      for (var r = 0; r < rawRows.length; r++) {
+        var row = rawRows[r];
+        var outRow = [];
+        for (var col = 0; col < numCols; col++) {
+          outRow.push(col < row.length && row[col] !== null && row[col] !== undefined ? row[col] : "");
+        }
+        rows.push(outRow);
+      }
+    }
 
     return jsonOut({ headers: headers, rows: rows });
   } catch (err) {
@@ -54,10 +79,13 @@ function doPost(e) {
 
     if (action === "update") {
       var rowIndex = -1;
-      // Hoja opciones-base: buscar por idopcionesOld (o idproductoOld) + grupoOld + opcionOld.
       var idOld = data.idopcionesOld !== undefined ? data.idopcionesOld : data.idproductoOld;
-      if (idOld !== undefined || data.grupoOld !== undefined || data.opcionOld !== undefined) {
+      // Hoja opciones-base: buscar por idopcionesOld + grupoOld + opcionOld.
+      if (idOld !== undefined && data.grupoOld !== undefined && data.opcionOld !== undefined) {
         rowIndex = findRowOpciones(sheet, headers, idOld, data.grupoOld, data.opcionOld);
+      } else if (idOld !== undefined) {
+        // Hoja productos-base (u otras): buscar solo por ID.
+        rowIndex = findRowById(sheet, headers, idOld);
       } else {
         rowIndex = findRowById(sheet, headers, data);
       }

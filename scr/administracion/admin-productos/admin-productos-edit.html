@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar producto - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="admin-productos.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>Modificá los datos del producto en la hoja <strong>productos-base</strong>. Los valores actuales se cargan desde esa hoja.</p>
+        </header>
+
+        <section class="admin-card">
+            <div class="card-title">
+                <i class="fa-solid fa-pen-to-square"></i> Editar producto
+            </div>
+            <p id="edit-loading-hint" class="edit-hint" style="display: none;">Cargando datos del registro...</p>
+            <p id="edit-not-found-msg" class="edit-not-found" style="display: none;"></p>
+            <div id="form-validation-errors" class="validation-errors" role="alert" style="display: none;"></div>
+            <form class="admin-form" id="producto-form" novalidate style="display: none;">
+                <input type="hidden" name="mode" id="form-mode" value="edit">
+                <label>
+                    <span class="label-title">ID Producto <span class="req">*</span></span>
+                    <input type="text" name="idproducto" id="id-producto-input" required readonly>
+                </label>
+                <label>
+                    <span class="label-title">Nombre <span class="req">*</span></span>
+                    <input type="text" name="nombre" id="nombre-input" placeholder="Ej: Hamburguesa clásica">
+                </label>
+                <label>
+                    <span class="label-title">Habilitada</span>
+                    <select name="habilitada">
+                        <option value="SI">SI</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn" id="submit-btn">Actualizar</button>
+                    <a href="admin-productos.html" class="secondary-btn">Cancelar edición</a>
+                </div>
+                <span class="hint">Los cambios se guardan en la hoja <strong>productos-base</strong>. Al cancelar volvés al listado sin guardar.</span>
+            </form>
+            <div class="script-debug" id="script-debug" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../../config.js"></script>
+    <script src="../admin-common.js"></script>
+    <script src="admin-productos-edit.js"></script>
+</body>
+</html>

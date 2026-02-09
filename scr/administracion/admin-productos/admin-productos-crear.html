@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar producto - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="admin-productos.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>Agregá un nuevo producto. Se guarda en la hoja <strong>productos-base</strong>.</p>
+        </header>
+
+        <section class="admin-card">
+            <div class="card-title">
+                <i class="fa-solid fa-circle-plus"></i> Agregar producto
+            </div>
+            <div id="form-validation-errors" class="validation-errors" role="alert" style="display: none;"></div>
+            <form class="admin-form" id="producto-form" novalidate>
+                <label>
+                    <span class="label-title">ID Producto <span class="req">*</span></span>
+                    <input type="text" name="idproducto" id="id-producto-input" placeholder="Se genera al cargar" required readonly>
+                </label>
+                <label>
+                    <span class="label-title">Nombre <span class="req">*</span></span>
+                    <input type="text" name="nombre" id="nombre-input" placeholder="Ej: Hamburguesa clásica">
+                </label>
+                <label>
+                    <span class="label-title">Habilitada</span>
+                    <select name="habilitada">
+                        <option value="SI" selected>SI</option>
+                        <option value="NO">NO</option>
+                    </select>
+                </label>
+                <div class="form-actions">
+                    <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
+                    <a href="admin-productos.html" class="secondary-btn">Cancelar</a>
+                </div>
+                <span class="hint">ID Producto se genera automáticamente (PROD-001, PROD-002…). Hoja: productos-base.</span>
+            </form>
+            <div class="script-debug" id="script-debug" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../../config.js"></script>
+    <script src="../admin-common.js"></script>
+    <script src="admin-productos-crear.js"></script>
+</body>
+</html>
