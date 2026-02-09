@@ -18,6 +18,7 @@ Documentación del proyecto **Toro Rápido** (web de pedidos y menú).
 | Documento | Contenido |
 |-----------|-----------|
 | [CONFIGURACION.md](CONFIGURACION.md) | Referencia completa de `config.js`: todas las opciones y su relación con Google Sheets. |
+| [URL_CORTA.md](URL_CORTA.md) | Cómo configurar una URL corta (Bitly, TinyURL o dominio propio) para publicar en redes o mandar por mensaje. |
 | [HOJAS_GOOGLE_SHEETS.md](HOJAS_GOOGLE_SHEETS.md) | Resumen de cada hoja de Google Sheets y columnas que usa el proyecto. |
 
 ---

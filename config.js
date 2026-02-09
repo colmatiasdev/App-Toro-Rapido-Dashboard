@@ -13,6 +13,8 @@ window.APP_CONFIG = {
     maxProductos: 10,
 
     // ========== CONTACTO Y REDES ==========
+    /** URL corta para compartir en redes, WhatsApp o mensajes (ej. bit.ly/tororapido). Si está vacío no se usa. Ver docs/URL_CORTA.md */
+    urlCorta: "",
     /** Número de WhatsApp del negocio (con código de país, sin +). Se usa para enlaces y envío de pedidos. */
     telefonoNegocio: "5493814130520",
     /** Datos de Instagram para mostrar en el sitio. */

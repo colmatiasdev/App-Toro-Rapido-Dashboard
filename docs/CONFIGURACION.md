@@ -25,6 +25,7 @@ Las opciones se exponen en `window.APP_CONFIG`. No hace falta crear archivos `.e
 
 | Clave | Tipo | Descripción |
 |-------|------|-------------|
+| `urlCorta` | `string` | URL corta para compartir en redes, WhatsApp o mensajes (ej. `"https://bit.ly/tororapido"`). Si está vacío no se usa. Ver [URL_CORTA.md](URL_CORTA.md). |
 | `telefonoNegocio` | `string` | Número de WhatsApp con código de país, **sin** el símbolo `+` (ej. `"5493814130520"`). Se usa en el enlace de envío del pedido. |
 | `instagram` | `object` | `name`: usuario; `url`: enlace al perfil. Se usa en el footer y en la portada si está enlazado. |
 | `plataformas` | `object` | Enlaces a PedidosYa, Rappi, etc. para mostrar en el sitio. |
