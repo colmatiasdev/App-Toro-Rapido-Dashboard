@@ -70,55 +70,54 @@ const loadOpciones = async () => {
         }
 
         const mapped = rawRows.map((row) => {
-            const idproducto = cleanText(getValue(row, ["idproducto", "idproducto"]));
+            const idopciones = cleanText(getValue(row, ["ID Opciones", "idopciones", "idproducto"]));
             const grupo = cleanText(getValue(row, ["Grupo", "grupo"]));
             const tipo = cleanText(getValue(row, ["Tipo", "tipo"])) || "uno";
             const obligatorio = cleanText(getValue(row, ["Obligatorio", "obligatorio"])) || "NO";
             const opcion = cleanText(getValue(row, ["Opcion", "opcion", "Opción"]));
             const recargo = parseRecargo(getValue(row, ["Recargo", "recargo"]));
-            return { idproducto, grupo, tipo, obligatorio, opcion, recargo };
-        }).filter((r) => r.idproducto || r.grupo || r.opcion);
+            return { idopciones, grupo, tipo, obligatorio, opcion, recargo };
+        }).filter((r) => r.idopciones || r.grupo || r.opcion);
 
         state.rows = mapped;
+        const STORAGE_KEY = "opcionesEdit";
         tbody.innerHTML = mapped.map((row, idx) => `
             <tr>
-                <td>${row.idproducto || "—"}</td>
+                <td>${row.idopciones || "—"}</td>
                 <td>${row.grupo || "—"}</td>
                 <td>${row.tipo}</td>
                 <td>${row.obligatorio}</td>
                 <td>${row.opcion || "—"}</td>
                 <td>$ ${Number(row.recargo).toLocaleString("es-AR")}</td>
                 <td class="actions">
-                    <button class="action-btn" data-action="edit" data-index="${idx}">Editar</button>
+                    <a class="action-btn" href="admin-opciones-edit.html" data-action="edit" data-index="${idx}">Editar</a>
                 </td>
-            </tr>
-        `).join("");
+            </tr>`).join("");
+
+        tbody.addEventListener("click", function (e) {
+            const link = e.target.closest(".action-btn[data-action='edit']");
+            if (!link) return;
+            const idx = parseInt(link.getAttribute("data-index"), 10);
+            const row = state.rows[idx];
+            if (!row) return;
+            e.preventDefault();
+            try {
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    idopciones: row.idopciones || "",
+                    grupo: row.grupo || "",
+                    opcion: row.opcion || ""
+                }));
+            } catch (err) {
+                console.warn("sessionStorage no disponible", err);
+            }
+            window.location.href = "admin-opciones-edit.html";
+        });
     } catch (error) {
         console.error(error);
         tbody.innerHTML = `<tr><td colspan="7" class="table-loading">No se pudo cargar las opciones.</td></tr>`;
     }
 };
 
-const initTableActions = () => {
-    const tbody = document.getElementById("opciones-body");
-    tbody?.addEventListener("click", (event) => {
-        const btn = event.target.closest(".action-btn");
-        if (!btn) return;
-        const index = Number(btn.dataset.index);
-        const row = state.rows[index];
-        if (!row) return;
-        if (btn.dataset.action === "edit") {
-            const params = new URLSearchParams({
-                idproducto: row.idproducto || "",
-                grupo: row.grupo || "",
-                opcion: row.opcion || ""
-            });
-            window.location.href = `admin-opciones-crear.html?${params.toString()}`;
-        }
-    });
-};
-
 document.addEventListener("DOMContentLoaded", () => {
-    initTableActions();
     loadOpciones();
 });
