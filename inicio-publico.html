@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
+    <title>Toro Rápido - Inicio</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="imagenes/portada/portada1.jpeg" as="image">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="scr/footer/footer.css">
+    <script src="config.js" defer></script>
+    <script src="scr/footer/footer.js" defer></script>
+</head>
+<body>
+<section class="hero-carousel">
+    <div class="carousel-container" id="carousel">
+        <div class="slide active" data-bg="imagenes/portada/portada1.jpeg" style="background-image: url('imagenes/portada/portada1.jpeg')"></div>
+        <div class="slide" data-bg="imagenes/portada/portada2.jpeg"></div>
+        <div class="slide" data-bg="imagenes/portada/portada3.jpeg"></div>
+        <div class="slide" data-bg="imagenes/portada/portada4.jpeg"></div>
+        <div class="slide" data-bg="imagenes/portada/portada5.jpeg"></div>
+    </div>
+
+    <div class="hero-overlay">
+        <div class="hero-abierto hero-estado-local-badge" id="hero-estado-local" data-estado="verificando">
+            <i class="fa-solid fa-circle-notch fa-spin"></i>
+            <span class="hero-abierto-texto">Comprobando si estamos abiertos...</span>
+        </div>
+        <div class="hero-content">
+            <span class="brand-badge"><i class="fa-solid fa-bolt"></i> Toro Rápido</span>
+            <h1>Sabor que golpea fuerte</h1>
+            <p>Las mejores burgers y sándwiches de Tucumán, directo a tu puerta.</p>
+            <div class="hero-btns">
+                <div id="hero-btns-menu">
+                    <a id="link-menu-activo" href="scr/menu/menu-simple/menu-simple.html" class="btn-primary">Realiza tu pedido</a>
+                </div>
+                <a href="#info" class="btn-secondary">Conocenos</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="info" class="info-section-mensaje">
+    <div class="info-container">
+        <div class="info-header">
+            <h2>Pasión por la Comida Real</h2>
+            <p>En Toro Rápido no solo cocinamos, creamos experiencias de sabor con ingredientes frescos de Tucumán.</p>
+        </div>
+    </div>
+</section>
+
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-brands fa-instagram"></i></div>
+        <div class="social-title">Seguinos en Instagram</div>
+        <a class="social-card" id="ig-link" href="#" target="_blank">
+            <span id="ig-name">@Instagram</span>
+        </a>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon whatsapp-icon"><i class="fa-brands fa-whatsapp"></i></div>
+        <div class="social-title">Contactanos por WhatsApp</div>
+        <a class="social-card whatsapp-card" id="wsp-link" href="#" target="_blank">
+            <span id="wsp-text">Escribinos por WhatsApp</span>
+        </a>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-store"></i></div>
+        <div class="social-title">Encontranos en plataformas de delivery</div>
+        <div class="delivery-grid">
+            <div class="delivery-card">
+                <div class="delivery-icon" style="color:#e31a3d;"><i class="fa-solid fa-bicycle"></i></div>
+                <div class="delivery-title">PedidosYa</div>
+                <a class="delivery-btn pedidosya" id="pedidosya-link" href="#" target="_blank">Ver en PedidosYa</a>
+            </div>
+            <div class="delivery-card">
+                <div class="delivery-icon" style="color:#ff441f;"><i class="fa-solid fa-moped"></i></div>
+                <div class="delivery-title">Rappi</div>
+                <a class="delivery-btn rappi" id="rappi-link" href="#" target="_blank">Ver en Rappi</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="social-section" id="seccion-horario">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="social-title">Horario de atención</div>
+        <div class="horario-atencion-wrap" id="horario-atencion-wrap">
+            <div class="horario-loading" id="horario-loading">Cargando horarios...</div>
+            <div class="horario-proximo-feriado" id="horario-proximo-feriado" style="display:none;"></div>
+            <div class="horario-list" id="horario-list" style="display:none;"></div>
+            <div class="horario-fallback footer-meta" id="horario-fallback" style="display:none;">Todos los días de 21:00 a 01:30 hs (incluidos feriados).</div>
+        </div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+        <div class="social-title">Medios de pago</div>
+        <div class="footer-meta">Pagá como prefieras:</div>
+        <div class="footer-meta">Efectivo • Transferencia</div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-motorcycle"></i></div>
+        <div class="social-title">Envío</div>
+        <div class="footer-meta">Solo delivery en San Miguel de Tucumán.</div>
+    </div>
+</section>
+
+<section class="social-section">
+    <div class="social-container">
+        <div class="social-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+        <div class="social-title">Entrega rápida</div>
+        <div class="footer-meta">Coordinamos el envío apenas confirmes.</div>
+    </div>
+</section>
+
+<footer class="index-footer">
+    <div class="footer-container">
+        <h2 class="footer-title">Toro Rápido</h2>
+        <div class="footer-meta">San Miguel de Tucumán.</div>
+        <div class="footer-meta">© 2026  Todos los derechos reservados.</div>
+    </div>
+</footer>
+
+<script src="index.js" defer></script>
+</body>
+</html>
