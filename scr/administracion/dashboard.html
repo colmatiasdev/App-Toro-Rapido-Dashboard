@@ -4,29 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Toro Rápido</title>
+    <link rel="icon" href="../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin-header.css">
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="login/login.css">
 </head>
 <body>
+    <div id="admin-header-slot"></div>
     <main class="dashboard">
         <section id="login-slot" aria-live="polite"></section>
 
         <section class="dashboard-content" id="dashboard-content" aria-hidden="true">
             <header class="dashboard-header">
-                <h1>Panel de Administración</h1>
                 <p>Accesos rápidos para configurar y operar tu negocio.</p>
             </header>
 
             <section class="dashboard-grid">
-                <article class="dash-card">
-                    <div class="dash-icon"><i class="fa-solid fa-gear"></i></div>
-                    <h2>Configuración</h2>
-                    <p>Editá variables globales como WhatsApp, envíos y límites.</p>
-                    <a class="dash-btn" href="../../config.js" target="_blank">Abrir config.js</a>
-                </article>
-
                 <article class="dash-card">
                     <div class="dash-icon"><i class="fa-solid fa-layer-group"></i></div>
                     <h2>Menú simple</h2>
@@ -47,18 +42,8 @@
                     <p>Visualizá cómo se verá el menú publicado.</p>
                     <a id="link-menu-publicado" class="dash-btn" href="../menu/menu-simple/menu-simple.html">Ver menú publicado</a>
                 </article>
-
-                <article class="dash-card">
-                    <div class="dash-icon"><i class="fa-solid fa-receipt"></i></div>
-                    <h2>Pedidos</h2>
-                    <p>Gestioná pedidos y datos de entrega.</p>
-                    <a class="dash-btn" href="../pedidos/pedidos.html">Ir a pedidos</a>
-                </article>
             </section>
 
-            <a class="back-home" href="../../inicio-publico.html">
-                <i class="fa-solid fa-chevron-left"></i> Ver web pública
-            </a>
             <button class="logout-btn" id="logout-btn" type="button">
                 <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
             </button>

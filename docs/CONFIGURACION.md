@@ -85,7 +85,7 @@ Las opciones se exponen en `window.APP_CONFIG`. No hace falta crear archivos `.e
 
 | Clave | Tipo | Descripción |
 |-------|------|-------------|
-| `sesionPedidoTimeoutMinutos` | `number` | Minutos de inactividad tras los cuales se limpia el carrito y el resumen del pedido y se redirige a la página principal (como “sesión caducada”). `0` = desactivado. Ej.: `30` para 30 minutos. La actividad se renueva al cargar menú o pedidos y al agregar o quitar productos. |
+| `sesionPedidoTimeoutMinutos` | `number` | Minutos de inactividad tras los cuales se limpia el carrito y el resumen del pedido y se redirige a la página pública (inicio-publico.html) (como “sesión caducada”). `0` = desactivado. Ej.: `30` para 30 minutos. La actividad se renueva al cargar menú o pedidos y al agregar o quitar productos. |
 
 ---
 

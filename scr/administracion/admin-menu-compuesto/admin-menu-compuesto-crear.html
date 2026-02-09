@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agregar Ítem - Menú Simple</title>
+    <title>Agregar Ítem - Menú Compuesto</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../admin-header.css">
-    <link rel="stylesheet" href="admin-menu-simple.css">
+    <link rel="stylesheet" href="admin-menu-compuesto.css">
 </head>
 <body>
     <div id="admin-header-slot"></div>
     <main class="admin-menu">
         <header class="admin-header">
-            <p>Cargá un nuevo producto en el menú simple.</p>
+            <p>Cargá un nuevo producto en el menú compuesto.</p>
         </header>
 
         <section class="admin-card" id="admin-menu-crear">
             <div class="card-title">
-                <i class="fa-solid fa-circle-plus"></i> Agregar ítem (menú simple)
+                <i class="fa-solid fa-circle-plus"></i> Agregar ítem (menú compuesto)
             </div>
             <form class="admin-form" id="add-item-form">
                 <input type="hidden" name="mode" id="form-mode" value="create">
@@ -28,8 +28,19 @@
                     <input type="number" name="orden" id="orden-input" placeholder="Auto" readonly>
                 </label>
                 <label>
-                    <span class="label-title">ID Producto (automático)</span>
-                    <input type="text" name="idproducto" id="idproducto-input" placeholder="PROD-..." readonly>
+                    <span class="label-title">ID Menú único (automático)</span>
+                    <input type="text" name="idmenu-unico" id="idmenu-unico-input" placeholder="MENU-..." readonly>
+                </label>
+                <label>
+                    <span class="label-title">Tipo Menú <span class="req">*</span></span>
+                    <select name="tipomenu">
+                        <option value="MENU-SIMPLE" selected>MENU-SIMPLE</option>
+                        <option value="MENU-COMPUESTO">MENU-COMPUESTO</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="label-title">ID Menú variable</span>
+                    <input type="text" name="idmenu-variable" placeholder="Para MENU-COMPUESTO">
                 </label>
                 <label>
                     <span class="label-title">Categoría <span class="req">*</span></span>
@@ -40,12 +51,23 @@
                     <input type="text" name="producto" placeholder="Doble Cheese" required>
                 </label>
                 <label>
-                    <span class="label-title">Descripción</span>
-                    <input type="text" name="descripcion" placeholder="Carne doble y cheddar">
+                    <span class="label-title">Descripción Producto</span>
+                    <input type="text" name="descripcionproducto" placeholder="Carne doble y cheddar">
                 </label>
                 <label>
-                    <span class="label-title">Precio <span class="req">*</span></span>
-                    <input type="number" name="precio" placeholder="9500" required>
+                    <span class="label-title">Precio Actual <span class="req">*</span></span>
+                    <input type="number" name="precioactual" placeholder="9500" required>
+                </label>
+                <label>
+                    <span class="label-title">Precio Regular</span>
+                    <input type="number" name="precioregular" placeholder="11000">
+                </label>
+                <label>
+                    <span class="label-title">Mostrar Descuento</span>
+                    <select name="mostrardescuento">
+                        <option value="NO" selected>NO</option>
+                        <option value="SI">SI</option>
+                    </select>
                 </label>
                 <div class="image-upload" id="upload-image-block">
                     <span class="label-title">Subir Imagen</span>
@@ -55,9 +77,7 @@
                 <div class="image-preview" id="image-preview" style="display:none;">
                     <span class="label-title">Previsualización</span>
                     <img id="image-preview-img" alt="Previsualización de imagen">
-                    <button type="button" class="secondary-btn change-image-btn" id="change-image-btn">
-                        Cambiar imagen
-                    </button>
+                    <button type="button" class="secondary-btn change-image-btn" id="change-image-btn">Cambiar imagen</button>
                 </div>
                 <label>
                     <span class="label-title">Es Destacado</span>
@@ -81,7 +101,7 @@
                     <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
                     <button type="button" class="secondary-btn" id="cancel-edit">Cancelar edición</button>
                 </div>
-                <span class="hint">* Los campos con * son obligatorios. El ID se usa para editar y borrar.</span>
+                <span class="hint">* Los campos con * son obligatorios. El ID menú único se usa para editar y deshabilitar.</span>
             </form>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
         </section>
@@ -97,6 +117,6 @@
 
     <script src="../../../config.js"></script>
     <script src="../admin-common.js"></script>
-    <script src="admin-menu-simple-crear.js"></script>
+    <script src="admin-menu-compuesto-crear.js"></script>
 </body>
 </html>

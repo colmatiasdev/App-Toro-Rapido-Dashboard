@@ -1,0 +1,81 @@
+/* Barra superior común a todas las páginas de administración */
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 20px;
+    min-height: 64px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.admin-topbar-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-topbar-brand {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.admin-topbar-title {
+    margin: 0;
+    font-family: 'Bungee', cursive;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #0f172a;
+}
+
+.admin-topbar-logo {
+    height: 52px;
+    width: auto;
+    max-width: 200px;
+    object-fit: contain;
+    display: block;
+}
+
+.admin-topbar-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+.admin-topbar-back:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+@media (max-width: 480px) {
+    .admin-topbar {
+        padding: 8px 14px;
+        min-height: 56px;
+    }
+    .admin-topbar-brand-wrap {
+        gap: 10px;
+    }
+    .admin-topbar-title {
+        font-size: 1rem;
+    }
+    .admin-topbar-logo {
+        height: 40px;
+        max-width: 160px;
+    }
+}

@@ -50,11 +50,14 @@ Detalle completo en [docs/CONFIGURACION.md](docs/CONFIGURACION.md).
 
 ## Estructura del proyecto
 
+- **Página de inicio del sitio**: `index.html` redirige al **panel de administración** (`scr/administracion/dashboard.html`). Si no hay sesión se muestra el login; si hay sesión, el dashboard.
+- **Página pública (portada para clientes)**: `inicio-publico.html` — portada con carrusel, horarios, enlace al menú y redes.
+
 ```
-personal/
 ├── config.js              # Configuración central
-├── index.html             # Portada
-├── index.js / index.css   # Lógica y estilos de portada
+├── index.html             # Entrada: redirige a administración (login/dashboard)
+├── inicio-publico.html    # Portada pública (clientes)
+├── index.js / index.css   # Lógica y estilos de la portada pública
 ├── README.md              # Este archivo
 ├── docs/                  # Documentación
 │   ├── INDICE.md          # Índice de la documentación
@@ -71,7 +74,7 @@ personal/
     ├── pedidos/           # Formulario y envío a WhatsApp
     ├── confirmacion/      # Página post-pedido
     ├── footer/            # Pie de página
-    └── administracion/    # Módulo admin (dashboard, login)
+    └── administracion/    # Login, dashboard y gestión (menú simple/compuesto)
 ```
 
 ## Documentación
