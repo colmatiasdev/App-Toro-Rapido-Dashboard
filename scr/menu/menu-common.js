@@ -136,6 +136,45 @@ const rowsToObjects = (headers, rows) => rows.map((row) => {
     return obj;
 });
 
+/** Obtiene valor de un objeto por varias posibles claves (ej. Grupo, grupo). */
+const getRowVal = (row, keys) => {
+    const k = keys.find((key) => row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== "");
+    return k ? row[k] : "";
+};
+
+/**
+ * Convierte filas de la hoja "menu-opciones" en un Map: idproducto -> array de grupos.
+ * Cada grupo: { nombre, tipo: "uno"|"varios", obligatorio: boolean, opciones: [{ nombre, recargo }] }
+ */
+const buildOpcionesMapFromRows = (rows) => {
+    const map = new Map();
+    if (!Array.isArray(rows) || rows.length === 0) return map;
+    rows.forEach((row) => {
+        const idProducto = cleanText(getRowVal(row, ["idproducto", "IdProducto", "idproducto", "id menu"]));
+        const grupo = cleanText(getRowVal(row, ["Grupo", "grupo", "grupo nombre"]));
+        const tipoRaw = String(getRowVal(row, ["Tipo", "tipo"])).toLowerCase();
+        const tipo = tipoRaw === "varios" ? "varios" : "uno";
+        const obligatorioRaw = String(getRowVal(row, ["Obligatorio", "obligatorio"])).trim().toUpperCase();
+        const obligatorio = obligatorioRaw === "SI" || obligatorioRaw === "SÍ";
+        const opcion = cleanText(getRowVal(row, ["Opcion", "opcion", "Opción", "opción"]));
+        const recargoRaw = getRowVal(row, ["Recargo", "recargo"]);
+        const recargo = Math.max(0, Number(String(recargoRaw).replace(/[^\d.-]/g, "")) || 0);
+        if (!idProducto || !grupo || !opcion) return;
+        if (!map.has(idProducto)) map.set(idProducto, []);
+        const groups = map.get(idProducto);
+        let group = groups.find((g) => g.nombre === grupo);
+        if (!group) {
+            group = { nombre: grupo, tipo, obligatorio, opciones: [] };
+            groups.push(group);
+        }
+        if (group.opciones.some((o) => o.nombre === opcion)) return;
+        group.opciones.push({ nombre: opcion, recargo });
+    });
+    return map;
+};
+
+if (typeof window !== "undefined") window.buildOpcionesMapFromRows = buildOpcionesMapFromRows;
+
 const updateQtyUI = (id, qty) => {
     const value = document.getElementById(`qty-${id}`);
     const wrapper = document.querySelector(`[data-qty-wrapper="${id}"]`);
@@ -215,12 +254,14 @@ const updateCartV2 = () => {
 
     try {
         const items = Array.from(cartV2.values()).map((item) => ({
-            id: item.id,
+            id: item.baseId || item.id,
+            cartKey: item.id,
             name: item.name,
             price: item.price,
             qty: item.qty,
             subtotal: item.qty * item.price,
-            category: item.category || ""
+            category: item.category || "",
+            options: item.options || []
         }));
         const subtotalVal = items.reduce((acc, item) => acc + item.subtotal, 0);
         const deliveryVal = subtotalVal > 0 && subtotalVal < freeFromV2 ? deliveryV2 : 0;
@@ -244,6 +285,12 @@ const findItemById = (id) => {
 
 const MAX_QTY = Number(window.APP_CONFIG?.maxProductos) || 10;
 
+const getOptionsSignature = (options) => {
+    if (!options || options.length === 0) return "";
+    const copy = options.slice().sort((a, b) => (a.grupo + a.opcion).localeCompare(b.grupo + b.opcion));
+    return JSON.stringify(copy);
+};
+
 const addItemV2 = (id) => {
     const result = findItemById(id);
     if (!result || result.item.available === false) return;
@@ -253,6 +300,38 @@ const addItemV2 = (id) => {
     current.qty += 1;
     cartV2.set(id, current);
     updateQtyUI(id, current.qty);
+    updateCartV2();
+};
+
+/** Agrega al carrito un producto con opciones (desde la página producto). */
+const addItemWithOptionsV2 = (baseId, qty, options) => {
+    const result = findItemById(baseId);
+    if (!result || result.item.available === false) return;
+    const { item, category } = result;
+    const sig = getOptionsSignature(options);
+    const cartKey = sig ? baseId + "|" + sig : baseId;
+    const recargoTotal = (options || []).reduce((s, o) => s + (Number(o.recargo) || 0), 0);
+    const unitPrice = (Number(item.price) || 0) + recargoTotal;
+    const optionsLabel = (options || []).map((o) => o.opcion).join(", ");
+    const nameToShow = optionsLabel ? item.name + " (" + optionsLabel + ")" : item.name;
+    let current = cartV2.get(cartKey);
+    if (!current) {
+        current = {
+            ...item,
+            id: cartKey,
+            baseId: baseId,
+            name: nameToShow,
+            price: unitPrice,
+            qty: 0,
+            category,
+            options: options || []
+        };
+    }
+    const addQty = Math.min(MAX_QTY - current.qty, Math.max(1, qty || 1));
+    if (addQty <= 0) return;
+    current.qty += addQty;
+    cartV2.set(cartKey, current);
+    updateQtyUI(baseId, (cartV2.get(baseId) || {}).qty || 0);
     updateCartV2();
 };
 
@@ -337,7 +416,9 @@ const APPLY_ADD_KEY = "toro_add_product_id";
 const APPLY_ADD_QTY_KEY = "toro_add_product_qty";
 const PRODUCTO_DETALLE_KEY = "toro_producto_detalle";
 
-/** Aplica el agregado desde la página producto (id + cantidad). Llamar al cargar el menú. */
+const APPLY_OPTIONS_KEY = "toro_add_product_options";
+
+/** Aplica el agregado desde la página producto (id + cantidad + opciones). Llamar al cargar el menú. */
 const applyPendingAddFromProduct = () => {
     try {
         const addId = sessionStorage.getItem(APPLY_ADD_KEY);
@@ -345,10 +426,22 @@ const applyPendingAddFromProduct = () => {
         sessionStorage.removeItem(APPLY_ADD_KEY);
         const qtyRaw = sessionStorage.getItem(APPLY_ADD_QTY_KEY);
         sessionStorage.removeItem(APPLY_ADD_QTY_KEY);
+        let options = [];
+        try {
+            const optRaw = sessionStorage.getItem(APPLY_OPTIONS_KEY);
+            if (optRaw) {
+                options = JSON.parse(optRaw);
+                sessionStorage.removeItem(APPLY_OPTIONS_KEY);
+            }
+        } catch (e) {}
         const qty = Math.min(MAX_QTY, Math.max(1, parseInt(qtyRaw || "1", 10) || 1));
         const res = findItemById(addId);
         if (res && res.item.available !== false) {
-            for (let i = 0; i < qty; i++) addItemV2(addId);
+            if (options && options.length > 0) {
+                addItemWithOptionsV2(addId, qty, options);
+            } else {
+                for (let i = 0; i < qty; i++) addItemV2(addId);
+            }
         }
     } catch (e) {}
 };
@@ -375,7 +468,8 @@ const initActionsV2 = () => {
                         priceRegular: item.priceRegular,
                         mostrarDescuento: item.mostrarDescuento,
                         porcentajeDescuento: item.porcentajeDescuento,
-                        esDestacado: item.esDestacado
+                        esDestacado: item.esDestacado,
+                        opciones: item.opciones || []
                     },
                     category: result.category,
                     returnMenu: window.MENU_RETURN || "simple"
@@ -404,12 +498,14 @@ const initActionsV2 = () => {
             return;
         }
         const items = Array.from(cartV2.values()).map((item) => ({
-            id: item.id,
+            id: item.baseId || item.id,
+            cartKey: item.id,
             name: item.name,
             price: item.price,
             qty: item.qty,
             subtotal: item.qty * item.price,
-            category: item.category || ""
+            category: item.category || "",
+            options: item.options || []
         }));
         const subtotal = items.reduce((acc, item) => acc + item.subtotal, 0);
         const delivery = subtotal > 0 && subtotal < freeFromV2 ? deliveryV2 : 0;
@@ -660,12 +756,17 @@ const restoreCartFromStorage = () => {
         const payload = JSON.parse(stored);
         if (!payload || !Array.isArray(payload.items)) return;
         payload.items.forEach((entry) => {
-            const result = findItemById(entry.id);
+            const baseId = entry.baseId || entry.id;
+            const result = findItemById(baseId);
             if (!result || result.item.available === false) return;
             const qty = Math.min(Number(entry.qty) || 0, MAX_QTY);
             if (qty <= 0) return;
-            cartV2.set(entry.id, { ...result.item, category: result.category, qty });
-            updateQtyUI(entry.id, qty);
+            const cartKey = entry.cartKey || entry.id;
+            const cartEntry = entry.options && entry.options.length > 0
+                ? { ...result.item, id: cartKey, baseId: baseId, name: entry.name, price: entry.price, qty, category: entry.category || result.category, options: entry.options }
+                : { ...result.item, id: cartKey, category: result.category, qty };
+            cartV2.set(cartKey, cartEntry);
+            if (cartKey === baseId) updateQtyUI(baseId, qty);
         });
     } catch (error) { console.warn(error); }
 };

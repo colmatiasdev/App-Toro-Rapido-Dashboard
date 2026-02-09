@@ -6,6 +6,36 @@ window.MENU_RETURN = "simple";
 const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv";
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
+const MENU_OPCIONES_SHEET_NAME = window.APP_CONFIG?.menuOpcionesSheetName || "menu-opciones";
+
+const fetchOpcionesData = async () => {
+    if (!MENU_SCRIPT_URL || !MENU_OPCIONES_SHEET_NAME) return new Map();
+    try {
+        const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
+        const response = await fetch(`${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(MENU_OPCIONES_SHEET_NAME)}&_ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) return new Map();
+        const text = await response.text();
+        let payload = null;
+        try { payload = JSON.parse(text); } catch (e) {}
+        let rows = [];
+        if (Array.isArray(payload)) rows = payload;
+        else if (payload && Array.isArray(payload.rows) && Array.isArray(payload.headers)) rows = rowsToObjects(payload.headers, payload.rows);
+        else if (payload && Array.isArray(payload.data)) rows = payload.data;
+        return typeof buildOpcionesMapFromRows === "function" ? buildOpcionesMapFromRows(rows) : new Map();
+    } catch (e) {
+        console.warn("Opciones desde Apps Script:", e);
+        return new Map();
+    }
+};
+
+const applyOpcionesToMenu = (menuSections, opcionesMap) => {
+    if (!opcionesMap || !menuSections) return;
+    menuSections.forEach((section) => {
+        (section.items || []).forEach((item) => {
+            item.opciones = opcionesMap.get(item.id) || [];
+        });
+    });
+};
 
 const mapRowsToMenu = (rows) => {
     const getValue = (row, candidates) => {
@@ -166,8 +196,9 @@ const fetchMenuData = async () => {
 const loadMenuData = async () => {
     let usedFallback = false;
     try {
-        const mapped = await fetchMenuData();
+        const [mapped, opcionesMap] = await Promise.all([fetchMenuData(), fetchOpcionesData()]);
         if (mapped && mapped.length) {
+            applyOpcionesToMenu(mapped, opcionesMap);
             window.menuData = mapped;
             return false;
         }

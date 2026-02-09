@@ -7,6 +7,7 @@ const URL_CSV = window.APP_CONFIG?.googleSheetUrlMenuCompuesto || window.APP_CON
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuCompuestoSheetName || "menu-toro-rapido-web-compuesto";
 const MENU_DETALLE_SHEET_NAME = window.APP_CONFIG?.menuCompuestoDetalleSheetName || "menu-compuesto-detalle";
+const MENU_OPCIONES_SHEET_NAME = window.APP_CONFIG?.menuOpcionesSheetName || "menu-opciones";
 const URL_CSV_DETALLE = window.APP_CONFIG?.googleSheetUrlMenuCompuestoDetalle || "";
 
 const TIPO_MENU_COMPUESTO = ["MENU-COMPUESTO", "MENU-COMPUE"];
@@ -297,12 +298,43 @@ const mergeDetalleIntoMenu = (menuSections, detalleMap) => {
     });
 };
 
+const fetchOpcionesData = async () => {
+    const scriptUrl = MENU_SCRIPT_URL;
+    if (!scriptUrl || !MENU_OPCIONES_SHEET_NAME) return new Map();
+    try {
+        const sep = scriptUrl.includes("?") ? "&" : "?";
+        const response = await fetch(`${scriptUrl}${sep}action=list&sheetName=${encodeURIComponent(MENU_OPCIONES_SHEET_NAME)}&_ts=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) return new Map();
+        const text = await response.text();
+        let payload = null;
+        try { payload = JSON.parse(text); } catch (e) {}
+        let rows = [];
+        if (Array.isArray(payload)) rows = payload;
+        else if (payload && Array.isArray(payload.rows) && Array.isArray(payload.headers)) rows = rowsToObjects(payload.headers, payload.rows);
+        else if (payload && Array.isArray(payload.data)) rows = payload.data;
+        return typeof buildOpcionesMapFromRows === "function" ? buildOpcionesMapFromRows(rows) : new Map();
+    } catch (e) {
+        console.warn("Opciones desde Apps Script:", e);
+        return new Map();
+    }
+};
+
+const applyOpcionesToMenu = (menuSections, opcionesMap) => {
+    if (!opcionesMap || !menuSections) return;
+    menuSections.forEach((section) => {
+        (section.items || []).forEach((item) => {
+            item.opciones = opcionesMap.get(item.id) || [];
+        });
+    });
+};
+
 const loadMenuData = async () => {
     let usedFallback = false;
     try {
-        const [mapped, detalleMap] = await Promise.all([fetchMenuData(), fetchDetalleData()]);
+        const [mapped, detalleMap, opcionesMap] = await Promise.all([fetchMenuData(), fetchDetalleData(), fetchOpcionesData()]);
         if (mapped && mapped.length) {
             mergeDetalleIntoMenu(mapped, detalleMap || null);
+            applyOpcionesToMenu(mapped, opcionesMap);
             window.menuData = mapped;
             return false;
         }

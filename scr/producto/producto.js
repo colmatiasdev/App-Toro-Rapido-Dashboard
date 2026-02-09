@@ -10,6 +10,12 @@
     const MAX_QTY = Number(window.APP_CONFIG?.maxProductos) || 10;
 
     const formatPrice = (value) => `$ ${Number(value).toLocaleString("es-AR")}`;
+    const escapeHtml = (s) => {
+        if (s == null) return "";
+        const div = document.createElement("div");
+        div.textContent = s;
+        return div.innerHTML;
+    };
 
     function getUrlParam(name) {
         const params = new URLSearchParams(window.location.search);
@@ -157,6 +163,82 @@
             incluyeWrap.style.display = "none";
         }
 
+        const opcionesWrap = document.getElementById("producto-opciones-wrap");
+        const opcionesList = document.getElementById("producto-opciones-list");
+        const opcionesData = Array.isArray(item.opciones) ? item.opciones : [];
+        let selectedOpciones = [];
+        const updateTotalConOpciones = () => {
+            const totalRecargo = selectedOpciones.reduce((s, o) => s + (o.recargo || 0), 0);
+            const total = priceActual + totalRecargo;
+            const el = document.getElementById("producto-total-con-opciones");
+            if (el) {
+                if (totalRecargo > 0) {
+                    el.style.display = "flex";
+                    el.querySelector(".producto-total-con-opciones-monto").textContent = formatPrice(total);
+                } else {
+                    el.style.display = "none";
+                }
+            }
+        };
+        const collectSelected = () => {
+            selectedOpciones = [];
+            opcionesData.forEach((group, gIdx) => {
+                if (group.tipo === "uno") {
+                    const radio = document.querySelector(`input[name="producto-opcion-g-${gIdx}"]:checked`);
+                    if (radio && radio.dataset.opcion && radio.dataset.recargo !== undefined) {
+                        selectedOpciones.push({
+                            grupo: group.nombre,
+                            opcion: radio.dataset.opcion,
+                            recargo: Number(radio.dataset.recargo) || 0
+                        });
+                    }
+                } else {
+                    document.querySelectorAll(`input[name="producto-opcion-g-${gIdx}"]:checked`).forEach((cb) => {
+                        if (cb.dataset.opcion !== undefined)
+                            selectedOpciones.push({
+                                grupo: group.nombre,
+                                opcion: cb.dataset.opcion,
+                                recargo: Number(cb.dataset.recargo) || 0
+                            });
+                    });
+                }
+            });
+            updateTotalConOpciones();
+        };
+        if (opcionesWrap && opcionesList && opcionesData.length > 0) {
+            opcionesWrap.style.display = "block";
+            opcionesList.innerHTML = opcionesData
+                .map(
+                    (group, gIdx) => `
+                <div class="producto-opcion-grupo" data-grupo-idx="${gIdx}">
+                    <h4 class="producto-opcion-grupo-title">${escapeHtml(group.nombre)}${group.obligatorio ? ' <span class="producto-opcion-obligatorio">(elegir al menos uno)</span>' : ""}</h4>
+                    <div class="producto-opcion-opciones">
+                        ${group.opciones
+                            .map(
+                                (opt, oIdx) => {
+                                    const inputId = `producto-opcion-${gIdx}-${oIdx}`;
+                                    const isRadio = group.tipo === "uno";
+                                    const recargoStr = opt.recargo > 0 ? ` + ${formatPrice(opt.recargo)}` : "";
+                                    return `
+                            <label class="producto-opcion-label">
+                                <input type="${isRadio ? "radio" : "checkbox"}" name="producto-opcion-g-${gIdx}" id="${inputId}" value="${escapeHtml(opt.nombre)}" data-opcion="${escapeHtml(opt.nombre)}" data-recargo="${opt.recargo}">
+                                <span class="producto-opcion-text">${escapeHtml(opt.nombre)}${recargoStr}</span>
+                            </label>`;
+                                }
+                            )
+                            .join("")}
+                    </div>
+                </div>`
+                )
+                .join("");
+            opcionesList.querySelectorAll("input").forEach((inp) => {
+                inp.addEventListener("change", collectSelected);
+            });
+            collectSelected();
+        } else if (opcionesWrap) {
+            opcionesWrap.style.display = "none";
+        }
+
         const volverBtn = document.getElementById("producto-volver");
         const volverMenuBtn = document.getElementById("producto-volver-menu");
         volverBtn.href = returnUrl;
@@ -232,8 +314,25 @@
             agregarBtn.innerHTML = '<i class="fa-solid fa-basket-shopping"></i> Agregar al pedido';
             agregarBtn.addEventListener("click", function (e) {
                 e.preventDefault();
+                if (opcionesData.length > 0) {
+                    collectSelected();
+                    const missing = opcionesData.filter(
+                        (g) => g.obligatorio && !selectedOpciones.some((s) => s.grupo === g.nombre)
+                    );
+                    if (missing.length > 0) {
+                        alert("Por favor elegí al menos una opción en: " + missing.map((g) => g.nombre).join(", "));
+                        return;
+                    }
+                }
                 sessionStorage.setItem(ADD_KEY, item.id);
                 sessionStorage.setItem(ADD_QTY_KEY, String(currentQty));
+                try {
+                    if (selectedOpciones.length > 0) {
+                        sessionStorage.setItem("toro_add_product_options", JSON.stringify(selectedOpciones));
+                    } else {
+                        sessionStorage.removeItem("toro_add_product_options");
+                    }
+                } catch (err) {}
                 window.location.href = returnUrl;
             });
         }
