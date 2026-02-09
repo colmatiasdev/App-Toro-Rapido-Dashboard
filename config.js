@@ -80,5 +80,9 @@ window.APP_CONFIG = {
     /** Costo base de envío en pesos (se aplica si el subtotal no alcanza montoMinimoEnvioGratis). */
     costoEnvioBase: 1500,
     /** Subtotal mínimo en pesos a partir del cual el envío es gratis. */
-    montoMinimoEnvioGratis: 25000
+    montoMinimoEnvioGratis: 25000,
+
+    // ========== SESIÓN DE PEDIDO (CIRCUITO PÚBLICO) ==========
+    /** Minutos de inactividad tras los cuales se limpia el carrito/resumen y se redirige a la página principal. 0 = desactivado. Ej: 30 */
+    sesionPedidoTimeoutMinutos: 1
 };

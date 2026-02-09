@@ -214,6 +214,8 @@ async function cargarPie() {
 }
 
 async function initPedidos() {
+    if (typeof window.checkAndExpirarSesionPedido === "function" && window.checkAndExpirarSesionPedido("../../index.html")) return;
+    if (typeof window.touchSesionPedido === "function") window.touchSesionPedido();
     const menuActivo = window.APP_CONFIG?.menuActivo || "menu-simple";
     const linkModificar = document.getElementById("link-modificar-pedido");
     if (linkModificar) {

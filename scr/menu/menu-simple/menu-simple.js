@@ -278,6 +278,8 @@ const renderMenu = (menuData) => {
 };
 
 const initMenu = async () => {
+    if (typeof window.checkAndExpirarSesionPedido === "function" && window.checkAndExpirarSesionPedido("../../../index.html")) return;
+    if (typeof window.touchSesionPedido === "function") window.touchSesionPedido();
     const loadingEl = document.getElementById("menu-loading");
     if (loadingEl) loadingEl.style.display = "block";
     const [, , , usedFallback] = await Promise.all([

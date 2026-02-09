@@ -480,6 +480,8 @@ const renderMenu = (menuData) => {
 const initMenu = async () => {
     const loadingEl = document.getElementById("menu-loading");
     if (loadingEl) loadingEl.style.display = "block";
+    if (typeof window.checkAndExpirarSesionPedido === "function" && window.checkAndExpirarSesionPedido("../../../index.html")) return;
+    if (typeof window.touchSesionPedido === "function") window.touchSesionPedido();
     const [, , , usedFallback] = await Promise.all([
         loadHeaderV2(),
         loadPromoV2(),

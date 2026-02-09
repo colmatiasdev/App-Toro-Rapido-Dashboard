@@ -282,6 +282,7 @@ const updateCartV2 = () => {
     try {
         const payload = buildPayloadFromCart();
         sessionStorage.setItem("toro_pedido", JSON.stringify(payload));
+        if (typeof window.touchSesionPedido === "function") window.touchSesionPedido();
         const baseIds = [...new Set(payload.items.map((it) => it.id))];
         baseIds.forEach((baseId) => updateQtyUI(baseId, getTotalQtyForProduct(baseId)));
     } catch (e) {}
@@ -500,6 +501,7 @@ const tryRedirectToPedidosAfterAdd = () => {
     try {
         const payload = buildPayloadFromCart();
         sessionStorage.setItem("toro_pedido", JSON.stringify(payload));
+        if (typeof window.touchSesionPedido === "function") window.touchSesionPedido();
         window.location.href = PEDIDOS_BASE_REL;
     } catch (e) {}
     return true;
@@ -586,7 +588,10 @@ const initActionsV2 = () => {
         }
         const payload = buildPayloadFromCart();
         const encoded = encodeURIComponent(JSON.stringify(payload));
-        try { sessionStorage.setItem("toro_pedido", JSON.stringify(payload)); } catch (error) { console.warn(error); }
+        try {
+            sessionStorage.setItem("toro_pedido", JSON.stringify(payload));
+            if (typeof window.touchSesionPedido === "function") window.touchSesionPedido();
+        } catch (error) { console.warn(error); }
         const reservaParam = window.__menuPuedeReservar ? "&reserva=1" : "";
         window.location.href = `../../pedidos/pedidos.html?pedido=${encoded}${reservaParam}`;
     });

@@ -81,6 +81,12 @@ Las opciones se exponen en `window.APP_CONFIG`. No hace falta crear archivos `.e
 | `costoEnvioBase` | `number` | Costo de envío en pesos cuando el subtotal es menor que `montoMinimoEnvioGratis`. |
 | `montoMinimoEnvioGratis` | `number` | Subtotal mínimo en pesos a partir del cual el envío es gratis. |
 
+### Sesión de pedido (circuito público)
+
+| Clave | Tipo | Descripción |
+|-------|------|-------------|
+| `sesionPedidoTimeoutMinutos` | `number` | Minutos de inactividad tras los cuales se limpia el carrito y el resumen del pedido y se redirige a la página principal (como “sesión caducada”). `0` = desactivado. Ej.: `30` para 30 minutos. La actividad se renueva al cargar menú o pedidos y al agregar o quitar productos. |
+
 ---
 
 ## Relación con Google Sheets
