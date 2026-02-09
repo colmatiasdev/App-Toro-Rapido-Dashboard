@@ -49,7 +49,7 @@ const loadOpciones = async () => {
     if (!tbody) return;
 
     if (!MENU_SCRIPT_URL) {
-        tbody.innerHTML = `<tr><td colspan="7" class="table-loading">No hay Apps Script configurado (appsScriptMenuUrl en config.js).</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="table-loading">No hay Apps Script configurado (appsScriptMenuUrl en config.js).</td></tr>`;
         return;
     }
 
@@ -65,10 +65,11 @@ const loadOpciones = async () => {
 
         const rawRows = rowsFromSheetData(data);
         if (!rawRows.length) {
-            tbody.innerHTML = `<tr><td colspan="7" class="table-loading">No hay opciones. Agregá una desde el botón superior.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="table-loading">No hay opciones. Agregá una desde el botón superior.</td></tr>`;
             return;
         }
 
+        const habilitadaVal = (v) => (cleanText(v) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const mapped = rawRows.map((row) => {
             const idopciones = cleanText(getValue(row, ["ID Opciones", "idopciones", "idproducto"]));
             const grupo = cleanText(getValue(row, ["Grupo", "grupo"]));
@@ -76,11 +77,19 @@ const loadOpciones = async () => {
             const obligatorio = cleanText(getValue(row, ["Obligatorio", "obligatorio"])) || "NO";
             const opcion = cleanText(getValue(row, ["Opcion", "opcion", "Opción"]));
             const recargo = parseRecargo(getValue(row, ["Recargo", "recargo"]));
-            return { idopciones, grupo, tipo, obligatorio, opcion, recargo };
+            const habilitada = habilitadaVal(getValue(row, ["Habilitada", "habilitada"]));
+            return { idopciones, grupo, tipo, obligatorio, opcion, recargo, habilitada };
         }).filter((r) => r.idopciones || r.grupo || r.opcion);
 
         state.rows = mapped;
         const STORAGE_KEY = "opcionesEdit";
+        const btnHabilitada = (h, idx) => {
+            const isSi = h === "SI";
+            const cls = isSi ? "habilitada-btn habilitada-si" : "habilitada-btn habilitada-no";
+            const title = isSi ? "Habilitada. Clic para deshabilitar" : "Deshabilitada. Clic para habilitar";
+            const icon = isSi ? "fa-circle-check" : "fa-circle-xmark";
+            return `<button type="button" class="${cls}" data-index="${idx}" title="${title}" aria-label="${title}"><i class="fa-solid ${icon}"></i></button>`;
+        };
         tbody.innerHTML = mapped.map((row, idx) => `
             <tr>
                 <td>${row.idopciones || "—"}</td>
@@ -89,12 +98,54 @@ const loadOpciones = async () => {
                 <td>${row.obligatorio}</td>
                 <td>${row.opcion || "—"}</td>
                 <td>$ ${Number(row.recargo).toLocaleString("es-AR")}</td>
+                <td class="habilitada-cell">${btnHabilitada(row.habilitada, idx)}</td>
                 <td class="actions">
                     <a class="action-btn" href="admin-opciones-edit.html" data-action="edit" data-index="${idx}">Editar</a>
                 </td>
             </tr>`).join("");
 
-        tbody.addEventListener("click", function (e) {
+        tbody.addEventListener("click", async function (e) {
+            const toggleBtn = e.target.closest(".habilitada-btn");
+            if (toggleBtn) {
+                e.preventDefault();
+                const idx = parseInt(toggleBtn.getAttribute("data-index"), 10);
+                const row = state.rows[idx];
+                if (!row || !MENU_SCRIPT_URL) return;
+                const newHabilitada = row.habilitada === "SI" ? "NO" : "SI";
+                toggleBtn.disabled = true;
+                toggleBtn.classList.add("habilitada-btn-loading");
+                try {
+                    const payload = {
+                        action: "update",
+                        sheetName: SHEET_NAME,
+                        idopcionesOld: row.idopciones || "",
+                        grupoOld: row.grupo || "",
+                        opcionOld: row.opcion || "",
+                        idopciones: row.idopciones || "",
+                        "ID Opciones": row.idopciones || "",
+                        Grupo: row.grupo || "",
+                        Tipo: row.tipo || "",
+                        Obligatorio: row.obligatorio || "",
+                        Opcion: row.opcion || "",
+                        Recargo: String(row.recargo),
+                        Habilitada: newHabilitada
+                    };
+                    const res = await fetch(MENU_SCRIPT_URL, {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "text/plain;charset=utf-8" },
+                        body: JSON.stringify(payload)
+                    });
+                    await loadOpciones();
+                } catch (err) {
+                    console.error(err);
+                    alert("No se pudo actualizar Habilitada. Revisá la consola.");
+                } finally {
+                    toggleBtn.disabled = false;
+                    toggleBtn.classList.remove("habilitada-btn-loading");
+                }
+                return;
+            }
             const link = e.target.closest(".action-btn[data-action='edit']");
             if (!link) return;
             const idx = parseInt(link.getAttribute("data-index"), 10);
@@ -114,7 +165,7 @@ const loadOpciones = async () => {
         });
     } catch (error) {
         console.error(error);
-        tbody.innerHTML = `<tr><td colspan="7" class="table-loading">No se pudo cargar las opciones.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="table-loading">No se pudo cargar las opciones.</td></tr>`;
     }
 };
 
