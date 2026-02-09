@@ -3,7 +3,7 @@ window.formatMoneda = (valor) => `$ ${Number(valor).toLocaleString("es-AR")}`;
 
 window.APP_CONFIG = {
     // ========== GENERAL Y DEBUG ==========
-    /** true: en la página principal (index) se muestran botones por cada versión de menú para pruebas. false: solo el menú activo. */
+    /** true: en la página pública (inicio-publico.html) se muestran botones por cada versión de menú para pruebas. false: solo el menú activo. */
     debug: false,
     /** Lista de versiones de menú disponibles. Solo se usa cuando debug es true. */
     menuVersiones: ["menu-simple", "menu-compuesto"],
@@ -13,6 +13,8 @@ window.APP_CONFIG = {
     maxProductos: 10,
 
     // ========== CONTACTO Y REDES ==========
+    /** URL del sitio web público. Se usa en el panel de administración para el enlace "Ver web pública". */
+    urlWebPublica: "https://colmatiasdev.github.io/App-Toro-Rapido-Delivery/",
     /** URL corta para compartir en redes, WhatsApp o mensajes (ej. bit.ly/tororapido). Si está vacío no se usa. Ver docs/URL_CORTA.md */
     urlCorta: "",
     /** Número de WhatsApp del negocio (con código de país, sin +). Se usa para enlaces y envío de pedidos. */
@@ -83,6 +85,6 @@ window.APP_CONFIG = {
     montoMinimoEnvioGratis: 25000,
 
     // ========== SESIÓN DE PEDIDO (CIRCUITO PÚBLICO) ==========
-    /** Minutos de inactividad tras los cuales se limpia el carrito/resumen y se redirige a la página principal. 0 = desactivado. Ej: 30 */
+    /** Minutos de inactividad tras los cuales se limpia el carrito/resumen y se redirige a la página pública (inicio-publico.html). 0 = desactivado. Ej: 30 */
     sesionPedidoTimeoutMinutos: 1
 };

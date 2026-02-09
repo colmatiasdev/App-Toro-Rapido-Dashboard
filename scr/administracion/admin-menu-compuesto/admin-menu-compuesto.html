@@ -3,28 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menú compuesto - Toro Rápido</title>
+    <title>Menú Compuesto - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../dashboard.css">
+    <link rel="stylesheet" href="../admin-header.css">
     <link rel="stylesheet" href="admin-menu-compuesto.css">
 </head>
 <body>
-    <main class="dashboard">
-        <section class="dashboard-content" style="display:block;">
-            <header class="dashboard-header">
-                <h1>Menú compuesto</h1>
-                <p>Sección en preparación. Próximamente podrás gestionar combinaciones.</p>
-            </header>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>Datos del menú compuesto cargados desde Google Sheets.</p>
+        </header>
 
-            <section class="dashboard-grid">
-                <article class="dash-card">
-                    <div class="dash-icon"><i class="fa-solid fa-gear"></i></div>
-                    <h2>Próximos pasos</h2>
-                    <p>Cuando me indiques los requerimientos, armo esta pantalla.</p>
-                    <a class="dash-btn" href="../dashboard.html">Volver al panel</a>
-                </article>
-            </section>
+        <div class="admin-actions">
+            <a class="primary-btn" href="admin-menu-compuesto-crear.html">
+                <i class="fa-solid fa-circle-plus"></i> Agregar ítem
+            </a>
+        </div>
+
+        <section class="admin-card">
+            <div class="card-title">
+                <i class="fa-solid fa-list-check"></i> Ítems del menú compuesto
+            </div>
+            <div class="table-wrap">
+                <table class="menu-table">
+                    <thead>
+                        <tr>
+                            <th>Orden</th>
+                            <th>ID</th>
+                            <th>Tipo Menú</th>
+                            <th>Categoría</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Agotado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menu-body">
+                        <tr>
+                            <td colspan="9" class="table-loading">Cargando menú...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
@@ -36,6 +60,7 @@
         </div>
     </footer>
 
+    <script src="../../../config.js"></script>
     <script src="../admin-common.js"></script>
     <script src="admin-menu-compuesto.js"></script>
 </body>
