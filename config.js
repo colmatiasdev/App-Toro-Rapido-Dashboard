@@ -51,6 +51,8 @@ window.APP_CONFIG = {
     googleSheetUrlMenuCompuestoDetalle: "",
     /** Nombre de la hoja de opciones/agregados por producto (ej. "menu-opciones" o "opciones-base"). Columnas: idproducto, Grupo, Tipo, Obligatorio, Opcion, Recargo. Ver docs/MENU_OPCIONES_SHEET.md */
     menuOpcionesSheetName: "opciones-base",
+    /** Nombre de la hoja de productos. Columnas esperadas: ID Producto, Nombre, Habilitada (SI/NO). */
+    menuProductosSheetName: "productos-base",
 
     // ========== HORARIO DE ATENCIÓN ==========
     /** Nombre de la hoja de horarios en el Sheet. Columnas: IDHORARIO, DIA, HORA DESDE, MINUTO DESDE, HORA HASTA, MINUTO HASTA. DIA: Lunes, Martes, etc. Horas 0-23, minutos 0-59. */

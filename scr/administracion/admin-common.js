@@ -8,10 +8,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!headerSlot) return;
 
     const path = window.location.pathname || "";
-    const isDashboard = (path.includes("dashboard") || path.endsWith("administracion/")) && !path.includes("admin-menu") && !path.includes("admin-opciones");
+    const isDashboard = (path.includes("dashboard") || path.endsWith("administracion/")) && !path.includes("admin-menu") && !path.includes("admin-opciones") && !path.includes("admin-productos");
     const isCrear = path.includes("crear");
     const isMenuSimple = path.includes("admin-menu-simple");
     const isOpciones = path.includes("admin-opciones");
+    const isProductos = path.includes("admin-productos");
     const depth = isDashboard ? 0 : 1;
 
     const logoBase = depth === 0 ? "../../" : "../../../";
@@ -50,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (titleEl) {
         if (isDashboard) titleEl.textContent = "Panel de Administración";
         else if (isOpciones) titleEl.textContent = isCrear ? "Agregar opción" : "Administrador de opciones";
+        else if (isProductos) titleEl.textContent = path.includes("edit") ? "Editar producto" : (isCrear ? "Agregar producto" : "Administrador de productos");
         else if (isCrear) titleEl.textContent = isMenuSimple ? "Agregar ítem - Menú simple" : "Agregar ítem - Menú compuesto";
         else titleEl.textContent = isMenuSimple ? "Administrador de Menú Simple" : "Administrador de Menú Compuesto";
     }
@@ -59,6 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
             backLink.href = (window.APP_CONFIG && window.APP_CONFIG.urlWebPublica) ? window.APP_CONFIG.urlWebPublica : "../../inicio-publico.html";
             backText.textContent = "Ver web pública";
         } else if (isOpciones && isCrear) {
+            backLink.href = "admin-opciones.html";
+            backText.textContent = "Volver al listado";
+        } else if (isProductos && (isCrear || path.includes("edit"))) {
+            backLink.href = "admin-productos.html";
+            backText.textContent = "Volver al listado";
+        } else if (isOpciones && path.includes("edit")) {
             backLink.href = "admin-opciones.html";
             backText.textContent = "Volver al listado";
         } else if (isCrear) {

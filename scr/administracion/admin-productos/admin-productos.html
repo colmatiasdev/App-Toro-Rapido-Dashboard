@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="admin-productos.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>ABM de productos. Hoja <strong>productos-base</strong>. Habilitar o deshabilitar sin eliminar.</p>
+        </header>
+
+        <div class="admin-actions">
+            <a class="primary-btn" href="admin-productos-crear.html">
+                <i class="fa-solid fa-circle-plus"></i> Agregar producto
+            </a>
+        </div>
+
+        <section class="admin-card">
+            <div class="card-title">
+                <i class="fa-solid fa-box"></i> Productos cargados desde Google Sheets
+            </div>
+            <div class="table-wrap">
+                <table class="menu-table">
+                    <thead>
+                        <tr>
+                            <th>ID Producto</th>
+                            <th>Nombre</th>
+                            <th>Habilitada</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productos-body">
+                        <tr>
+                            <td colspan="4" class="table-loading">Cargando productos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../../config.js"></script>
+    <script src="../admin-common.js"></script>
+    <script src="admin-productos.js"></script>
+</body>
+</html>
