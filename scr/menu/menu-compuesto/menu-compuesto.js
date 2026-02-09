@@ -300,10 +300,9 @@ const mergeDetalleIntoMenu = (menuSections, detalleMap) => {
 const loadMenuData = async () => {
     let usedFallback = false;
     try {
-        const mapped = await fetchMenuData();
+        const [mapped, detalleMap] = await Promise.all([fetchMenuData(), fetchDetalleData()]);
         if (mapped && mapped.length) {
-            const detalleMap = await fetchDetalleData();
-            mergeDetalleIntoMenu(mapped, detalleMap);
+            mergeDetalleIntoMenu(mapped, detalleMap || null);
             window.menuData = mapped;
             return false;
         }
@@ -433,11 +432,13 @@ const renderMenu = (menuData) => {
 const initMenu = async () => {
     const loadingEl = document.getElementById("menu-loading");
     if (loadingEl) loadingEl.style.display = "block";
-    await loadHeaderV2();
-    await loadPromoV2();
-    await loadResumenV2();
+    const [, , , usedFallback] = await Promise.all([
+        loadHeaderV2(),
+        loadPromoV2(),
+        loadResumenV2(),
+        loadMenuData()
+    ]);
     bindHeaderActions();
-    const usedFallback = await loadMenuData();
     renderMenu(window.menuData);
     restoreCartFromStorage();
     try { applyPendingAddFromProduct(); } catch (e) {}
@@ -447,7 +448,7 @@ const initMenu = async () => {
     if (loadingEl) loadingEl.style.display = "none";
     const errorEl = document.getElementById("menu-error");
     if (errorEl) errorEl.style.display = usedFallback ? "flex" : "none";
-    await loadFooter();
+    loadFooter();
     setTimeout(async () => {
         try {
             const refreshed = await fetchMenuData();
