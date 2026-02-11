@@ -249,6 +249,7 @@ const selectProductoBase = (item) => {
         c.classList.remove("selected");
         if ((c.dataset.idproducto || "") === (item.idproducto || "")) c.classList.add("selected");
     });
+    updateDebugPayloadCompuesto();
 };
 
 const setProductoBaseReadonlyDisplay = (esDestacado, productoAgotado, stock) => {
@@ -296,6 +297,62 @@ const switchPanelsByTipo = () => {
         setAutoId();
         setAutoOrder();
     }
+    updateDebugPayloadCompuesto();
+};
+
+const updateDebugPayloadCompuesto = () => {
+    if (typeof window.renderDebugPayloadSection !== "function") return;
+    const tipo = document.getElementById("tipomenu-select")?.value || "";
+    const form = document.getElementById("add-item-form");
+    if (!form) return;
+    const data = new FormData(form);
+    const blocks = [];
+    if (tipo === "MENU-SIMPLE") {
+        const payloadSimple = {
+            action: "create",
+            sheetName: MENU_SIMPLE_SHEET_NAME,
+            idmenu: cleanText(data.get("idmenu_simple")),
+            orden: cleanText(data.get("orden_simple")),
+            idproducto: cleanText(data.get("idproducto")),
+            Categoria: cleanText(data.get("categoria_simple")),
+            Producto: cleanText(data.get("producto_simple")),
+            Descripcion: cleanText(data.get("descripcion_simple")),
+            Precio: cleanText(data.get("precio_simple")),
+            Imagen: currentImageUrlSimple ? "(imagen)" : "",
+            "Es Destacado": cleanText(data.get("esdestacado_simple")) || "NO",
+            "Producto Agotado": cleanText(data.get("productoagotado_simple")) || "NO",
+            stock: cleanText(data.get("stock_simple")),
+            Habilitado: "SI"
+        };
+        blocks.push({ title: "1. Registro en menú simple", sheetName: MENU_SIMPLE_SHEET_NAME, payload: payloadSimple });
+        blocks.push({
+            title: "2. Registro en menú compuesto",
+            sheetName: MENU_SHEET_NAME,
+            payload: { action: "create", sheetName: MENU_SHEET_NAME, orden: "(siguiente)", "idmenu-unico": "(nuevo)", "Tipo Menu": "MENU-SIMPLE" }
+        });
+    } else if (tipo === "MENU-COMPUESTO") {
+        const payloadComp = {
+            action: "create",
+            sheetName: MENU_SHEET_NAME,
+            orden: cleanText(data.get("orden")),
+            "idmenu-unico": cleanText(data.get("idmenu-unico")),
+            "Tipo Menu": "MENU-COMPUESTO",
+            "idmenu-variable": cleanText(data.get("idmenu-variable")),
+            Categoria: cleanText(data.get("categoria")),
+            Producto: cleanText(data.get("producto")),
+            "Descripcion Producto": cleanText(data.get("descripcionproducto")),
+            "Precio Actual": cleanText(data.get("precioactual")),
+            "Precio Regular": cleanText(data.get("precioregular")),
+            "Mostar Descuento": cleanText(data.get("mostrardescuento")) || "NO",
+            Imagen: currentImageUrl ? "(imagen)" : "",
+            "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
+            "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
+            Stock: cleanText(data.get("stock")),
+            Habilitado: "SI"
+        };
+        blocks.push({ sheetName: MENU_SHEET_NAME, payload: payloadComp });
+    }
+    window.renderDebugPayloadSection("debug-payload-wrap", blocks);
 };
 
 const setFormMode = (mode) => {
@@ -446,6 +503,10 @@ const initForm = () => {
                 habilitado: "SI",
                 Habilitado: "SI"
             };
+            if (!payload.idmenu) {
+                alert("Falta ID Menú. Recargá la página y volvé a elegir MENU-SIMPLE.");
+                return;
+            }
             if (!payload.idproducto) {
                 alert("Elegí un producto de la lista de productos base.");
                 return;
@@ -574,6 +635,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         switchPanelsByTipo();
     }
     document.getElementById("tipomenu-select")?.addEventListener("change", switchPanelsByTipo);
+    const form = document.getElementById("add-item-form");
+    form?.addEventListener("input", updateDebugPayloadCompuesto);
+    form?.addEventListener("change", updateDebugPayloadCompuesto);
 
     const fileInput = document.getElementById("imagen-file");
     const uploadBtn = document.getElementById("upload-image-btn");

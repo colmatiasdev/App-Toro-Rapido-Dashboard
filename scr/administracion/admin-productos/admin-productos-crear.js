@@ -265,7 +265,45 @@ document.addEventListener("DOMContentLoaded", async () => {
         stockInput.addEventListener("blur", capStock);
     }
 
+    const updateDebugPayloadProductos = () => {
+        if (typeof window.renderDebugPayloadSection !== "function") return;
+        const form = document.getElementById("producto-form");
+        if (!form) return;
+        const data = new FormData(form);
+        const idproducto = cleanText(data.get("idproducto"));
+        const categoria = cleanText(data.get("categoria"));
+        const producto = cleanText(data.get("producto"));
+        const descripcion = cleanText(data.get("descripcion"));
+        const precioActual = cleanText(data.get("precio_actual"));
+        const imagen = cleanText(data.get("imagen"));
+        const esDestacado = (cleanText(data.get("es_destacado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const stockRaw = cleanText(data.get("stock"));
+        const stockNumRaw = stockRaw === "" ? 0 : (Number(stockRaw.replace(",", ".")) || 0);
+        const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
+        const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
+        const payload = {
+            action: "create",
+            sheetName: SHEET_NAME,
+            idproducto,
+            "ID Producto": idproducto,
+            Categoria: categoria,
+            Producto: producto,
+            Descripcion: descripcion,
+            "Precio Actual": precioNum,
+            "Precio Regular": precioNum,
+            Imagen: imagen && imagen.length > 60 ? "(imagen)" : imagen,
+            "Es Destacado": esDestacado,
+            "Producto Agotado": "NO",
+            STOCK: stock,
+            Habilitada: "NO",
+            Habilitado: "NO"
+        };
+        window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+    };
+
     const form = document.getElementById("producto-form");
+    form?.addEventListener("input", updateDebugPayloadProductos);
+    form?.addEventListener("change", updateDebugPayloadProductos);
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
         clearValidationErrors(form);
@@ -340,4 +378,5 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
     });
+    updateDebugPayloadProductos();
 });

@@ -4,7 +4,7 @@ window.formatMoneda = (valor) => `$ ${Number(valor).toLocaleString("es-AR")}`;
 window.APP_CONFIG = {
     // ========== GENERAL Y DEBUG ==========
     /** true: en la página pública (inicio-publico.html) se muestran botones por cada versión de menú para pruebas. false: solo el menú activo. */
-    debug: false,
+    debug: true,
     /** Lista de versiones de menú disponibles. Solo se usa cuando debug es true. */
     menuVersiones: ["menu-simple", "menu-compuesto"],
     /** Menú público activo cuando debug es false. Debe coincidir con un valor de menuVersiones. */
@@ -34,7 +34,7 @@ window.APP_CONFIG = {
     /** URL del despliegue de Google Apps Script para envío de pedidos. */
     appsScriptPedidosUrl: "https://script.google.com/macros/s/AKfycbzzCRn0wQHHNg9PRQAprtyFXdAvRJT0iTFv_x3GlzZ5PFNpEcFzfvNJJBM5SxNL6TH4xw/exec",
     /** URL del despliegue de Apps Script para menú, opciones, horarios, productos. */
-    appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbzyKYacKq44oV7tnHdqiVQfMa_3KoYzozDOukZZyT4UawnoeMzinabilNTBknqODTS3zA/exec",
+    appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbxtFDv6ee-JnHSCRBMOI6_H4h6YdRvwLlLxBP7BzMGd0TZIDeqcVDC4fFkxizXFW1f90Q/exec",
 
     // ========== MENÚ – HOJAS DE CÁLCULO ==========
     /** URL CSV de la hoja del menú simple (opcional). Si no está, se usa Apps Script. */

@@ -134,6 +134,31 @@ const setImageFallback = (img) => {
     };
 };
 
+const updateDebugPayloadSimple = () => {
+    if (typeof window.renderDebugPayloadSection !== "function") return;
+    const form = document.getElementById("add-item-form");
+    if (!form) return;
+    const data = new FormData(form);
+    const formMode = document.getElementById("form-mode")?.value || "create";
+    const payload = {
+        action: formMode === "edit" ? "update" : "create",
+        sheetName: MENU_SHEET_NAME,
+        orden: cleanText(data.get("orden")),
+        idproducto: cleanText(data.get("idproducto")),
+        Categoria: cleanText(data.get("categoria")),
+        Producto: cleanText(data.get("producto")),
+        Descripcion: cleanText(data.get("descripcion")),
+        Precio: cleanText(data.get("precio")),
+        Imagen: currentImageUrl ? "(imagen)" : "",
+        "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
+        "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
+        stock: cleanText(data.get("stock")),
+        habilitado: formMode === "edit" ? undefined : "SI",
+        Habilitado: formMode === "edit" ? undefined : "SI"
+    };
+    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: MENU_SHEET_NAME, payload }]);
+};
+
 const setImagePreview = (url) => {
     const wrapper = document.getElementById("image-preview");
     const img = document.getElementById("image-preview-img");
@@ -313,6 +338,10 @@ document.addEventListener("DOMContentLoaded", () => {
         setAutoId();
         setAutoOrder();
     }
+    updateDebugPayloadSimple();
+    const form = document.getElementById("add-item-form");
+    form?.addEventListener("input", updateDebugPayloadSimple);
+    form?.addEventListener("change", updateDebugPayloadSimple);
     const fileInput = document.getElementById("imagen-file");
     const uploadBtn = document.getElementById("upload-image-btn");
     const changeBtn = document.getElementById("change-image-btn");
@@ -325,7 +354,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         const reader = new FileReader();
-        reader.onload = () => setImagePreview(reader.result);
+        reader.onload = () => {
+            setImagePreview(reader.result);
+            updateDebugPayloadSimple();
+        };
         reader.readAsDataURL(file);
     });
 });
