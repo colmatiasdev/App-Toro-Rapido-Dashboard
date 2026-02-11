@@ -253,8 +253,35 @@ const loadRecordAndShowForm = async () => {
     form.style.display = "";
 };
 
+const updateDebugPayloadOpciones = () => {
+    if (typeof window.renderDebugPayloadSection !== "function") return;
+    const form = document.getElementById("opcion-form");
+    if (!form) return;
+    const data = new FormData(form);
+    const idopciones = cleanText(data.get("idopciones"));
+    const grupo = cleanText(data.get("grupo"));
+    const opcion = cleanText(data.get("opcion"));
+    const payload = {
+        action: "update",
+        sheetName: SHEET_NAME,
+        idopciones,
+        "ID Opciones": idopciones,
+        Grupo: grupo,
+        Tipo: (cleanText(data.get("tipo")) || "uno").toLowerCase(),
+        Obligatorio: (cleanText(data.get("obligatorio")) || "NO").toUpperCase(),
+        Opcion: opcion,
+        Recargo: cleanText(data.get("recargo")) || "0",
+        idopcionesOld: editKey.idopciones || idopciones,
+        grupoOld: editKey.grupo || grupo,
+        opcionOld: editKey.opcion || opcion
+    };
+    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+};
+
 const initForm = () => {
     const form = document.getElementById("opcion-form");
+    form?.addEventListener("input", updateDebugPayloadOpciones);
+    form?.addEventListener("change", updateDebugPayloadOpciones);
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
         clearValidationErrors(form);
@@ -323,4 +350,5 @@ const initForm = () => {
 document.addEventListener("DOMContentLoaded", async () => {
     initForm();
     await loadRecordAndShowForm();
+    document.getElementById("opcion-form")?.dispatchEvent(new Event("input"));
 });

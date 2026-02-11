@@ -218,8 +218,39 @@ const loadForEdit = async () => {
     return true;
 };
 
+const updateDebugPayloadOpciones = () => {
+    if (typeof window.renderDebugPayloadSection !== "function") return;
+    const form = document.getElementById("opcion-form");
+    if (!form) return;
+    const data = new FormData(form);
+    const formMode = document.getElementById("form-mode")?.value || "create";
+    const idopciones = cleanText(data.get("idopciones"));
+    const grupo = cleanText(data.get("grupo"));
+    const opcion = cleanText(data.get("opcion"));
+    const payload = {
+        action: formMode === "edit" ? "update" : "create",
+        sheetName: SHEET_NAME,
+        idopciones,
+        "ID Opciones": idopciones,
+        Grupo: grupo,
+        Tipo: (cleanText(data.get("tipo")) || "uno").toLowerCase(),
+        Obligatorio: (cleanText(data.get("obligatorio")) || "NO").toUpperCase(),
+        Opcion: opcion,
+        Recargo: cleanText(data.get("recargo")) || "0"
+    };
+    if (formMode === "edit") {
+        const params = new URLSearchParams(window.location.search);
+        payload.idopcionesOld = params.get("idopciones") ?? idopciones;
+        payload.grupoOld = params.get("grupo") ?? grupo;
+        payload.opcionOld = params.get("opcion") ?? opcion;
+    }
+    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+};
+
 const initForm = () => {
     const form = document.getElementById("opcion-form");
+    form?.addEventListener("input", updateDebugPayloadOpciones);
+    form?.addEventListener("change", updateDebugPayloadOpciones);
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
         clearValidationErrors(form);
@@ -320,4 +351,5 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("form-mode").value = "create";
         await setCreateModeId();
     }
+    updateDebugPayloadOpciones();
 });

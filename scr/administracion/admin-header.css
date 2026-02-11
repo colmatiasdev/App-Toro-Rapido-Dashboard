@@ -123,3 +123,76 @@ body.admin-has-topbar {
         max-width: 160px;
     }
 }
+
+/* ========== Sección debug (solo cuando config.debug === true) ========== */
+.debug-payload-wrap {
+    display: none;
+    margin-bottom: 1rem;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+.debug-payload-wrap.visible {
+    display: block;
+}
+.debug-payload-wrap .debug-payload-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #92400e;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.debug-payload-wrap .debug-payload-title::before {
+    content: "🔍";
+}
+.debug-payload-wrap .debug-payload-sheet {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #b45309;
+    padding: 0.35rem 0.5rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+    display: inline-block;
+}
+.debug-payload-wrap .debug-payload-sheet::before {
+    content: "📋 Hoja: ";
+}
+.debug-payload-wrap .debug-payload-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: #78350f;
+}
+.debug-payload-wrap .debug-payload-list li {
+    margin-bottom: 0.25rem;
+}
+.debug-payload-wrap .debug-payload-list li strong {
+    color: #92400e;
+    font-weight: 700;
+}
+.debug-payload-wrap .debug-payload-hint {
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    color: #a16207;
+    font-style: italic;
+}
+.debug-payload-wrap .debug-payload-block + .debug-payload-block {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #f59e0b;
+}
+.debug-payload-wrap .debug-payload-block-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #b45309;
+    margin-bottom: 0.5rem;
+}
+.debug-payload-wrap .debug-payload-block-title::before {
+    content: "▸ ";
+}

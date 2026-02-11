@@ -1,3 +1,45 @@
+/**
+ * Renderiza la sección de vista previa debug (solo si APP_CONFIG.debug === true).
+ * @param {string} wrapId - ID del contenedor (ej. "debug-payload-wrap")
+ * @param {Array<{ sheetName: string, title?: string, payload: Object }>} blocks - Lista de envíos (hoja + campos)
+ */
+window.renderDebugPayloadSection = function (wrapId, blocks) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    if (!window.APP_CONFIG || !window.APP_CONFIG.debug) {
+        wrap.classList.remove("visible");
+        wrap.style.display = "none";
+        return;
+    }
+    const escapeHtml = (s) => {
+        const div = document.createElement("div");
+        div.textContent = s == null ? "" : String(s);
+        return div.innerHTML;
+    };
+    const formatVal = (v) => {
+        if (v == null || v === "") return "—";
+        const s = String(v);
+        if (s.length > 60 && s.indexOf("data:") === 0) return "(imagen base64)";
+        return s;
+    };
+    wrap.classList.add("visible");
+    wrap.style.display = "block";
+    let html = '<p class="debug-payload-title">Vista previa de envío (modo debug)</p>';
+    (blocks || []).forEach((b) => {
+        html += '<div class="debug-payload-block">';
+        if (b.title) html += '<p class="debug-payload-block-title">' + escapeHtml(b.title) + "</p>";
+        html += '<p class="debug-payload-sheet">' + escapeHtml(b.sheetName || "") + "</p>";
+        html += '<ul class="debug-payload-list">';
+        const keys = Object.keys(b.payload || {}).filter((k) => k !== "action" && k !== "sheetName");
+        keys.forEach((k) => {
+            html += "<li><strong>" + escapeHtml(k) + ":</strong> " + escapeHtml(formatVal(b.payload[k])) + "</li>";
+        });
+        html += "</ul></div>";
+    });
+    html += '<p class="debug-payload-hint">Estos son los datos que se enviarán al hacer clic en Guardar.</p>';
+    wrap.innerHTML = html;
+};
+
 document.addEventListener("DOMContentLoaded", () => {
     const year = new Date().getFullYear();
     document.querySelectorAll("[data-admin-year]").forEach((el) => {

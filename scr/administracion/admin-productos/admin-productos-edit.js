@@ -332,6 +332,42 @@ const initForm = () => {
         };
         stockInput.addEventListener("blur", capStock);
     }
+    const updateDebugPayloadProductos = () => {
+        if (typeof window.renderDebugPayloadSection !== "function") return;
+        if (!form) return;
+        const data = new FormData(form);
+        const idproducto = cleanText(data.get("idproducto"));
+        const categoria = cleanText(data.get("categoria"));
+        const producto = cleanText(data.get("producto"));
+        const descripcion = cleanText(data.get("descripcion"));
+        const precioActual = cleanText(data.get("precio_actual"));
+        const imagen = cleanText(data.get("imagen"));
+        const esDestacado = (cleanText(data.get("es_destacado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const stockRaw = cleanText(data.get("stock"));
+        const stockNumRaw = stockRaw === "" ? 0 : (Number(stockRaw.replace(",", ".")) || 0);
+        const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
+        const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
+        const precioRegularNum = (loadedPrecioActual !== "" && loadedPrecioActual != null) ? (Number(loadedPrecioActual) || 0) : precioNum;
+        const payload = {
+            action: "update",
+            sheetName: SHEET_NAME,
+            idproductoOld: editKeyIdProducto || idproducto,
+            idproducto,
+            "ID Producto": idproducto,
+            Categoria: categoria,
+            Producto: producto,
+            Descripcion: descripcion,
+            "Precio Actual": precioNum,
+            "Precio Regular": precioRegularNum,
+            Imagen: imagen && imagen.length > 60 ? "(imagen)" : imagen,
+            "Es Destacado": esDestacado,
+            "Producto Agotado": loadedProductoAgotado,
+            STOCK: stock
+        };
+        window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+    };
+    form?.addEventListener("input", updateDebugPayloadProductos);
+    form?.addEventListener("change", updateDebugPayloadProductos);
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
         clearValidationErrors(form);
@@ -411,4 +447,5 @@ const initForm = () => {
 document.addEventListener("DOMContentLoaded", async () => {
     initForm();
     await loadRecordAndShowForm();
+    document.getElementById("producto-form")?.dispatchEvent(new Event("input"));
 });
