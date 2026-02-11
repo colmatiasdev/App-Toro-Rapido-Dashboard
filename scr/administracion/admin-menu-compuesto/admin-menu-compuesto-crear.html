@@ -36,25 +36,37 @@
                     </label>
                 </div>
 
-                <!-- Panel MENU-SIMPLE: insertar en hoja menu-simple -->
+                <!-- Panel MENU-SIMPLE: insertar en hoja menu-simple (idmenu = clave única; idproducto = de productos-base) -->
                 <div id="form-panel-simple" class="form-panel" style="display: none;">
+                    <div class="productos-base-selector">
+                        <span class="label-title">Seleccionar producto base <span class="req">*</span></span>
+                        <p class="field-hint">Elegí un producto de la lista. Los datos que se usaran automáticamente en el menú.</p>
+                        <div id="productos-base-loading" class="productos-base-loading" style="display: none;" role="status" aria-live="polite">
+                            <span class="productos-base-spinner" aria-hidden="true"></span>
+                            <span>Cargando productos...</span>
+                        </div>
+                        <div id="productos-base-list" class="productos-base-list"></div>
+                        <div id="productos-base-empty" class="productos-base-empty" style="display: none;">No hay productos en productos-base. Creá uno desde Administración de productos.</div>
+                    </div>
+                    <input type="hidden" name="categoria_simple" id="categoria-input-simple">
+                    <input type="hidden" name="producto_simple" id="producto-input-simple">
+                    <input type="hidden" name="descripcion_simple" id="descripcion-input-simple">
+                    <input type="hidden" name="precio_simple" id="precio-input-simple">
                     <label><span class="label-title">Orden (automático)</span><input type="number" name="orden_simple" id="orden-simple-input" placeholder="Auto" readonly></label>
-                    <label><span class="label-title">ID Producto (automático)</span><input type="text" name="idproducto" id="idproducto-input" placeholder="PROD-..." readonly></label>
-                    <label class="label-categoria">
-                        <span class="label-title">Categoría <span class="req">*</span></span>
-                        <input type="text" name="categoria_simple" id="categoria-input-simple" list="categoria-datalist-simple" placeholder="Elegí una o escribí una nueva" autocomplete="off">
-                        <datalist id="categoria-datalist-simple"></datalist>
-                        <span class="field-hint">Se cargan las categorías de la hoja menú simple; podés elegir una o escribir una nueva.</span>
-                    </label>
-                    <label><span class="label-title">Producto <span class="req">*</span></span><input type="text" name="producto_simple" placeholder="Doble Cheese"></label>
-                    <label><span class="label-title">Descripción</span><input type="text" name="descripcion_simple" placeholder="Carne doble y cheddar"></label>
-                    <label><span class="label-title">Precio <span class="req">*</span></span><input type="number" name="precio_simple" placeholder="9500"></label>
-                    <div class="image-upload" id="upload-image-block-simple"><span class="label-title">Subir Imagen</span><button type="button" class="secondary-btn" id="upload-image-btn-simple">Seleccionar imagen</button></div>
-                    <input type="file" name="imagenFile_simple" id="imagen-file-simple" accept="image/*" class="image-input-hidden">
-                    <div class="image-preview" id="image-preview-simple" style="display:none;"><span class="label-title">Previsualización</span><img id="image-preview-img-simple" alt=""><button type="button" class="secondary-btn" id="change-image-btn-simple">Cambiar imagen</button></div>
-                    <label><span class="label-title">Es Destacado</span><select name="esdestacado_simple"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
-                    <label><span class="label-title">Producto Agotado</span><select name="productoagotado_simple"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
-                    <label><span class="label-title">Stock</span><input type="number" name="stock_simple" placeholder="10"></label>
+                    <label><span class="label-title">ID Menú (clave en hoja menú simple)</span><input type="text" name="idmenu_simple" id="idmenu-simple-input" placeholder="MENU-SIMPLE-..." readonly></label>
+                    <label><span class="label-title">ID Producto (de productos-base)</span><input type="text" name="idproducto" id="idproducto-input" placeholder="Elegí un producto de la lista" readonly></label>
+                    <div class="producto-base-readonly-block" id="producto-base-readonly-block">
+                        <span class="label-title">Datos del producto (solo lectura)</span>
+                        <p class="field-hint">Estos valores vienen de la tabla productos-base y no se modifican aquí.</p>
+                        <div class="readonly-fields-row">
+                            <span class="readonly-field"><strong>Es Destacado:</strong> <span id="display-esdestacado-simple" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Producto Agotado:</strong> <span id="display-productoagotado-simple" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Stock:</strong> <span id="display-stock-simple" class="readonly-value">—</span></span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="esdestacado_simple" id="esdestacado-input-simple" value="NO">
+                    <input type="hidden" name="productoagotado_simple" id="productoagotado-input-simple" value="NO">
+                    <input type="hidden" name="stock_simple" id="stock-input-simple" value="">
                 </div>
 
                 <!-- Panel MENU-COMPUESTO: insertar en hoja menu-compuesto -->

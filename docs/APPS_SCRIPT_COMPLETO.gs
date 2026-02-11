@@ -10,6 +10,7 @@
  *   - action=delete: marca Habilitado/Habilitada = NO en la fila del ID.
  *   - action=update: actualiza la fila (productos por idproductoOld; opciones por idopcionesOld+grupoOld+opcionOld; menú por idmenu-unico).
  *   - action=create: agrega una fila nueva. Acepta cualquier hoja (productos-base, opciones-base, menu-toro-rapido-web-simple, menu-toro-rapido-web-compuesto, etc.).
+ *     Para menu-toro-rapido-web-simple: la hoja debe existir con ese nombre exacto y la fila 1 con los headers (ej. idmenu, idproducto, orden, Categoria, Producto, Descripcion, Precio, Imagen, etc.).
  */
 
 // ========== doGet ==========
@@ -23,8 +24,8 @@ function doGet(e) {
       var sheetName = (params.sheetName || "productos-base").toString().trim();
       var sheet = ss.getSheetByName(sheetName);
       if (!sheet) return jsonOut({ result: "error", error: "Hoja no encontrada: " + sheetName });
-      var idVal = (params.idproducto || params.idproductoOld || params.idopciones || params.idopcionesOld || params["idmenu-unico"] || params.idmenuunico || "").toString().trim();
-      if (!idVal) return jsonOut({ result: "error", error: "Falta idproducto, idopciones o idmenu-unico" });
+      var idVal = (params.idproducto || params.idproductoOld || params.idopciones || params.idopcionesOld || params["idmenu-unico"] || params.idmenuunico || params.idmenu || "").toString().trim();
+      if (!idVal) return jsonOut({ result: "error", error: "Falta idproducto, idopciones, idmenu o idmenu-unico" });
       var valorHabilitado = (params.habilitado || params.habilitada || "NO").toString().toUpperCase();
       var habilitadaVal = (valorHabilitado === "SI") ? "SI" : "NO";
       var headers = getHeaders(sheet);
@@ -101,7 +102,7 @@ function doPost(e) {
           : data.idproductoOld !== undefined ? data.idproductoOld
           : data["idmenu-unico"] !== undefined ? data["idmenu-unico"]
           : data.idmenuunico !== undefined ? data.idmenuunico
-          : (data.idproducto || data.idopciones || data["idmenu-unico"] || data.idmenuunico);
+          : (data.idproducto || data.idopciones || data.idmenu || data["idmenu-unico"] || data.idmenuunico);
         if (idOld !== undefined && idOld !== null && idOld !== "") {
           rowIndex = findRowById(sheet, headers, idOld);
         } else {
@@ -157,11 +158,11 @@ function safeCellValue(v) {
   return String(v);
 }
 
-// Busca fila por id: idproducto, idopciones, idmenu-unico, idmenuunico o "id" (string o objeto con esas propiedades).
+// Busca fila por id: idproducto, idopciones, idmenu (menu-simple), idmenu-unico, idmenuunico o "id".
 function findRowById(sheet, headers, idProductoOrData) {
   var idValue;
   if (typeof idProductoOrData === "object") {
-    idValue = idProductoOrData.idproducto || idProductoOrData.idopciones || idProductoOrData["idmenu-unico"] || idProductoOrData.idmenuunico || idProductoOrData.id;
+    idValue = idProductoOrData.idproducto || idProductoOrData.idopciones || idProductoOrData["idmenu-unico"] || idProductoOrData.idmenuunico || idProductoOrData.idmenu || idProductoOrData.id;
   } else {
     idValue = idProductoOrData;
   }
@@ -173,6 +174,7 @@ function findRowById(sheet, headers, idProductoOrData) {
   if (idCol === -1) idCol = findHeaderIndex(headers, "idopciones");
   if (idCol === -1) idCol = findHeaderIndex(headers, "idmenu-unico");
   if (idCol === -1) idCol = findHeaderIndex(headers, "idmenuunico");
+  if (idCol === -1) idCol = findHeaderIndex(headers, "idmenu");  // hoja menu-toro-rapido-web-simple
   if (idCol === -1) idCol = findHeaderIndex(headers, "id");
   if (idCol === -1) return -1;
 

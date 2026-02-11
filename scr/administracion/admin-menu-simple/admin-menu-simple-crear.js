@@ -120,17 +120,28 @@ const setDebug = (message) => {
 
 let currentImageUrl = "";
 
+const DEFAULT_IMAGE_PLACEHOLDER = (() => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect fill="#f1f5f9" width="400" height="300"/><text x="200" y="155" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="18">Sin imagen</text></svg>';
+    return "data:image/svg+xml," + encodeURIComponent(svg);
+})();
+
+const setImageFallback = (img) => {
+    if (!img) return;
+    img.onerror = function () {
+        this.onerror = null;
+        this.src = DEFAULT_IMAGE_PLACEHOLDER;
+        this.alt = "Sin imagen";
+    };
+};
+
 const setImagePreview = (url) => {
     const wrapper = document.getElementById("image-preview");
     const img = document.getElementById("image-preview-img");
     if (!wrapper || !img) return;
-    if (!url) {
-        wrapper.style.display = "none";
-        img.src = "";
-        return;
-    }
     wrapper.style.display = "grid";
-    img.src = url;
+    img.src = url || DEFAULT_IMAGE_PLACEHOLDER;
+    img.alt = url ? "" : "Sin imagen";
+    setImageFallback(img);
 };
 
 const fillForm = (item) => {
@@ -211,6 +222,13 @@ const initForm = () => {
             alert("Falta configurar appsScriptMenuUrl en config.js.");
             return;
         }
+        const submitBtn = document.getElementById("submit-btn");
+        const originalSubmitText = submitBtn?.textContent || "Guardar";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Guardando...";
+        }
+        try {
         setDebug("Enviando datos al Apps Script...");
 
         const formMode = document.getElementById("form-mode")?.value || "create";
@@ -275,6 +293,12 @@ const initForm = () => {
             console.error(error);
             setDebug(`Error al enviar: ${error?.message || error}`);
             alert("No se pudo enviar el ítem. Revisá el Apps Script.");
+        }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalSubmitText;
+            }
         }
     });
 };

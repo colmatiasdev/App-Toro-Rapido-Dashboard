@@ -208,6 +208,10 @@ body {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
 }
+.primary-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
 .secondary-btn {
     border: 1px solid #e2e8f0;
     background: #fff;
@@ -269,6 +273,156 @@ body {
 .admin-form .form-panel .image-upload,
 .admin-form .form-panel .image-preview {
     grid-column: 1 / -1;
+}
+
+/* Selector de productos base (listado mínimo: ID, categoría, descripción, precio, imagen) */
+.form-panel .productos-base-selector {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 10px;
+}
+.productos-base-selector .field-hint {
+    margin-top: 0;
+}
+.productos-base-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: var(--toro-muted);
+    font-size: 0.9rem;
+}
+.productos-base-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e2e8f0;
+    border-top-color: var(--toro-red);
+    border-radius: 50%;
+    animation: productos-base-spin 0.8s linear infinite;
+}
+@keyframes productos-base-spin {
+    to { transform: rotate(360deg); }
+}
+.productos-base-empty {
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: var(--toro-muted);
+    font-size: 0.9rem;
+}
+.form-panel .producto-base-readonly-block {
+    grid-column: 1 / -1;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+.producto-base-readonly-block .label-title {
+    display: block;
+    margin-bottom: 4px;
+}
+.producto-base-readonly-block .field-hint {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+.readonly-fields-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+}
+.readonly-field {
+    font-size: 0.9rem;
+    color: var(--toro-dark);
+}
+.readonly-field strong {
+    color: var(--toro-muted);
+    font-weight: 700;
+}
+.readonly-value {
+    font-weight: 800;
+    color: var(--toro-dark);
+}
+.productos-base-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+.producto-base-card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 8px;
+    padding: 0;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+.producto-base-card:hover {
+    border-color: var(--toro-muted);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+.producto-base-card.selected {
+    border-color: var(--toro-red);
+    box-shadow: 0 0 0 1px var(--toro-red);
+}
+.producto-base-card-img-wrap {
+    aspect-ratio: 1;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.producto-base-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.producto-base-no-img {
+    font-size: 0.75rem;
+    color: var(--toro-muted);
+}
+.producto-base-card-id {
+    font-size: 0.7rem;
+    color: var(--toro-muted);
+    padding: 6px 10px 0;
+    word-break: break-all;
+}
+.producto-base-card-cat {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--toro-red);
+    padding: 0 10px;
+}
+.producto-base-card-name {
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 0 10px;
+    line-height: 1.25;
+}
+.producto-base-card-desc {
+    font-size: 0.75rem;
+    color: var(--toro-muted);
+    padding: 0 10px 4px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.producto-base-card-precio {
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 0 10px 10px;
+    color: var(--toro-dark);
 }
 .hint {
     grid-column: 1 / -1;
@@ -364,6 +518,7 @@ body {
         font-size: 16px;
     }
     .admin-form input[type="file"] { padding: 10px 12px; }
+    .productos-base-list { grid-template-columns: 1fr 1fr; gap: 10px; }
     .form-actions,
     .form-actions-end {
         flex-direction: column;
