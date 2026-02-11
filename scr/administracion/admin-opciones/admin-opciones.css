@@ -144,6 +144,10 @@ body {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
 }
+.primary-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
 .secondary-btn {
     border: 1px solid #e2e8f0;
     background: #fff;

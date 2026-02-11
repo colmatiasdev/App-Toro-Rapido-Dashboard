@@ -232,6 +232,13 @@ const initForm = () => {
             showValidationErrors(validation.errors, form);
             return;
         }
+        const submitBtn = document.getElementById("submit-btn");
+        const originalSubmitText = submitBtn?.textContent || "Guardar";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Guardando...";
+        }
+        try {
         setDebug("Enviando...");
 
         const formMode = document.getElementById("form-mode")?.value || "create";
@@ -273,6 +280,12 @@ const initForm = () => {
             console.error(error);
             setDebug("Error: " + (error?.message || error));
             alert("No se pudo enviar. Revisá el Apps Script.");
+        }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalSubmitText;
+            }
         }
     });
 };

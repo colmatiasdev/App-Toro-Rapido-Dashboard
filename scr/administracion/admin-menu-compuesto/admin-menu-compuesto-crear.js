@@ -1,6 +1,7 @@
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuCompuestoSheetName || "menu-toro-rapido-web-compuesto";
 const MENU_SIMPLE_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
+const PRODUCTOS_SHEET_NAME = window.APP_CONFIG?.menuProductosSheetName || "productos-base";
 
 const normalizeKey = (value) => (value ?? "")
     .toString()
@@ -11,10 +12,32 @@ const normalizeKey = (value) => (value ?? "")
 
 const cleanText = (value) => (value ?? "").toString().trim();
 
+const ALPHANUM = "0123456789abcdefghijklmnopqrstuvwxyz";
+const randomAlphanumeric = (len) => {
+    let s = "";
+    for (let i = 0; i < len; i++) s += ALPHANUM[Math.floor(Math.random() * ALPHANUM.length)];
+    return s;
+};
+
 const escapeHtml = (text) => {
     const div = document.createElement("div");
     div.textContent = text ?? "";
     return div.innerHTML;
+};
+
+/** Imagen por defecto cuando no hay URL o el enlace está roto (SVG "Sin imagen"). */
+const DEFAULT_IMAGE_PLACEHOLDER = (() => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect fill="#f1f5f9" width="400" height="300"/><text x="200" y="155" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="18">Sin imagen</text></svg>';
+    return "data:image/svg+xml," + encodeURIComponent(svg);
+})();
+
+const setImageFallback = (img) => {
+    if (!img) return;
+    img.onerror = function () {
+        this.onerror = null;
+        this.src = DEFAULT_IMAGE_PLACEHOLDER;
+        this.alt = "Sin imagen";
+    };
 };
 
 const fillCategoriaDatalist = (datalistId, rows, keys) => {
@@ -90,6 +113,22 @@ const fetchSheetListSimple = async () => {
     }
 };
 
+const fetchProductosBase = async () => {
+    if (!MENU_SCRIPT_URL) return [];
+    const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
+    const url = `${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(PRODUCTOS_SHEET_NAME)}&_ts=${Date.now()}`;
+    try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) return [];
+        const data = await response.json();
+        if (data?.error || data?.result === "error") return [];
+        return rowsFromSheetData(data);
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+};
+
 const setAutoOrder = async () => {
     const input = document.getElementById("orden-input");
     if (!input) return;
@@ -120,16 +159,119 @@ const setAutoOrderSimple = async () => {
     input.value = max + 1;
 };
 
+const loadAndShowProductosBase = async () => {
+    const listEl = document.getElementById("productos-base-list");
+    const loadingEl = document.getElementById("productos-base-loading");
+    const emptyEl = document.getElementById("productos-base-empty");
+    if (!listEl || !loadingEl || !emptyEl) return;
+    listEl.innerHTML = "";
+    emptyEl.style.display = "none";
+    loadingEl.style.display = "flex";
+    const rows = await fetchProductosBase();
+    loadingEl.style.display = "none";
+    if (!rows.length) {
+        emptyEl.style.display = "block";
+        return;
+    }
+    listEl.appendChild(renderProductosBaseCards(rows));
+};
+
+const renderProductosBaseCards = (rows) => {
+    const fragment = document.createDocumentFragment();
+    const parsePrecio = (v) => {
+        const raw = cleanText(v);
+        if (!raw) return "";
+        const n = raw.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".");
+        const num = Number.parseFloat(n);
+        return Number.isNaN(num) ? raw : num.toLocaleString("es-AR");
+    };
+    rows.forEach((row) => {
+        const idproducto = cleanText(getValue(row, ["ID Producto", "idproducto"]));
+        const categoria = cleanText(getValue(row, ["Categoria", "categoria", "Categoría"]));
+        const producto = cleanText(getValue(row, ["Producto", "producto"]));
+        const descripcion = cleanText(getValue(row, ["Descripcion", "descripcion", "Descripción"]));
+        const precio = parsePrecio(getValue(row, ["Precio", "Precio Actual", "precioactual"]));
+        const imagen = cleanText(getValue(row, ["Imagen", "imagen"]));
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "producto-base-card";
+        card.dataset.idproducto = idproducto;
+        card.innerHTML = `
+            <span class="producto-base-card-img-wrap">
+                <img src="${imagen ? escapeHtml(imagen) : DEFAULT_IMAGE_PLACEHOLDER}" alt="${imagen ? "" : "Sin imagen"}" loading="lazy">
+            </span>
+            <span class="producto-base-card-id">${escapeHtml(idproducto)}</span>
+            <span class="producto-base-card-cat">${escapeHtml(categoria)}</span>
+            <span class="producto-base-card-name">${escapeHtml(producto)}</span>
+            <span class="producto-base-card-desc">${escapeHtml(descripcion)}</span>
+            <span class="producto-base-card-precio">${precio ? "$ " + precio : "—"}</span>
+        `;
+        const cardImg = card.querySelector(".producto-base-card-img-wrap img");
+        if (cardImg) setImageFallback(cardImg);
+        const esDestacado = (cleanText(getValue(row, ["Es Destacado", "esdestacado"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const productoAgotado = (cleanText(getValue(row, ["Producto Agotado", "productoagotado"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const stock = cleanText(getValue(row, ["Stock", "stock"]));
+        card.addEventListener("click", () => selectProductoBase({ idproducto, categoria, producto, descripcion, precio: getValue(row, ["Precio", "Precio Actual", "precioactual"]), imagen, esDestacado, productoAgotado, stock }));
+        fragment.appendChild(card);
+    });
+    return fragment;
+};
+
+const selectProductoBase = (item) => {
+    const idproductoInput = document.getElementById("idproducto-input");
+    const catInput = document.getElementById("categoria-input-simple");
+    const prodInput = document.getElementById("producto-input-simple");
+    const descInput = document.getElementById("descripcion-input-simple");
+    const precioInput = document.getElementById("precio-input-simple");
+    const esDestacadoInput = document.getElementById("esdestacado-input-simple");
+    const productoAgotadoInput = document.getElementById("productoagotado-input-simple");
+    const stockInput = document.getElementById("stock-input-simple");
+    const displayEsDestacado = document.getElementById("display-esdestacado-simple");
+    const displayProductoAgotado = document.getElementById("display-productoagotado-simple");
+    const displayStock = document.getElementById("display-stock-simple");
+    if (idproductoInput) idproductoInput.value = item.idproducto || "";
+    if (catInput) catInput.value = item.categoria || "";
+    if (prodInput) prodInput.value = item.producto || "";
+    if (descInput) descInput.value = (item.descripcion ?? item.desc) || "";
+    const precioVal = (item.precio ?? "").toString().trim();
+    if (precioInput) precioInput.value = precioVal.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".") || "";
+    currentImageUrlSimple = item.imagen || "";
+    const esDestacado = (item.esDestacado || "NO").toString().toUpperCase() === "SI" ? "SI" : "NO";
+    const productoAgotado = (item.productoAgotado || "NO").toString().toUpperCase() === "SI" ? "SI" : "NO";
+    const stock = (item.stock ?? "").toString().trim();
+    if (esDestacadoInput) esDestacadoInput.value = esDestacado;
+    if (productoAgotadoInput) productoAgotadoInput.value = productoAgotado;
+    if (stockInput) stockInput.value = stock;
+    if (displayEsDestacado) displayEsDestacado.textContent = esDestacado;
+    if (displayProductoAgotado) displayProductoAgotado.textContent = productoAgotado;
+    if (displayStock) displayStock.textContent = stock || "—";
+    document.querySelectorAll(".producto-base-card").forEach((c) => {
+        c.classList.remove("selected");
+        if ((c.dataset.idproducto || "") === (item.idproducto || "")) c.classList.add("selected");
+    });
+};
+
+const setProductoBaseReadonlyDisplay = (esDestacado, productoAgotado, stock) => {
+    const d1 = document.getElementById("display-esdestacado-simple");
+    const d2 = document.getElementById("display-productoagotado-simple");
+    const d3 = document.getElementById("display-stock-simple");
+    if (d1) d1.textContent = esDestacado ?? "—";
+    if (d2) d2.textContent = productoAgotado ?? "—";
+    if (d3) d3.textContent = (stock !== undefined && stock !== "") ? stock : "—";
+};
+
 const setAutoIdSimple = () => {
-    const input = document.getElementById("idproducto-input");
-    if (!input) return;
-    input.value = `PROD-${Date.now()}`;
+    const idmenuInput = document.getElementById("idmenu-simple-input");
+    const idproductoInput = document.getElementById("idproducto-input");
+    const unique = () => Date.now().toString(36) + randomAlphanumeric(6);
+    if (idmenuInput) idmenuInput.value = "MENU-SIMPLE-" + unique();
+    if (idproductoInput) idproductoInput.value = "";
 };
 
 const setAutoId = () => {
     const input = document.getElementById("idmenu-unico-input");
     if (!input) return;
-    input.value = `MENU-${Date.now()}`;
+    input.value = "MENU-" + Date.now().toString(36) + randomAlphanumeric(8);
 };
 
 const switchPanelsByTipo = () => {
@@ -147,6 +289,7 @@ const switchPanelsByTipo = () => {
         if (actionsWrap) actionsWrap.style.display = "flex";
         setAutoIdSimple();
         setAutoOrderSimple();
+        loadAndShowProductosBase();
     } else if (tipo === "MENU-COMPUESTO") {
         if (panelCompuesto) panelCompuesto.style.display = "grid";
         if (actionsWrap) actionsWrap.style.display = "flex";
@@ -187,26 +330,20 @@ const setImagePreview = (url) => {
     const wrapper = document.getElementById("image-preview");
     const img = document.getElementById("image-preview-img");
     if (!wrapper || !img) return;
-    if (!url) {
-        wrapper.style.display = "none";
-        img.src = "";
-        return;
-    }
     wrapper.style.display = "grid";
-    img.src = url;
+    img.src = url || DEFAULT_IMAGE_PLACEHOLDER;
+    img.alt = url ? "" : "Sin imagen";
+    setImageFallback(img);
 };
 
 const setImagePreviewSimple = (url) => {
     const wrapper = document.getElementById("image-preview-simple");
     const img = document.getElementById("image-preview-img-simple");
     if (!wrapper || !img) return;
-    if (!url) {
-        wrapper.style.display = "none";
-        img.src = "";
-        return;
-    }
     wrapper.style.display = "grid";
-    img.src = url;
+    img.src = url || DEFAULT_IMAGE_PLACEHOLDER;
+    img.alt = url ? "" : "Sin imagen";
+    setImageFallback(img);
 };
 
 const fillForm = (item) => {
@@ -276,6 +413,13 @@ const initForm = () => {
             alert("Falta configurar appsScriptMenuUrl en config.js.");
             return;
         }
+        const submitBtn = document.getElementById("submit-btn");
+        const originalSubmitText = submitBtn?.textContent || "Guardar";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Guardando...";
+        }
+        try {
         setDebug("Enviando datos al Apps Script...");
 
         const formMode = document.getElementById("form-mode")?.value || "create";
@@ -283,22 +427,12 @@ const initForm = () => {
         const isCreate = formMode !== "edit";
 
         if (tipo === "MENU-SIMPLE") {
-            const fileInput = document.getElementById("imagen-file-simple");
-            let imageUrl = "";
-            if (fileInput?.files?.[0]) {
-                imageUrl = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(fileInput.files[0]);
-                });
-                setImagePreviewSimple(imageUrl);
-            }
-            if (!imageUrl) imageUrl = currentImageUrlSimple;
+            const imageUrl = currentImageUrlSimple;
 
             const payload = {
                 action: "create",
                 sheetName: MENU_SIMPLE_SHEET_NAME,
+                idmenu: cleanText(data.get("idmenu_simple")),
                 orden: cleanText(data.get("orden_simple")),
                 idproducto: cleanText(data.get("idproducto")),
                 Categoria: cleanText(data.get("categoria_simple")),
@@ -312,8 +446,8 @@ const initForm = () => {
                 habilitado: "SI",
                 Habilitado: "SI"
             };
-            if (!payload.Categoria || !payload.Producto || !payload.Precio) {
-                alert("Completá Categoría, Producto y Precio (menú simple).");
+            if (!payload.idproducto) {
+                alert("Elegí un producto de la lista de productos base.");
                 return;
             }
             try {
@@ -323,12 +457,32 @@ const initForm = () => {
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payload)
                 });
-                setDebug("Enviado a hoja menú simple.");
-                alert("Ítem enviado para crear en menú simple.");
+                const compuestoRows = await fetchSheetList();
+                let nextOrden = 1;
+                compuestoRows.forEach((row) => {
+                    const v = cleanText(getValue(row, ["orden", "order"]));
+                    const num = Number(v);
+                    if (!Number.isNaN(num)) nextOrden = Math.max(nextOrden, num + 1);
+                });
+                const idmenuUnico = "MENU-" + Date.now().toString(36) + randomAlphanumeric(8);
+                const payloadCompuesto = {
+                    action: "create",
+                    sheetName: MENU_SHEET_NAME,
+                    orden: nextOrden,
+                    "idmenu-unico": idmenuUnico,
+                    "Tipo Menu": "MENU-SIMPLE"
+                };
+                await fetch(MENU_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payloadCompuesto)
+                });
+                setDebug("Enviado a menú simple y a menú compuesto (idmenu-unico: " + idmenuUnico + ").");
+                alert("Ítem creado en menú simple y en menú compuesto (idmenu-unico: " + idmenuUnico + ").");
                 form.reset();
-                if (fileInput) fileInput.value = "";
-                setImagePreviewSimple("");
                 currentImageUrlSimple = "";
+                setProductoBaseReadonlyDisplay("—", "—", "—");
                 switchPanelsByTipo();
             } catch (error) {
                 console.error(error);
@@ -397,6 +551,12 @@ const initForm = () => {
             setDebug(`Error al enviar: ${error?.message || error}`);
             alert("No se pudo enviar el ítem. Revisá el Apps Script.");
         }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalSubmitText;
+            }
+        }
     });
 };
 
@@ -431,22 +591,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         reader.readAsDataURL(file);
     });
 
-    const fileInputSimple = document.getElementById("imagen-file-simple");
-    const uploadBtnSimple = document.getElementById("upload-image-btn-simple");
-    const changeBtnSimple = document.getElementById("change-image-btn-simple");
-    uploadBtnSimple?.addEventListener("click", () => fileInputSimple?.click());
-    changeBtnSimple?.addEventListener("click", () => fileInputSimple?.click());
-    fileInputSimple?.addEventListener("change", () => {
-        const file = fileInputSimple?.files?.[0];
-        if (!file) {
-            setImagePreviewSimple("");
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = () => {
-            currentImageUrlSimple = reader.result;
-            setImagePreviewSimple(reader.result);
-        };
-        reader.readAsDataURL(file);
-    });
 });

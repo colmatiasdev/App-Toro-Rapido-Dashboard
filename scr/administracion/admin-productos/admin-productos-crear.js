@@ -137,15 +137,22 @@ const validateForm = (form) => {
     return { valid: errors.length === 0, errors };
 };
 
+const ALPHANUM = "0123456789abcdefghijklmnopqrstuvwxyz";
+const randomAlphanumeric = (len) => {
+    let s = "";
+    for (let i = 0; i < len; i++) s += ALPHANUM[Math.floor(Math.random() * ALPHANUM.length)];
+    return s;
+};
+
 const generateNextIdProducto = (rows) => {
     const idKeys = ["ID Producto", "idproducto"];
-    let maxNum = 0;
-    for (const r of rows) {
-        const raw = cleanText(getValue(r, idKeys));
-        const match = /^PROD-?(\d+)$/i.exec(raw);
-        if (match) maxNum = Math.max(maxNum, parseInt(match[1], 10));
+    const existing = new Set(rows.map((r) => cleanText(getValue(r, idKeys)).toLowerCase()));
+    let id;
+    for (let i = 0; i < 20; i++) {
+        id = "PROD-BASE-" + randomAlphanumeric(10);
+        if (!existing.has(id.toLowerCase())) return id;
     }
-    return "PROD-" + String(maxNum + 1).padStart(3, "0");
+    return "PROD-BASE-" + Date.now().toString(36) + randomAlphanumeric(4);
 };
 
 const escapeHtml = (text) => {
@@ -271,6 +278,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             showValidationErrors(validation.errors, form);
             return;
         }
+        const submitBtn = document.getElementById("submit-btn");
+        const originalSubmitText = submitBtn?.textContent || "Guardar";
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Guardando...";
+        }
+        try {
         setDebug("Enviando...");
 
         const data = new FormData(form);
@@ -318,6 +332,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.error(error);
             setDebug("Error: " + (error?.message || error));
             alert("No se pudo enviar. Revisá el Apps Script.");
+        }
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalSubmitText;
+            }
         }
     });
 });
