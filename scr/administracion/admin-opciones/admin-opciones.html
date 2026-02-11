@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Opciones de producto - Toro Rápido</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,7 +14,7 @@
     <div id="admin-header-slot"></div>
     <main class="admin-menu">
         <header class="admin-header">
-            <p>Opciones y agregados por producto (aderezo, tamaño, recargos). Hoja <strong>opciones-base</strong>.</p>
+            <p>Opciones y agregados por producto (Aderezo, Tamaño porciones, recargos, Guarniciones, Agregados de Verdura). Hoja <strong>opciones-base</strong>.</p>
         </header>
 
         <div class="admin-actions">
@@ -25,14 +25,16 @@
 
         <section class="admin-card">
             <div class="card-title">
-                <i class="fa-solid fa-sliders"></i> Opciones cargadas desde Google Sheets
+                <i class="fa-solid fa-sliders"></i> Listado de opciones de los Productos
+            </div>
+            <div class="opciones-leyenda">
+                <p class="opciones-leyenda-item"><strong>Tipo:</strong> <em>uno</em> = el cliente elige una sola opción del grupo (como un radio); <em>varios</em> = puede elegir varias (como checkboxes).</p>
+                <p class="opciones-leyenda-item"><strong>Obligatorio:</strong> <em>SI</em> = debe elegir al menos una opción de este grupo antes de agregar al pedido; <em>NO</em> = es opcional.</p>
             </div>
             <div class="table-wrap">
                 <table class="menu-table">
                     <thead>
                         <tr>
-                            <th>ID Opciones</th>
-                            <th>Grupo</th>
                             <th>Tipo</th>
                             <th>Obligatorio</th>
                             <th>Nombre de la Opción</th>
@@ -43,7 +45,7 @@
                     </thead>
                     <tbody id="opciones-body">
                         <tr>
-                            <td colspan="8" class="table-loading">Cargando opciones...</td>
+                            <td colspan="6" class="table-loading">Cargando opciones...</td>
                         </tr>
                     </tbody>
                 </table>

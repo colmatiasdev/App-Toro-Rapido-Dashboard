@@ -349,7 +349,8 @@ body {
 .precio-con-icono.precio-promo { color: #b45309; }
 .precio-con-icono.precio-promo i { font-size: 0.8rem; }
 .menu-table .cell-descuento { text-align: center; vertical-align: middle; white-space: nowrap; }
-.descuento-pct { font-weight: 800; color: #b45309; font-size: 0.85rem; }
+.descuento-pct,
+.descuento-monto { font-weight: 800; color: #b45309; font-size: 0.85rem; }
 .table-loading { text-align: center; color: var(--toro-muted); }
 
 /* Columna Producto Agotado */

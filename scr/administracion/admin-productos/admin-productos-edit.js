@@ -91,7 +91,8 @@ const VALIDATION = {
     categoriaMaxLen: 100,
     descripcionMaxLen: 500,
     imagenMaxLen: 500,
-    stockMaxLen: 50
+    stockMaxLen: 50,
+    stockMax: 999
 };
 
 const showValidationErrors = (errors, form) => {
@@ -150,6 +151,12 @@ const validateForm = (form) => {
     if (imagen.length > VALIDATION.imagenMaxLen) errors.push({ field: "imagen", message: "Imagen (URL) no puede superar " + VALIDATION.imagenMaxLen + " caracteres." });
     const stock = cleanText(data.get("stock"));
     if (stock.length > VALIDATION.stockMaxLen) errors.push({ field: "stock", message: "STOCK no puede superar " + VALIDATION.stockMaxLen + " caracteres." });
+    if (stock !== "") {
+        const stockNum = Number(stock.replace(",", "."));
+        if (Number.isNaN(stockNum) || stockNum < 0) {
+            errors.push({ field: "stock", message: "STOCK debe ser un número mayor o igual a 0 (máximo " + VALIDATION.stockMax + ", se ajusta automáticamente)." });
+        }
+    }
     return { valid: errors.length === 0, errors };
 };
 
@@ -172,6 +179,8 @@ const getEditParams = () => {
 
 let editKeyIdProducto = "";
 let loadedProductoAgotado = "NO";
+/** Precio Actual al cargar el formulario; al guardar se envía como Precio Regular. */
+let loadedPrecioActual = "";
 
 const initImagenPreview = () => {
     const hiddenInput = document.getElementById("imagen-input");
@@ -275,7 +284,9 @@ const loadRecordAndShowForm = async () => {
     form.querySelector('[name="producto"]').value = cleanText(getValue(row, ["Producto", "producto"]));
     form.querySelector('[name="descripcion"]').value = cleanText(getValue(row, ["Descripcion", "descripcion", "Descripción"]));
     const precioActual = getValue(row, ["Precio Actual", "precioactual", "PrecioActual"]);
-    form.querySelector('[name="precio_actual"]').value = precioActual !== "" && precioActual != null ? (Number(precioActual) || "") : "";
+    const precioActualNum = precioActual !== "" && precioActual != null ? (Number(precioActual) || 0) : "";
+    loadedPrecioActual = precioActualNum;
+    form.querySelector('[name="precio_actual"]').value = precioActualNum !== "" ? precioActualNum : "";
     const imagenUrl = cleanText(getValue(row, ["Imagen", "imagen"]));
     const hiddenImagen = document.getElementById("imagen-input");
     const urlInput = document.getElementById("imagen-url-input");
@@ -287,7 +298,9 @@ const loadRecordAndShowForm = async () => {
     const checkDestacado = document.getElementById("es_destacado_check");
     if (hiddenDestacado) hiddenDestacado.value = esDestacadoVal;
     if (checkDestacado) checkDestacado.checked = esDestacadoVal === "SI";
-    form.querySelector('[name="stock"]').value = cleanText(getValue(row, ["STOCK", "stock"]));
+    const stockLoaded = cleanText(getValue(row, ["STOCK", "stock"]));
+    const stockVal = stockLoaded === "" ? "" : Math.min(VALIDATION.stockMax, Math.max(0, Number(stockLoaded) || 0));
+    form.querySelector('[name="stock"]').value = stockVal === "" ? "" : stockVal;
 
     const idInput = document.getElementById("id-producto-input");
     if (idInput) idInput.readOnly = true;
@@ -304,6 +317,20 @@ const initForm = () => {
         checkDestacado.addEventListener("change", () => {
             inputDestacado.value = checkDestacado.checked ? "SI" : "NO";
         });
+    }
+    const stockInput = form?.querySelector('[name="stock"]');
+    if (stockInput) {
+        const capStock = () => {
+            const v = stockInput.value;
+            if (v === "") return;
+            const n = Number(v.replace(",", "."));
+            if (!Number.isNaN(n) && n > VALIDATION.stockMax) {
+                stockInput.value = VALIDATION.stockMax;
+            } else if (!Number.isNaN(n) && n < 0) {
+                stockInput.value = "0";
+            }
+        };
+        stockInput.addEventListener("blur", capStock);
     }
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -327,8 +354,11 @@ const initForm = () => {
         const precioActual = cleanText(data.get("precio_actual"));
         const imagen = cleanText(data.get("imagen"));
         const esDestacado = (cleanText(data.get("es_destacado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
-        const stock = cleanText(data.get("stock"));
+        const stockRaw = cleanText(data.get("stock"));
+        const stockNumRaw = stockRaw === "" ? 0 : (Number(stockRaw.replace(",", ".")) || 0);
+        const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
         const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
+        const precioRegularNum = (loadedPrecioActual !== "" && loadedPrecioActual != null) ? (Number(loadedPrecioActual) || 0) : precioNum;
 
         const payload = {
             action: "update",
@@ -340,7 +370,7 @@ const initForm = () => {
             Producto: producto,
             Descripcion: descripcion,
             "Precio Actual": precioNum,
-            "Precio Regular": precioNum,
+            "Precio Regular": precioRegularNum,
             Imagen: imagen,
             "Es Destacado": esDestacado,
             "Producto Agotado": loadedProductoAgotado,

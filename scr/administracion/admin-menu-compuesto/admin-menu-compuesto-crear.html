@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Agregar Ítem - Menú Compuesto</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,89 +19,73 @@
 
         <section class="admin-card" id="admin-menu-crear">
             <div class="card-title">
-                <i class="fa-solid fa-circle-plus"></i> Agregar ítem (menú compuesto)
+                <i class="fa-solid fa-circle-plus"></i> Agregar nuevo ítem
             </div>
-            <form class="admin-form" id="add-item-form">
+            <div id="form-validation-errors" class="validation-errors" role="alert" style="display: none;"></div>
+            <form class="admin-form" id="add-item-form" novalidate>
                 <input type="hidden" name="mode" id="form-mode" value="create">
-                <label>
-                    <span class="label-title">Orden (automático)</span>
-                    <input type="number" name="orden" id="orden-input" placeholder="Auto" readonly>
-                </label>
-                <label>
-                    <span class="label-title">ID Menú único (automático)</span>
-                    <input type="text" name="idmenu-unico" id="idmenu-unico-input" placeholder="MENU-..." readonly>
-                </label>
-                <label>
-                    <span class="label-title">Tipo Menú <span class="req">*</span></span>
-                    <select name="tipomenu">
-                        <option value="MENU-SIMPLE" selected>MENU-SIMPLE</option>
-                        <option value="MENU-COMPUESTO">MENU-COMPUESTO</option>
-                    </select>
-                </label>
-                <label>
-                    <span class="label-title">ID Menú variable</span>
-                    <input type="text" name="idmenu-variable" placeholder="Para MENU-COMPUESTO">
-                </label>
-                <label>
-                    <span class="label-title">Categoría <span class="req">*</span></span>
-                    <input type="text" name="categoria" placeholder="Burgers" required>
-                </label>
-                <label>
-                    <span class="label-title">Producto <span class="req">*</span></span>
-                    <input type="text" name="producto" placeholder="Doble Cheese" required>
-                </label>
-                <label>
-                    <span class="label-title">Descripción Producto</span>
-                    <input type="text" name="descripcionproducto" placeholder="Carne doble y cheddar">
-                </label>
-                <label>
-                    <span class="label-title">Precio Actual <span class="req">*</span></span>
-                    <input type="number" name="precioactual" placeholder="9500" required>
-                </label>
-                <label>
-                    <span class="label-title">Precio Regular</span>
-                    <input type="number" name="precioregular" placeholder="11000">
-                </label>
-                <label>
-                    <span class="label-title">Mostrar Descuento</span>
-                    <select name="mostrardescuento">
-                        <option value="NO" selected>NO</option>
-                        <option value="SI">SI</option>
-                    </select>
-                </label>
-                <div class="image-upload" id="upload-image-block">
-                    <span class="label-title">Subir Imagen</span>
-                    <button type="button" class="secondary-btn" id="upload-image-btn">Seleccionar imagen</button>
+                <div class="form-step-tipomenu">
+                    <label class="form-row-full">
+                        <span class="label-title">Elegir el tipo de menú <span class="req">*</span></span>
+                        <select name="tipomenu" id="tipomenu-select">
+                            <option value="">— Elegí una opción —</option>
+                            <option value="MENU-SIMPLE">MENU-SIMPLE (hoja menú simple)</option>
+                            <option value="MENU-COMPUESTO">MENU-COMPUESTO (hoja menú compuesto)</option>
+                        </select>
+                        <span class="field-hint">Seleccioná si el ítem se guarda en la hoja menú simple o en la hoja menú compuesto.</span>
+                    </label>
                 </div>
-                <input type="file" name="imagenFile" id="imagen-file" accept="image/*" class="image-input-hidden">
-                <div class="image-preview" id="image-preview" style="display:none;">
-                    <span class="label-title">Previsualización</span>
-                    <img id="image-preview-img" alt="Previsualización de imagen">
-                    <button type="button" class="secondary-btn change-image-btn" id="change-image-btn">Cambiar imagen</button>
+
+                <!-- Panel MENU-SIMPLE: insertar en hoja menu-simple -->
+                <div id="form-panel-simple" class="form-panel" style="display: none;">
+                    <label><span class="label-title">Orden (automático)</span><input type="number" name="orden_simple" id="orden-simple-input" placeholder="Auto" readonly></label>
+                    <label><span class="label-title">ID Producto (automático)</span><input type="text" name="idproducto" id="idproducto-input" placeholder="PROD-..." readonly></label>
+                    <label class="label-categoria">
+                        <span class="label-title">Categoría <span class="req">*</span></span>
+                        <input type="text" name="categoria_simple" id="categoria-input-simple" list="categoria-datalist-simple" placeholder="Elegí una o escribí una nueva" autocomplete="off">
+                        <datalist id="categoria-datalist-simple"></datalist>
+                        <span class="field-hint">Se cargan las categorías de la hoja menú simple; podés elegir una o escribir una nueva.</span>
+                    </label>
+                    <label><span class="label-title">Producto <span class="req">*</span></span><input type="text" name="producto_simple" placeholder="Doble Cheese"></label>
+                    <label><span class="label-title">Descripción</span><input type="text" name="descripcion_simple" placeholder="Carne doble y cheddar"></label>
+                    <label><span class="label-title">Precio <span class="req">*</span></span><input type="number" name="precio_simple" placeholder="9500"></label>
+                    <div class="image-upload" id="upload-image-block-simple"><span class="label-title">Subir Imagen</span><button type="button" class="secondary-btn" id="upload-image-btn-simple">Seleccionar imagen</button></div>
+                    <input type="file" name="imagenFile_simple" id="imagen-file-simple" accept="image/*" class="image-input-hidden">
+                    <div class="image-preview" id="image-preview-simple" style="display:none;"><span class="label-title">Previsualización</span><img id="image-preview-img-simple" alt=""><button type="button" class="secondary-btn" id="change-image-btn-simple">Cambiar imagen</button></div>
+                    <label><span class="label-title">Es Destacado</span><select name="esdestacado_simple"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
+                    <label><span class="label-title">Producto Agotado</span><select name="productoagotado_simple"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
+                    <label><span class="label-title">Stock</span><input type="number" name="stock_simple" placeholder="10"></label>
                 </div>
-                <label>
-                    <span class="label-title">Es Destacado</span>
-                    <select name="esdestacado">
-                        <option value="NO" selected>NO</option>
-                        <option value="SI">SI</option>
-                    </select>
-                </label>
-                <label>
-                    <span class="label-title">Producto Agotado</span>
-                    <select name="productoagotado">
-                        <option value="NO" selected>NO</option>
-                        <option value="SI">SI</option>
-                    </select>
-                </label>
-                <label>
-                    <span class="label-title">Stock</span>
-                    <input type="number" name="stock" placeholder="10">
-                </label>
-                <div class="form-actions">
+
+                <!-- Panel MENU-COMPUESTO: insertar en hoja menu-compuesto -->
+                <div id="form-panel-compuesto" class="form-panel" style="display: none;">
+                    <label><span class="label-title">Orden (automático)</span><input type="number" name="orden" id="orden-input" placeholder="Auto" readonly></label>
+                    <label><span class="label-title">ID Menú único (automático)</span><input type="text" name="idmenu-unico" id="idmenu-unico-input" placeholder="MENU-..." readonly></label>
+                    <label><span class="label-title">ID Menú variable</span><input type="text" name="idmenu-variable" placeholder="Para MENU-COMPUESTO"></label>
+                    <label class="label-categoria">
+                        <span class="label-title">Categoría <span class="req">*</span></span>
+                        <input type="text" name="categoria" id="categoria-input-compuesto" list="categoria-datalist-compuesto" placeholder="Elegí una o escribí una nueva" autocomplete="off">
+                        <datalist id="categoria-datalist-compuesto"></datalist>
+                        <span class="field-hint">Se cargan las categorías de la hoja menú compuesto; podés elegir una o escribir una nueva.</span>
+                    </label>
+                    <label><span class="label-title">Producto <span class="req">*</span></span><input type="text" name="producto" placeholder="Doble Cheese"></label>
+                    <label><span class="label-title">Descripción Producto</span><input type="text" name="descripcionproducto" placeholder="Carne doble y cheddar"></label>
+                    <label><span class="label-title">Precio Actual <span class="req">*</span></span><input type="number" name="precioactual" placeholder="9500"></label>
+                    <label><span class="label-title">Precio Regular</span><input type="number" name="precioregular" placeholder="11000"></label>
+                    <label><span class="label-title">Mostrar Descuento</span><select name="mostrardescuento"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
+                    <div class="image-upload" id="upload-image-block"><span class="label-title">Subir Imagen</span><button type="button" class="secondary-btn" id="upload-image-btn">Seleccionar imagen</button></div>
+                    <input type="file" name="imagenFile" id="imagen-file" accept="image/*" class="image-input-hidden">
+                    <div class="image-preview" id="image-preview" style="display:none;"><span class="label-title">Previsualización</span><img id="image-preview-img" alt=""><button type="button" class="secondary-btn change-image-btn" id="change-image-btn">Cambiar imagen</button></div>
+                    <label><span class="label-title">Es Destacado</span><select name="esdestacado"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
+                    <label><span class="label-title">Producto Agotado</span><select name="productoagotado"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
+                    <label><span class="label-title">Stock</span><input type="number" name="stock" placeholder="10"></label>
+                </div>
+
+                <div id="form-actions-wrap" class="form-actions form-actions-end" style="display: none;">
                     <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
-                    <button type="button" class="secondary-btn" id="cancel-edit">Cancelar edición</button>
+                    <a href="admin-menu-compuesto.html" class="secondary-btn">Cancelar</a>
                 </div>
-                <span class="hint">* Los campos con * son obligatorios. El ID menú único se usa para editar y deshabilitar.</span>
+                <span class="hint">* Los campos con * son obligatorios. Según Tipo Menú se inserta en la hoja menú simple o menú compuesto.</span>
             </form>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
         </section>

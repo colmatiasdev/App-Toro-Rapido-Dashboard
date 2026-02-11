@@ -68,7 +68,8 @@ const VALIDATION = {
     categoriaMaxLen: 100,
     descripcionMaxLen: 500,
     imagenMaxLen: 500,
-    stockMaxLen: 50
+    stockMaxLen: 50,
+    stockMax: 999
 };
 
 const showValidationErrors = (errors, form) => {
@@ -127,6 +128,12 @@ const validateForm = (form) => {
     if (imagen.length > VALIDATION.imagenMaxLen) errors.push({ field: "imagen", message: "Imagen (URL) no puede superar " + VALIDATION.imagenMaxLen + " caracteres." });
     const stock = cleanText(data.get("stock"));
     if (stock.length > VALIDATION.stockMaxLen) errors.push({ field: "stock", message: "STOCK no puede superar " + VALIDATION.stockMaxLen + " caracteres." });
+    if (stock !== "") {
+        const stockNum = Number(stock.replace(",", "."));
+        if (Number.isNaN(stockNum) || stockNum < 0) {
+            errors.push({ field: "stock", message: "STOCK debe ser un número mayor o igual a 0 (máximo " + VALIDATION.stockMax + ", se ajusta automáticamente)." });
+        }
+    }
     return { valid: errors.length === 0, errors };
 };
 
@@ -236,6 +243,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    const stockInput = document.querySelector('[name="stock"]');
+    if (stockInput) {
+        const capStock = () => {
+            const v = stockInput.value;
+            if (v === "") return;
+            const n = Number(v.replace(",", "."));
+            if (!Number.isNaN(n) && n > VALIDATION.stockMax) {
+                stockInput.value = VALIDATION.stockMax;
+            } else if (!Number.isNaN(n) && n < 0) {
+                stockInput.value = "0";
+            }
+        };
+        stockInput.addEventListener("blur", capStock);
+    }
+
     const form = document.getElementById("producto-form");
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -260,7 +282,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const imagen = cleanText(data.get("imagen"));
         const esDestacado = (cleanText(data.get("es_destacado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const stockRaw = cleanText(data.get("stock"));
-        const stock = stockRaw === "" ? "0" : stockRaw;
+        const stockNumRaw = stockRaw === "" ? 0 : (Number(stockRaw.replace(",", ".")) || 0);
+        const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
         const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
 
         const payload = {
