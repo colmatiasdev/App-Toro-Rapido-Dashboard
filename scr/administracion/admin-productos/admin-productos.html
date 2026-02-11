@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Productos - Toro Rápido</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,7 +14,7 @@
     <div id="admin-header-slot"></div>
     <main class="admin-menu">
         <header class="admin-header">
-            <p>ABM de productos. Hoja <strong>productos-base</strong>. Habilitar o deshabilitar sin eliminar.</p>
+            <p>Administración de productos. Hoja <strong>productos-base</strong>.</p>
         </header>
 
         <div class="admin-actions">
@@ -25,21 +25,28 @@
 
         <section class="admin-card">
             <div class="card-title">
-                <i class="fa-solid fa-box"></i> Productos cargados desde Google Sheets
+                <i class="fa-solid fa-box"></i> Listado de productos cargados
             </div>
             <div class="table-wrap">
                 <table class="menu-table">
                     <thead>
                         <tr>
-                            <th>ID Producto</th>
-                            <th>Nombre</th>
+                            <th class="cell-destacado" title="Destacado"><i class="fa-solid fa-crown" aria-hidden="true"></i></th>
+                            <th>Imagen</th>
+                            <th>Producto</th>
+                            <th>Descripción</th>
+                            <th>Precio Actual</th>
+                            <th>Precio Regular</th>
+                            <th>Descuento %</th>
+                            <th>Producto Agotado</th>
+                            <th>STOCK</th>
                             <th>Habilitada</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="productos-body">
                         <tr>
-                            <td colspan="4" class="table-loading">Cargando productos...</td>
+                            <td colspan="11" class="table-loading">Cargando productos...</td>
                         </tr>
                     </tbody>
                 </table>

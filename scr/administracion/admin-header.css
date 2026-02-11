@@ -1,18 +1,59 @@
-/* Barra superior común a todas las páginas de administración */
+/* Barra superior común - ancho completo y responsive como el resto de la página */
+html {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body.admin-has-topbar {
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+#admin-header-slot {
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Full-bleed: la barra llega a los bordes del viewport aunque el contenido esté centrado */
+@supports (width: 100vw) {
+    #admin-header-slot {
+        width: 100vw;
+        max-width: 100vw;
+        position: relative;
+        left: 50%;
+        margin-left: -50vw;
+    }
+}
+
 .admin-topbar {
     position: sticky;
     top: 0;
     z-index: 100;
+    width: 100%;
+    min-width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 6px 20px;
+    justify-content: center;
+    padding: 6px 16px;
+    padding-top: max(6px, env(safe-area-inset-top));
     min-height: 64px;
     box-sizing: border-box;
     background: #ffffff;
     border-bottom: 1px solid #e2e8f0;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    -webkit-tap-highlight-color: transparent;
+}
+.admin-topbar-inner {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 4px;
+    box-sizing: border-box;
 }
 
 .admin-topbar-brand-wrap {
@@ -48,7 +89,8 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 14px;
+    padding: 10px 14px;
+    min-height: 44px;
     border-radius: 999px;
     background: #f1f5f9;
     color: #475569;
@@ -56,6 +98,8 @@
     font-weight: 700;
     font-size: 0.85rem;
     transition: background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .admin-topbar-back:hover {

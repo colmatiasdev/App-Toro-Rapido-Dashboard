@@ -51,6 +51,28 @@ const fetchProductosList = async () => {
     }
 };
 
+const escapeHtml = (text) => {
+    const div = document.createElement("div");
+    div.textContent = text ?? "";
+    return div.innerHTML;
+};
+
+const fillCategoriaDatalist = (rows) => {
+    const datalist = document.getElementById("categoria-datalist");
+    if (!datalist) return;
+    const seen = new Set();
+    const categorias = [];
+    for (const r of rows) {
+        const c = cleanText(getValue(r, ["Categoria", "categoria", "Categoría"]));
+        if (c && !seen.has(c)) {
+            seen.add(c);
+            categorias.push(c);
+        }
+    }
+    categorias.sort((a, b) => a.localeCompare(b, "es"));
+    datalist.innerHTML = categorias.map((c) => `<option value="${escapeHtml(c)}">`).join("");
+};
+
 const setDebug = (message) => {
     const box = document.getElementById("script-debug");
     if (!box) return;
@@ -65,7 +87,11 @@ const setDebug = (message) => {
 
 const VALIDATION = {
     idProductoMaxLen: 50,
-    nombreMaxLen: 200
+    productoMaxLen: 200,
+    categoriaMaxLen: 100,
+    descripcionMaxLen: 500,
+    imagenMaxLen: 500,
+    stockMaxLen: 50
 };
 
 const showValidationErrors = (errors, form) => {
@@ -98,17 +124,32 @@ const clearValidationErrors = (form) => {
 const validateForm = (form) => {
     const data = new FormData(form);
     const idproducto = cleanText(data.get("idproducto"));
-    const nombre = cleanText(data.get("nombre"));
+    const producto = cleanText(data.get("producto"));
     const errors = [];
 
     if (!idproducto) errors.push({ field: "idproducto", message: "ID Producto es obligatorio." });
     else if (idproducto.length > VALIDATION.idProductoMaxLen) {
         errors.push({ field: "idproducto", message: "ID Producto no puede superar " + VALIDATION.idProductoMaxLen + " caracteres." });
     }
-    if (!nombre) errors.push({ field: "nombre", message: "Nombre es obligatorio." });
-    else if (nombre.length > VALIDATION.nombreMaxLen) {
-        errors.push({ field: "nombre", message: "Nombre no puede superar " + VALIDATION.nombreMaxLen + " caracteres." });
+    if (!producto) errors.push({ field: "producto", message: "Producto es obligatorio." });
+    else if (producto.length > VALIDATION.productoMaxLen) {
+        errors.push({ field: "producto", message: "Producto no puede superar " + VALIDATION.productoMaxLen + " caracteres." });
     }
+    const categoria = cleanText(data.get("categoria"));
+    if (!categoria) errors.push({ field: "categoria", message: "Categoría es obligatoria." });
+    else if (categoria.length > VALIDATION.categoriaMaxLen) errors.push({ field: "categoria", message: "Categoría no puede superar " + VALIDATION.categoriaMaxLen + " caracteres." });
+    const precioActualRaw = cleanText(data.get("precio_actual"));
+    if (precioActualRaw === "") errors.push({ field: "precio_actual", message: "Precio Actual es obligatorio." });
+    else {
+        const n = Number(precioActualRaw.replace(",", "."));
+        if (Number.isNaN(n) || n < 0) errors.push({ field: "precio_actual", message: "Precio Actual debe ser un número mayor o igual a 0." });
+    }
+    const descripcion = cleanText(data.get("descripcion"));
+    if (descripcion.length > VALIDATION.descripcionMaxLen) errors.push({ field: "descripcion", message: "Descripción no puede superar " + VALIDATION.descripcionMaxLen + " caracteres." });
+    const imagen = cleanText(data.get("imagen"));
+    if (imagen.length > VALIDATION.imagenMaxLen) errors.push({ field: "imagen", message: "Imagen (URL) no puede superar " + VALIDATION.imagenMaxLen + " caracteres." });
+    const stock = cleanText(data.get("stock"));
+    if (stock.length > VALIDATION.stockMaxLen) errors.push({ field: "stock", message: "STOCK no puede superar " + VALIDATION.stockMaxLen + " caracteres." });
     return { valid: errors.length === 0, errors };
 };
 
@@ -130,6 +171,59 @@ const getEditParams = () => {
 };
 
 let editKeyIdProducto = "";
+let loadedProductoAgotado = "NO";
+
+const initImagenPreview = () => {
+    const hiddenInput = document.getElementById("imagen-input");
+    const urlWrap = document.getElementById("imagen-url-wrap");
+    const urlInput = document.getElementById("imagen-url-input");
+    const cargarBtn = document.getElementById("imagen-cargar-btn");
+    const previewEmpty = document.getElementById("imagen-preview-empty");
+    const previewImg = document.getElementById("imagen-preview-img");
+    if (!hiddenInput || !previewEmpty || !previewImg) return;
+
+    const updatePreview = (url) => {
+        const u = (url ?? (urlInput ? urlInput.value : hiddenInput.value) ?? "").trim();
+        previewEmpty.textContent = "No hay imagen cargada";
+        if (!u) {
+            previewImg.style.display = "none";
+            previewImg.src = "";
+            previewImg.alt = "";
+            previewEmpty.style.display = "block";
+            return;
+        }
+        previewEmpty.style.display = "none";
+        previewImg.alt = "Vista previa de la imagen del producto";
+        previewImg.style.display = "block";
+        previewImg.src = u;
+        previewImg.onerror = () => {
+            previewImg.style.display = "none";
+            previewEmpty.textContent = "No se pudo cargar la imagen";
+            previewEmpty.style.display = "block";
+        };
+        previewImg.onload = () => {
+            previewEmpty.style.display = "none";
+        };
+    };
+
+    const syncFromUrlInput = () => {
+        const v = (urlInput && urlInput.value) ? urlInput.value.trim() : "";
+        if (hiddenInput) hiddenInput.value = v;
+        updatePreview(v);
+    };
+
+    if (cargarBtn && urlWrap && urlInput) {
+        cargarBtn.addEventListener("click", () => {
+            const isHidden = urlWrap.style.display === "none" || !urlWrap.style.display;
+            urlWrap.style.display = isHidden ? "block" : "none";
+            if (isHidden) setTimeout(() => urlInput.focus(), 50);
+        });
+        urlInput.addEventListener("input", syncFromUrlInput);
+        urlInput.addEventListener("paste", () => setTimeout(syncFromUrlInput, 10));
+    }
+
+    updatePreview();
+};
 
 const loadRecordAndShowForm = async () => {
     const params = getEditParams();
@@ -167,24 +261,50 @@ const loadRecordAndShowForm = async () => {
         return;
     }
 
+    fillCategoriaDatalist(rows);
+
     if (notFoundMsg) notFoundMsg.style.display = "none";
     if (!form) return;
 
     editKeyIdProducto = idNorm;
+    const productoAgotado = (cleanText(getValue(row, ["Producto Agotado", "productoagotado", "ProductoAgotado"])) || "NO").toUpperCase();
+    loadedProductoAgotado = productoAgotado === "SI" ? "SI" : "NO";
 
     form.querySelector('[name="idproducto"]').value = cleanText(getValue(row, ["ID Producto", "idproducto"]));
-    form.querySelector('[name="nombre"]').value = cleanText(getValue(row, ["Nombre", "nombre"]));
-    const habilitada = (cleanText(getValue(row, ["Habilitada", "habilitada"])) || "NO").toUpperCase();
-    form.querySelector('[name="habilitada"]').value = habilitada === "SI" ? "SI" : "NO";
+    form.querySelector('[name="categoria"]').value = cleanText(getValue(row, ["Categoria", "categoria", "Categoría"]));
+    form.querySelector('[name="producto"]').value = cleanText(getValue(row, ["Producto", "producto"]));
+    form.querySelector('[name="descripcion"]').value = cleanText(getValue(row, ["Descripcion", "descripcion", "Descripción"]));
+    const precioActual = getValue(row, ["Precio Actual", "precioactual", "PrecioActual"]);
+    form.querySelector('[name="precio_actual"]').value = precioActual !== "" && precioActual != null ? (Number(precioActual) || "") : "";
+    const imagenUrl = cleanText(getValue(row, ["Imagen", "imagen"]));
+    const hiddenImagen = document.getElementById("imagen-input");
+    const urlInput = document.getElementById("imagen-url-input");
+    if (hiddenImagen) hiddenImagen.value = imagenUrl;
+    if (urlInput) urlInput.value = imagenUrl;
+    const esDestacado = (cleanText(getValue(row, ["Es Destacado", "esdestacado", "EsDestacado"])) || "NO").toUpperCase();
+    const esDestacadoVal = esDestacado === "SI" ? "SI" : "NO";
+    const hiddenDestacado = form.querySelector('[name="es_destacado"]');
+    const checkDestacado = document.getElementById("es_destacado_check");
+    if (hiddenDestacado) hiddenDestacado.value = esDestacadoVal;
+    if (checkDestacado) checkDestacado.checked = esDestacadoVal === "SI";
+    form.querySelector('[name="stock"]').value = cleanText(getValue(row, ["STOCK", "stock"]));
 
     const idInput = document.getElementById("id-producto-input");
     if (idInput) idInput.readOnly = true;
 
     form.style.display = "";
+    initImagenPreview();
 };
 
 const initForm = () => {
     const form = document.getElementById("producto-form");
+    const checkDestacado = document.getElementById("es_destacado_check");
+    const inputDestacado = form?.querySelector('[name="es_destacado"]');
+    if (checkDestacado && inputDestacado) {
+        checkDestacado.addEventListener("change", () => {
+            inputDestacado.value = checkDestacado.checked ? "SI" : "NO";
+        });
+    }
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
         clearValidationErrors(form);
@@ -201,8 +321,14 @@ const initForm = () => {
 
         const data = new FormData(form);
         const idproducto = cleanText(data.get("idproducto"));
-        const nombre = cleanText(data.get("nombre"));
-        const habilitada = (cleanText(data.get("habilitada")) || "SI").toUpperCase();
+        const categoria = cleanText(data.get("categoria"));
+        const producto = cleanText(data.get("producto"));
+        const descripcion = cleanText(data.get("descripcion"));
+        const precioActual = cleanText(data.get("precio_actual"));
+        const imagen = cleanText(data.get("imagen"));
+        const esDestacado = (cleanText(data.get("es_destacado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const stock = cleanText(data.get("stock"));
+        const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
 
         const payload = {
             action: "update",
@@ -210,8 +336,15 @@ const initForm = () => {
             idproductoOld: editKeyIdProducto || idproducto,
             idproducto: idproducto,
             "ID Producto": idproducto,
-            Nombre: nombre,
-            Habilitada: habilitada === "SI" ? "SI" : "NO"
+            Categoria: categoria,
+            Producto: producto,
+            Descripcion: descripcion,
+            "Precio Actual": precioNum,
+            "Precio Regular": precioNum,
+            Imagen: imagen,
+            "Es Destacado": esDestacado,
+            "Producto Agotado": loadedProductoAgotado,
+            STOCK: stock
         };
 
         try {

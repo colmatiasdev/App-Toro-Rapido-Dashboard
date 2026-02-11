@@ -190,12 +190,18 @@ body {
 .menu-table th { font-weight: 800; background: #f1f5f9; }
 .table-loading { text-align: center; color: var(--toro-muted); }
 
+/* Columna Habilitada: botón circular SI/NO (mismo diseño que Productos) */
 .habilitada-cell { text-align: center; vertical-align: middle; }
 .habilitada-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 36px; height: 36px;
-    border: none; border-radius: 50%;
-    cursor: pointer; font-size: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.25rem;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .habilitada-btn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
