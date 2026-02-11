@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Editar producto - Toro Rápido</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -30,22 +30,54 @@
                     <span class="label-title">ID Producto <span class="req">*</span></span>
                     <input type="text" name="idproducto" id="id-producto-input" required readonly>
                 </label>
-                <label>
-                    <span class="label-title">Nombre <span class="req">*</span></span>
-                    <input type="text" name="nombre" id="nombre-input" placeholder="Ej: Hamburguesa clásica">
+                <label class="label-categoria">
+                    <span class="label-title">Categoría <span class="req">*</span></span>
+                    <input type="text" name="categoria" id="categoria-input" list="categoria-datalist" placeholder="Elegí una o escribí una nueva" autocomplete="off" required>
+                    <datalist id="categoria-datalist"></datalist>
+                    <span class="field-hint">Se cargan las categorías existentes de la hoja; podés elegir una o escribir una nueva.</span>
                 </label>
                 <label>
-                    <span class="label-title">Habilitada</span>
-                    <select name="habilitada">
-                        <option value="SI">SI</option>
-                        <option value="NO">NO</option>
-                    </select>
+                    <span class="label-title">Producto <span class="req">*</span></span>
+                    <input type="text" name="producto" placeholder="Ej: Hamburguesa clásica" required>
                 </label>
-                <div class="form-actions">
+                <label class="span-2">
+                    <span class="label-title">Descripción</span>
+                    <input type="text" name="descripcion" placeholder="Descripción del producto">
+                </label>
+                <label>
+                    <span class="label-title">Precio Actual <span class="req">*</span></span>
+                    <input type="number" name="precio_actual" step="0.01" min="0" placeholder="0" required>
+                </label>
+                <label class="destacado-check-wrap">
+                    <input type="hidden" name="es_destacado" id="es_destacado_input" value="NO">
+                    <input type="checkbox" id="es_destacado_check" value="SI" aria-label="Es destacado">
+                    <span class="destacado-label"><i class="fa-solid fa-crown"></i> Es destacado</span>
+                </label>
+                <label>
+                    <span class="label-title">STOCK</span>
+                    <input type="text" name="stock" placeholder="0 (por defecto)">
+                </label>
+                <div class="imagen-preview-wrap span-2">
+                    <div class="imagen-preview-label">Imagen del producto</div>
+                    <div class="imagen-preview" id="imagen-preview">
+                        <span class="imagen-preview-empty" id="imagen-preview-empty">No hay imagen cargada</span>
+                        <img id="imagen-preview-img" class="imagen-preview-img" src="" alt="" style="display: none;">
+                    </div>
+                    <input type="hidden" name="imagen" id="imagen-input">
+                    <button type="button" class="secondary-btn imagen-cargar-btn" id="imagen-cargar-btn" aria-label="Cargar nueva imagen">
+                        <i class="fa-solid fa-image"></i> Cargar nueva imagen
+                    </button>
+                    <div class="imagen-url-wrap" id="imagen-url-wrap" style="display: none;">
+                        <label class="imagen-url-label">
+                            <span>URL de la imagen</span>
+                            <input type="text" id="imagen-url-input" placeholder="https://..." autocomplete="off">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-actions form-actions-end">
                     <button type="submit" class="primary-btn" id="submit-btn">Actualizar</button>
                     <a href="admin-productos.html" class="secondary-btn">Cancelar edición</a>
                 </div>
-                <span class="hint">Los cambios se guardan en la hoja <strong>productos-base</strong>. Al cancelar volvés al listado sin guardar.</span>
             </form>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
         </section>

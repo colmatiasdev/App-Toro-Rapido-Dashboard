@@ -64,7 +64,11 @@ const setDebug = (message) => {
 
 const VALIDATION = {
     idProductoMaxLen: 50,
-    nombreMaxLen: 200
+    productoMaxLen: 200,
+    categoriaMaxLen: 100,
+    descripcionMaxLen: 500,
+    imagenMaxLen: 500,
+    stockMaxLen: 50
 };
 
 const showValidationErrors = (errors, form) => {
@@ -97,17 +101,32 @@ const clearValidationErrors = (form) => {
 const validateForm = (form) => {
     const data = new FormData(form);
     const idproducto = cleanText(data.get("idproducto"));
-    const nombre = cleanText(data.get("nombre"));
+    const producto = cleanText(data.get("producto"));
     const errors = [];
 
     if (!idproducto) errors.push({ field: "idproducto", message: "ID Producto es obligatorio." });
     else if (idproducto.length > VALIDATION.idProductoMaxLen) {
         errors.push({ field: "idproducto", message: "ID Producto no puede superar " + VALIDATION.idProductoMaxLen + " caracteres." });
     }
-    if (!nombre) errors.push({ field: "nombre", message: "Nombre es obligatorio." });
-    else if (nombre.length > VALIDATION.nombreMaxLen) {
-        errors.push({ field: "nombre", message: "Nombre no puede superar " + VALIDATION.nombreMaxLen + " caracteres." });
+    if (!producto) errors.push({ field: "producto", message: "Producto es obligatorio." });
+    else if (producto.length > VALIDATION.productoMaxLen) {
+        errors.push({ field: "producto", message: "Producto no puede superar " + VALIDATION.productoMaxLen + " caracteres." });
     }
+    const categoria = cleanText(data.get("categoria"));
+    if (!categoria) errors.push({ field: "categoria", message: "Categoría es obligatoria." });
+    else if (categoria.length > VALIDATION.categoriaMaxLen) errors.push({ field: "categoria", message: "Categoría no puede superar " + VALIDATION.categoriaMaxLen + " caracteres." });
+    const precioActualRaw = cleanText(data.get("precio_actual"));
+    if (precioActualRaw === "") errors.push({ field: "precio_actual", message: "Precio Actual es obligatorio." });
+    else {
+        const n = Number(precioActualRaw.replace(",", "."));
+        if (Number.isNaN(n) || n < 0) errors.push({ field: "precio_actual", message: "Precio Actual debe ser un número mayor o igual a 0." });
+    }
+    const descripcion = cleanText(data.get("descripcion"));
+    if (descripcion.length > VALIDATION.descripcionMaxLen) errors.push({ field: "descripcion", message: "Descripción no puede superar " + VALIDATION.descripcionMaxLen + " caracteres." });
+    const imagen = cleanText(data.get("imagen"));
+    if (imagen.length > VALIDATION.imagenMaxLen) errors.push({ field: "imagen", message: "Imagen (URL) no puede superar " + VALIDATION.imagenMaxLen + " caracteres." });
+    const stock = cleanText(data.get("stock"));
+    if (stock.length > VALIDATION.stockMaxLen) errors.push({ field: "stock", message: "STOCK no puede superar " + VALIDATION.stockMaxLen + " caracteres." });
     return { valid: errors.length === 0, errors };
 };
 
@@ -122,16 +141,100 @@ const generateNextIdProducto = (rows) => {
     return "PROD-" + String(maxNum + 1).padStart(3, "0");
 };
 
+const escapeHtml = (text) => {
+    const div = document.createElement("div");
+    div.textContent = text ?? "";
+    return div.innerHTML;
+};
+
+const fillCategoriaDatalist = (rows) => {
+    const datalist = document.getElementById("categoria-datalist");
+    if (!datalist) return;
+    const seen = new Set();
+    const categorias = [];
+    for (const r of rows) {
+        const c = cleanText(getValue(r, ["Categoria", "categoria", "Categoría"]));
+        if (c && !seen.has(c)) {
+            seen.add(c);
+            categorias.push(c);
+        }
+    }
+    categorias.sort((a, b) => a.localeCompare(b, "es"));
+    datalist.innerHTML = categorias.map((c) => `<option value="${escapeHtml(c)}">`).join("");
+};
+
 const setCreateModeId = async () => {
     const input = document.getElementById("id-producto-input");
     if (!input) return;
     input.readOnly = true;
     const rows = await fetchProductosList();
+    fillCategoriaDatalist(rows);
     input.value = generateNextIdProducto(rows);
+};
+
+const initImagenPreview = () => {
+    const hiddenInput = document.getElementById("imagen-input");
+    const urlWrap = document.getElementById("imagen-url-wrap");
+    const urlInput = document.getElementById("imagen-url-input");
+    const cargarBtn = document.getElementById("imagen-cargar-btn");
+    const previewEmpty = document.getElementById("imagen-preview-empty");
+    const previewImg = document.getElementById("imagen-preview-img");
+    if (!hiddenInput || !previewEmpty || !previewImg) return;
+
+    const updatePreview = (url) => {
+        const u = (url ?? (urlInput ? urlInput.value : hiddenInput.value) ?? "").trim();
+        previewEmpty.textContent = "No hay imagen cargada";
+        if (!u) {
+            previewImg.style.display = "none";
+            previewImg.src = "";
+            previewImg.alt = "";
+            previewEmpty.style.display = "block";
+            return;
+        }
+        previewEmpty.style.display = "none";
+        previewImg.alt = "Vista previa de la imagen del producto";
+        previewImg.style.display = "block";
+        previewImg.src = u;
+        previewImg.onerror = () => {
+            previewImg.style.display = "none";
+            previewEmpty.textContent = "No se pudo cargar la imagen";
+            previewEmpty.style.display = "block";
+        };
+        previewImg.onload = () => {
+            previewEmpty.style.display = "none";
+        };
+    };
+
+    const syncFromUrlInput = () => {
+        const v = (urlInput && urlInput.value) ? urlInput.value.trim() : "";
+        if (hiddenInput) hiddenInput.value = v;
+        updatePreview(v);
+    };
+
+    if (cargarBtn && urlWrap && urlInput) {
+        cargarBtn.addEventListener("click", () => {
+            const isHidden = urlWrap.style.display === "none" || !urlWrap.style.display;
+            urlWrap.style.display = isHidden ? "block" : "none";
+            if (isHidden) setTimeout(() => urlInput.focus(), 50);
+        });
+        urlInput.addEventListener("input", syncFromUrlInput);
+        urlInput.addEventListener("paste", () => setTimeout(syncFromUrlInput, 10));
+    }
+
+    updatePreview();
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
     await setCreateModeId();
+    initImagenPreview();
+
+    const checkDestacado = document.getElementById("es_destacado_check");
+    const inputDestacado = document.getElementById("es_destacado_input");
+    if (checkDestacado && inputDestacado) {
+        checkDestacado.addEventListener("change", () => {
+            inputDestacado.value = checkDestacado.checked ? "SI" : "NO";
+        });
+    }
 
     const form = document.getElementById("producto-form");
     form?.addEventListener("submit", async (event) => {
@@ -150,16 +253,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const data = new FormData(form);
         const idproducto = cleanText(data.get("idproducto"));
-        const nombre = cleanText(data.get("nombre"));
-        const habilitada = (cleanText(data.get("habilitada")) || "SI").toUpperCase();
+        const categoria = cleanText(data.get("categoria"));
+        const producto = cleanText(data.get("producto"));
+        const descripcion = cleanText(data.get("descripcion"));
+        const precioActual = cleanText(data.get("precio_actual"));
+        const imagen = cleanText(data.get("imagen"));
+        const esDestacado = (cleanText(data.get("es_destacado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const stockRaw = cleanText(data.get("stock"));
+        const stock = stockRaw === "" ? "0" : stockRaw;
+        const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
 
         const payload = {
             action: "create",
             sheetName: SHEET_NAME,
             idproducto: idproducto,
             "ID Producto": idproducto,
-            Nombre: nombre,
-            Habilitada: habilitada === "SI" ? "SI" : "NO"
+            Categoria: categoria,
+            Producto: producto,
+            Descripcion: descripcion,
+            "Precio Actual": precioNum,
+            "Precio Regular": precioNum,
+            Imagen: imagen,
+            "Es Destacado": esDestacado,
+            "Producto Agotado": "NO",
+            STOCK: stock,
+            Habilitada: "NO",
+            Habilitado: "NO"
         };
 
         try {
