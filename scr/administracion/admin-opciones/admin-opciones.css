@@ -1,16 +1,27 @@
+/* Mismo diseño y lógica que admin-productos: variables, safe-area, responsive, tabla y botones */
 :root {
     --toro-red: #e11d48;
     --toro-dark: #0f172a;
     --toro-muted: #64748b;
     --toro-bg: #f8fafc;
+    --safe-top: env(safe-area-inset-top, 0);
+    --safe-bottom: env(safe-area-inset-bottom, 0);
+    --safe-left: env(safe-area-inset-left, 0);
+    --safe-right: env(safe-area-inset-right, 0);
 }
 
 * { box-sizing: border-box; }
+html {
+    -webkit-text-size-adjust: 100%;
+}
 body {
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
     background: var(--toro-bg);
     color: var(--toro-dark);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+    padding-bottom: var(--safe-bottom);
 }
 
 .admin-footer {
@@ -59,7 +70,7 @@ body {
 
 .admin-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
 }
 .primary-btn i { margin-right: 6px; }
 
@@ -71,11 +82,30 @@ body {
     margin-bottom: 14px;
 }
 
+.opciones-leyenda {
+    margin: 0 0 12px 0;
+    padding: 12px 14px;
+    background: #f1f5f9;
+    border-left: 4px solid var(--toro-red);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.8rem;
+    color: var(--toro-muted);
+    line-height: 1.4;
+}
+.opciones-leyenda-item {
+    margin: 0 0 6px 0;
+}
+.opciones-leyenda-item:last-child {
+    margin-bottom: 0;
+}
+.opciones-leyenda strong { color: var(--toro-dark); }
+.opciones-leyenda em { font-style: italic; color: var(--toro-dark); }
+
 .admin-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(220px, 1fr));
     gap: 12px;
-    align-items: end;
+    align-items: start;
 }
 .admin-form label {
     display: grid;
@@ -107,6 +137,12 @@ body {
     cursor: pointer;
     width: fit-content;
     text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 .secondary-btn {
     border: 1px solid #e2e8f0;
@@ -117,8 +153,15 @@ body {
     padding: 10px 14px;
     cursor: pointer;
     width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 .form-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.form-actions-end { grid-column: 1 / -1; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #e2e8f0; justify-content: center; }
 .hint { grid-column: 1 / -1; font-size: 0.78rem; color: var(--toro-muted); }
 .field-hint { display: block; margin-top: 4px; font-size: 0.75rem; color: var(--toro-muted); }
 .edit-hint { font-size: 0.9rem; color: var(--toro-muted); margin-bottom: 8px; }
@@ -138,17 +181,30 @@ body {
     padding: 10px 12px;
     border-radius: 12px;
     background: #f1f5f9;
-    border: 1px dashed #cbd5f5;
+    border: 1px dashed #cbd5e1;
     font-size: 0.8rem;
     display: none;
     word-break: break-word;
 }
 
-.table-wrap { width: 100%; overflow: auto; }
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 calc(-1 * var(--safe-left));
+    padding: 0 var(--safe-left);
+}
+.table-wrap::after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+}
 .menu-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 640px;
+    min-width: 520px;
 }
 .menu-table th, .menu-table td {
     padding: 10px 12px;
@@ -181,6 +237,9 @@ body {
     align-items: center;
     justify-content: center;
     line-height: 1;
+    min-height: 36px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 .action-btn.danger {
     border-color: #fecaca;
@@ -190,7 +249,44 @@ body {
 .menu-table th { font-weight: 800; background: #f1f5f9; }
 .table-loading { text-align: center; color: var(--toro-muted); }
 
-/* Columna Habilitada: botón circular SI/NO (mismo diseño que Productos) */
+/* Encabezado de grupo: mismo diseño que productos (category-header) */
+.menu-table tr.opciones-group-header { background: transparent; }
+.menu-table tr.opciones-group-header td {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--toro-dark);
+    background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 100%);
+    padding: 12px 16px;
+    border-top: 2px solid #cbd5e1;
+    border-bottom: 1px solid #e2e8f0;
+    letter-spacing: 0.02em;
+}
+.menu-table tbody tr.opciones-group-header:first-child td { border-top: none; }
+.menu-table tr.opciones-group-header + tr td { border-top: none; }
+
+/* Columna Tipo: icono solo visual (radio = uno, checkbox = varios), deshabilitado */
+.tipo-cell { text-align: center; vertical-align: middle; }
+.tipo-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.85;
+}
+.tipo-icon.tipo-uno { color: var(--toro-dark); }
+.tipo-icon.tipo-uno i { font-size: 1.15rem; }
+.tipo-icon.tipo-varios { color: #15803d; }
+.tipo-icon.tipo-varios i { font-size: 1.15rem; }
+
+/* Recargo $0 → SIN CARGO */
+.menu-table td.recargo-sin-cargo {
+    color: var(--toro-muted);
+    font-style: italic;
+    font-weight: 600;
+}
+
+/* Columna Habilitada: mismo diseño que Productos (botón circular 38px) */
 .habilitada-cell { text-align: center; vertical-align: middle; }
 .habilitada-btn {
     display: inline-flex;
@@ -203,6 +299,8 @@ body {
     cursor: pointer;
     font-size: 1.25rem;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 .habilitada-btn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .habilitada-btn:active:not(:disabled) { transform: scale(0.98); }
@@ -214,7 +312,63 @@ body {
 .habilitada-btn i { font-size: 1.35rem; }
 .habilitada-btn-loading { opacity: 0.7; pointer-events: none; }
 
+/* ========== Tableta y móvil (≤ 768px) ========== */
+@media (max-width: 768px) {
+    .admin-menu { padding: 14px 14px 36px; }
+    .admin-card { padding: 16px; }
+    .admin-header p { font-size: 0.9rem; }
+    .admin-actions .primary-btn { min-height: 48px; padding: 12px 20px; }
+}
+
+/* ========== Móviles (≤ 600px) ========== */
 @media (max-width: 600px) {
-    .admin-form { grid-template-columns: 1fr; }
-    .primary-btn, .secondary-btn { width: 100%; justify-content: center; }
+    .admin-menu { padding: 12px 10px 28px; }
+    .admin-card { padding: 14px 12px; border-radius: 12px; }
+    .card-title { font-size: 0.95rem; margin-bottom: 12px; }
+    .admin-header p { font-size: 0.85rem; line-height: 1.4; }
+    .admin-form { grid-template-columns: 1fr; gap: 14px; }
+    .admin-form input, .admin-form select {
+        padding: 12px 14px;
+        min-height: 48px;
+        font-size: 16px;
+    }
+    .form-actions, .form-actions-end {
+        flex-direction: column;
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        gap: 10px;
+    }
+    .primary-btn, .secondary-btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 48px;
+        padding: 14px 16px;
+        font-size: 1rem;
+    }
+    .validation-errors { padding: 12px 14px; font-size: 0.9rem; line-height: 1.4; }
+    .table-wrap { margin: 0 -12px; padding: 0 12px; }
+    .table-wrap::before {
+        content: "Deslizá para ver más columnas →";
+        display: block;
+        font-size: 0.75rem;
+        color: var(--toro-muted);
+        margin-bottom: 8px;
+    }
+    .menu-table { min-width: 380px; font-size: 0.8rem; }
+    .menu-table th, .menu-table td { padding: 10px 8px; }
+    .habilitada-btn { width: 40px; height: 40px; min-width: 40px; min-height: 40px; font-size: 1.1rem; }
+    .action-btn { min-height: 40px; padding: 0 12px; font-size: 0.75rem; }
+}
+
+/* ========== Móviles pequeños (≤ 480px) ========== */
+@media (max-width: 480px) {
+    .admin-menu { padding: 10px 8px 24px; }
+    .admin-card { padding: 12px 10px; border-radius: 10px; }
+    .card-title { font-size: 0.9rem; margin-bottom: 10px; }
+    .admin-actions .primary-btn { width: 100%; min-height: 48px; padding: 14px; }
+    .table-wrap { margin: 0 -8px; padding: 0 8px; }
+    .menu-table { min-width: 360px; font-size: 0.75rem; }
+    .menu-table th, .menu-table td { padding: 8px 6px; }
+    .habilitada-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+    .action-btn { min-height: 36px; padding: 0 10px; font-size: 0.7rem; }
 }

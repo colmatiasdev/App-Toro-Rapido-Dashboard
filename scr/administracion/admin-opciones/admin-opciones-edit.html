@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Editar opción - Toro Rápido</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,7 +14,7 @@
     <div id="admin-header-slot"></div>
     <main class="admin-menu">
         <header class="admin-header">
-            <p id="form-header-desc">Modificá los datos de la opción en la hoja <strong>opciones-base</strong> de Google Sheet (la misma donde se crean con Agregar opción). Los valores actuales se cargan desde esa hoja; cambiá lo que quieras y guardá o cancelá.</p>
+            <p id="form-header-desc">Modificá los datos de la opción y guardá o cancelá.</p>
         </header>
 
         <section class="admin-card">
@@ -58,11 +58,11 @@
                     <span class="label-title">Recargo ($)</span>
                     <input type="number" name="recargo" placeholder="0" min="0" value="0">
                 </label>
-                <div class="form-actions">
+                <div class="form-actions form-actions-end">
                     <button type="submit" class="primary-btn" id="submit-btn">Actualizar</button>
                     <a href="admin-opciones.html" class="secondary-btn">Cancelar edición</a>
                 </div>
-                <span class="hint" id="form-footer-hint">Los cambios se guardan en la hoja <strong>opciones-base</strong> (misma que usa Agregar opción). Al cancelar volvés al listado sin guardar.</span>
+                <span class="hint" id="form-footer-hint">Al cancelar volvés al listado sin guardar.</span>
             </form>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
         </section>

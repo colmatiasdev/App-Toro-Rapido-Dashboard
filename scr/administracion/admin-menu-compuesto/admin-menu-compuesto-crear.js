@@ -1,5 +1,6 @@
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuCompuestoSheetName || "menu-toro-rapido-web-compuesto";
+const MENU_SIMPLE_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
 
 const normalizeKey = (value) => (value ?? "")
     .toString()
@@ -9,6 +10,29 @@ const normalizeKey = (value) => (value ?? "")
     .replace(/[\s_-]/g, "");
 
 const cleanText = (value) => (value ?? "").toString().trim();
+
+const escapeHtml = (text) => {
+    const div = document.createElement("div");
+    div.textContent = text ?? "";
+    return div.innerHTML;
+};
+
+const fillCategoriaDatalist = (datalistId, rows, keys) => {
+    const datalist = document.getElementById(datalistId);
+    if (!datalist) return;
+    const keyList = keys || ["Categoria", "categoria", "Categoría"];
+    const seen = new Set();
+    const categorias = [];
+    for (const r of rows) {
+        const c = cleanText(getValue(r, keyList));
+        if (c && !seen.has(c)) {
+            seen.add(c);
+            categorias.push(c);
+        }
+    }
+    categorias.sort((a, b) => a.localeCompare(b, "es"));
+    datalist.innerHTML = categorias.map((c) => `<option value="${escapeHtml(c)}">`).join("");
+};
 
 const getValue = (row, keys) => {
     if (!row || typeof row !== "object") return "";
@@ -50,11 +74,28 @@ const fetchSheetList = async () => {
     }
 };
 
+const fetchSheetListSimple = async () => {
+    if (!MENU_SCRIPT_URL) return [];
+    const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
+    const url = `${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(MENU_SIMPLE_SHEET_NAME)}&_ts=${Date.now()}`;
+    try {
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) return [];
+        const data = await response.json();
+        if (data?.error || data?.result === "error") return [];
+        return rowsFromSheetData(data);
+    } catch (e) {
+        console.error(e);
+        return [];
+    }
+};
+
 const setAutoOrder = async () => {
     const input = document.getElementById("orden-input");
     if (!input) return;
     input.value = "";
     const rows = await fetchSheetList();
+    fillCategoriaDatalist("categoria-datalist-compuesto", rows);
     let max = 0;
     rows.forEach((row) => {
         const v = cleanText(getValue(row, ["orden", "order"]));
@@ -64,10 +105,54 @@ const setAutoOrder = async () => {
     input.value = max + 1;
 };
 
+const setAutoOrderSimple = async () => {
+    const input = document.getElementById("orden-simple-input");
+    if (!input) return;
+    input.value = "";
+    const rows = await fetchSheetListSimple();
+    fillCategoriaDatalist("categoria-datalist-simple", rows);
+    let max = 0;
+    rows.forEach((row) => {
+        const v = cleanText(getValue(row, ["orden", "order"]));
+        const num = Number(v);
+        if (!Number.isNaN(num)) max = Math.max(max, num);
+    });
+    input.value = max + 1;
+};
+
+const setAutoIdSimple = () => {
+    const input = document.getElementById("idproducto-input");
+    if (!input) return;
+    input.value = `PROD-${Date.now()}`;
+};
+
 const setAutoId = () => {
     const input = document.getElementById("idmenu-unico-input");
     if (!input) return;
     input.value = `MENU-${Date.now()}`;
+};
+
+const switchPanelsByTipo = () => {
+    const tipo = document.getElementById("tipomenu-select")?.value || "";
+    const panelSimple = document.getElementById("form-panel-simple");
+    const panelCompuesto = document.getElementById("form-panel-compuesto");
+    const actionsWrap = document.getElementById("form-actions-wrap");
+
+    if (panelSimple) panelSimple.style.display = "none";
+    if (panelCompuesto) panelCompuesto.style.display = "none";
+    if (actionsWrap) actionsWrap.style.display = "none";
+
+    if (tipo === "MENU-SIMPLE") {
+        if (panelSimple) panelSimple.style.display = "grid";
+        if (actionsWrap) actionsWrap.style.display = "flex";
+        setAutoIdSimple();
+        setAutoOrderSimple();
+    } else if (tipo === "MENU-COMPUESTO") {
+        if (panelCompuesto) panelCompuesto.style.display = "grid";
+        if (actionsWrap) actionsWrap.style.display = "flex";
+        setAutoId();
+        setAutoOrder();
+    }
 };
 
 const setFormMode = (mode) => {
@@ -96,10 +181,24 @@ const setDebug = (message) => {
 };
 
 let currentImageUrl = "";
+let currentImageUrlSimple = "";
 
 const setImagePreview = (url) => {
     const wrapper = document.getElementById("image-preview");
     const img = document.getElementById("image-preview-img");
+    if (!wrapper || !img) return;
+    if (!url) {
+        wrapper.style.display = "none";
+        img.src = "";
+        return;
+    }
+    wrapper.style.display = "grid";
+    img.src = url;
+};
+
+const setImagePreviewSimple = (url) => {
+    const wrapper = document.getElementById("image-preview-simple");
+    const img = document.getElementById("image-preview-img-simple");
     if (!wrapper || !img) return;
     if (!url) {
         wrapper.style.display = "none";
@@ -158,23 +257,21 @@ const loadForEdit = async (id) => {
         productoAgotado: cleanText(getValue(row, ["Producto Agotado", "productoagotado"])) || "NO",
         stock: cleanText(getValue(row, ["Stock", "stock"]))
     });
+    document.getElementById("tipomenu-select").value = "MENU-COMPUESTO";
+    switchPanelsByTipo();
     setFormMode("edit");
 };
 
 const initForm = () => {
     const form = document.getElementById("add-item-form");
-    const cancelBtn = document.getElementById("cancel-edit");
-    cancelBtn?.addEventListener("click", () => {
-        form?.reset();
-        const fileInput = document.getElementById("imagen-file");
-        if (fileInput) fileInput.value = "";
-        setImagePreview("");
-        currentImageUrl = "";
-        setFormMode("create");
-    });
 
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
+        const tipo = document.getElementById("tipomenu-select")?.value || "";
+        if (!tipo) {
+            alert("Elegí el tipo de menú (MENU-SIMPLE o MENU-COMPUESTO) para continuar.");
+            return;
+        }
         if (!MENU_SCRIPT_URL) {
             alert("Falta configurar appsScriptMenuUrl en config.js.");
             return;
@@ -183,21 +280,77 @@ const initForm = () => {
 
         const formMode = document.getElementById("form-mode")?.value || "create";
         const data = new FormData(form);
+        const isCreate = formMode !== "edit";
+
+        if (tipo === "MENU-SIMPLE") {
+            const fileInput = document.getElementById("imagen-file-simple");
+            let imageUrl = "";
+            if (fileInput?.files?.[0]) {
+                imageUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(fileInput.files[0]);
+                });
+                setImagePreviewSimple(imageUrl);
+            }
+            if (!imageUrl) imageUrl = currentImageUrlSimple;
+
+            const payload = {
+                action: "create",
+                sheetName: MENU_SIMPLE_SHEET_NAME,
+                orden: cleanText(data.get("orden_simple")),
+                idproducto: cleanText(data.get("idproducto")),
+                Categoria: cleanText(data.get("categoria_simple")),
+                Producto: cleanText(data.get("producto_simple")),
+                Descripcion: cleanText(data.get("descripcion_simple")),
+                Precio: cleanText(data.get("precio_simple")),
+                Imagen: imageUrl,
+                "Es Destacado": cleanText(data.get("esdestacado_simple")) || "NO",
+                "Producto Agotado": cleanText(data.get("productoagotado_simple")) || "NO",
+                stock: cleanText(data.get("stock_simple")),
+                habilitado: "SI",
+                Habilitado: "SI"
+            };
+            if (!payload.Categoria || !payload.Producto || !payload.Precio) {
+                alert("Completá Categoría, Producto y Precio (menú simple).");
+                return;
+            }
+            try {
+                await fetch(MENU_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(payload)
+                });
+                setDebug("Enviado a hoja menú simple.");
+                alert("Ítem enviado para crear en menú simple.");
+                form.reset();
+                if (fileInput) fileInput.value = "";
+                setImagePreviewSimple("");
+                currentImageUrlSimple = "";
+                switchPanelsByTipo();
+            } catch (error) {
+                console.error(error);
+                setDebug(`Error: ${error?.message || error}`);
+                alert("No se pudo enviar. Revisá el Apps Script.");
+            }
+            return;
+        }
+
         const fileInput = document.getElementById("imagen-file");
         let imageUrl = "";
         if (fileInput?.files?.[0]) {
-            const base64 = await new Promise((resolve, reject) => {
+            imageUrl = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result);
                 reader.onerror = reject;
                 reader.readAsDataURL(fileInput.files[0]);
             });
-            imageUrl = base64;
-            setImagePreview(base64);
+            setImagePreview(imageUrl);
         }
         if (!imageUrl && formMode === "edit") imageUrl = currentImageUrl;
 
-        const isCreate = formMode !== "edit";
         const payload = {
             action: isCreate ? "create" : "update",
             sheetName: MENU_SHEET_NAME,
@@ -238,6 +391,7 @@ const initForm = () => {
             setImagePreview("");
             currentImageUrl = "";
             setFormMode("create");
+            switchPanelsByTipo();
         } catch (error) {
             console.error(error);
             setDebug(`Error al enviar: ${error?.message || error}`);
@@ -246,16 +400,21 @@ const initForm = () => {
     });
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     initForm();
     setFormMode("create");
     const id = new URLSearchParams(window.location.search).get("id");
     if (id) {
         loadForEdit(id);
+        switchPanelsByTipo();
     } else {
-        setAutoId();
-        setAutoOrder();
+        const [rowsCompuesto, rowsSimple] = await Promise.all([fetchSheetList(), fetchSheetListSimple()]);
+        fillCategoriaDatalist("categoria-datalist-compuesto", rowsCompuesto);
+        fillCategoriaDatalist("categoria-datalist-simple", rowsSimple);
+        switchPanelsByTipo();
     }
+    document.getElementById("tipomenu-select")?.addEventListener("change", switchPanelsByTipo);
+
     const fileInput = document.getElementById("imagen-file");
     const uploadBtn = document.getElementById("upload-image-btn");
     const changeBtn = document.getElementById("change-image-btn");
@@ -269,6 +428,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const reader = new FileReader();
         reader.onload = () => setImagePreview(reader.result);
+        reader.readAsDataURL(file);
+    });
+
+    const fileInputSimple = document.getElementById("imagen-file-simple");
+    const uploadBtnSimple = document.getElementById("upload-image-btn-simple");
+    const changeBtnSimple = document.getElementById("change-image-btn-simple");
+    uploadBtnSimple?.addEventListener("click", () => fileInputSimple?.click());
+    changeBtnSimple?.addEventListener("click", () => fileInputSimple?.click());
+    fileInputSimple?.addEventListener("change", () => {
+        const file = fileInputSimple?.files?.[0];
+        if (!file) {
+            setImagePreviewSimple("");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            currentImageUrlSimple = reader.result;
+            setImagePreviewSimple(reader.result);
+        };
         reader.readAsDataURL(file);
     });
 });

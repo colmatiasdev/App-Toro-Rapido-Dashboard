@@ -74,9 +74,11 @@ const loadProductos = async () => {
             const productoAgotado = siNo(getValue(row, ["Producto Agotado", "productoagotado", "ProductoAgotado"]));
             const stock = cleanText(getValue(row, ["STOCK", "stock"]));
             const habilitada = siNo(getValue(row, ["Habilitada", "habilitada", "Habilitado", "habilitado"]));
+            const montoDescuentoRaw = getValue(row, ["Monto Descuento", "montodescuento", "MontoDescuento"]);
+            const montoDescuento = (montoDescuentoRaw === "" || montoDescuentoRaw == null) ? NaN : Number(montoDescuentoRaw);
             return {
                 idproducto, categoria, producto, descripcion, precioActual, precioRegular, imagen,
-                esDestacado, productoAgotado, stock, habilitada,
+                esDestacado, productoAgotado, stock, habilitada, montoDescuento,
                 raw: row
             };
         }).filter((r) => r.idproducto || r.producto);
@@ -106,11 +108,9 @@ const loadProductos = async () => {
             return txt;
         };
         const descuentoCell = (row) => {
-            const actual = precioNum(row.precioActual);
-            const regular = precioNum(row.precioRegular);
-            if (Number.isNaN(actual) || Number.isNaN(regular) || regular <= 0 || actual >= regular) return "—";
-            const pct = Math.round(((regular - actual) / regular) * 100);
-            return `<span class="descuento-pct">${pct}%</span>`;
+            const monto = row.montoDescuento;
+            if (monto == null || Number.isNaN(monto) || monto === 0) return "—";
+            return `<span class="descuento-monto">${formatPrecio(monto)}</span>`;
         };
         const stockNum = (s) => (s === "" || s == null) ? 0 : Number(s);
         const isAgotado = (row) => row.productoAgotado === "SI" || stockNum(row.stock) === 0;
