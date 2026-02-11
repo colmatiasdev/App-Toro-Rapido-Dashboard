@@ -446,6 +446,10 @@ const initForm = () => {
                 habilitado: "SI",
                 Habilitado: "SI"
             };
+            if (!payload.idmenu) {
+                alert("Falta ID Menú. Recargá la página y volvé a elegir MENU-SIMPLE.");
+                return;
+            }
             if (!payload.idproducto) {
                 alert("Elegí un producto de la lista de productos base.");
                 return;
