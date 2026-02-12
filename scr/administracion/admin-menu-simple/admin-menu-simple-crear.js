@@ -2,6 +2,13 @@ const URL_CSV = window.APP_CONFIG?.googleSheetUrl || "";
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuSimpleSheetName || "menu-toro-rapido-web-simple";
 
+/** Todos los campos de la hoja menu-simple (orden de columnas). Al crear solo se envían idmenu e idproducto. */
+const MENU_SIMPLE_ALL_FIELDS = [
+    "idmenu", "idproducto", "Categoria", "Producto", "Descripcion", "Precio Actual", "Precio Regular",
+    "Imagen", "Es Destacado", "Producto Agotado", "STOCK", "orden", "Habilitado",
+    "Mostar Monto Descuento", "Mostar Descuento"
+];
+
 const normalizeKey = (value) => value
     .toString()
     .normalize("NFD")
@@ -87,6 +94,17 @@ const setAutoOrder = async () => {
     }
 };
 
+/** Genera un id único para menu-simple: MENU-SIMPLE-<alfanumérico> (ej. MENU-SIMPLE-mlil7jq7adowb5). */
+const generateIdMenu = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let part = "";
+    const len = 13;
+    for (let i = 0; i < len; i++) {
+        part += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return "MENU-SIMPLE-" + part;
+};
+
 const setAutoId = () => {
     const input = document.getElementById("idproducto-input");
     if (!input) return;
@@ -140,23 +158,75 @@ const updateDebugPayloadSimple = () => {
     if (!form) return;
     const data = new FormData(form);
     const formMode = document.getElementById("form-mode")?.value || "create";
-    const payload = {
-        action: formMode === "edit" ? "update" : "create",
-        sheetName: MENU_SHEET_NAME,
-        orden: cleanText(data.get("orden")),
-        idproducto: cleanText(data.get("idproducto")),
+    const isCreate = formMode !== "edit";
+    const idproducto = cleanText(data.get("idproducto"));
+    const formValues = {
+        idmenu: "(se generará al guardar)",
+        idproducto: idproducto,
         Categoria: cleanText(data.get("categoria")),
         Producto: cleanText(data.get("producto")),
         Descripcion: cleanText(data.get("descripcion")),
-        Precio: cleanText(data.get("precio")),
+        "Precio Actual": cleanText(data.get("precio")),
+        "Precio Regular": cleanText(data.get("precio")),
         Imagen: currentImageUrl ? "(imagen)" : "",
         "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
         "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
-        stock: cleanText(data.get("stock")),
-        habilitado: formMode === "edit" ? undefined : "SI",
-        Habilitado: formMode === "edit" ? undefined : "SI"
+        STOCK: cleanText(data.get("stock")),
+        orden: cleanText(data.get("orden")),
+        Habilitado: formMode === "edit" ? (cleanText(data.get("habilitado")) || "SI") : "SI",
+        "Mostar Monto Descuento": "NO",
+        "Mostar Descuento": "NO"
     };
-    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: MENU_SHEET_NAME, payload }]);
+    const usedOnCreate = { idmenu: true, idproducto: true };
+    let payload;
+    let allFieldsForDebug;
+    if (isCreate) {
+        payload = {
+            action: "create",
+            sheetName: MENU_SHEET_NAME,
+            idmenu: formValues.idmenu,
+            idproducto: formValues.idproducto
+        };
+        allFieldsForDebug = MENU_SIMPLE_ALL_FIELDS.map(function (key) {
+            const value = formValues[key] !== undefined ? formValues[key] : (key === "idmenu" ? "(se generará al guardar)" : (key === "idproducto" ? idproducto : "—"));
+            return { key: key, value: value, used: !!usedOnCreate[key] };
+        });
+    } else {
+        payload = {
+            action: "update",
+            sheetName: MENU_SHEET_NAME,
+            orden: formValues.orden,
+            idproducto: formValues.idproducto,
+            Categoria: formValues.Categoria,
+            Producto: formValues.Producto,
+            Descripcion: formValues.Descripcion,
+            Precio: formValues["Precio Actual"],
+            Imagen: formValues.Imagen,
+            "Es Destacado": formValues["Es Destacado"],
+            "Producto Agotado": formValues["Producto Agotado"],
+            stock: formValues.STOCK,
+            Habilitado: formValues.Habilitado
+        };
+        const valueByField = {
+            "Precio Actual": payload.Precio,
+            "Precio Regular": formValues["Precio Regular"]
+        };
+        allFieldsForDebug = MENU_SIMPLE_ALL_FIELDS.map(function (key) {
+            const value = valueByField[key] !== undefined ? valueByField[key] : (payload[key] !== undefined ? payload[key] : formValues[key]);
+            return { key: key, value: value != null && value !== "" ? value : "—", used: true };
+        });
+    }
+    const actionType = formMode === "edit" ? "update" : "create";
+    const actionDescription = formMode === "edit"
+        ? "Actualización de un registro existente en la hoja de Google Sheet del menú simple."
+        : "Al guardar (Crear) solo se envían idmenu e idproducto. El resto de campos de la hoja se muestran abajo pero no se usarán en esta acción.";
+    window.renderDebugPayloadSection("debug-payload-wrap", [{
+        sheetName: MENU_SHEET_NAME,
+        actionType: actionType,
+        actionDescription: actionDescription,
+        payload: payload,
+        allFieldsForDebug: allFieldsForDebug
+    }]);
 };
 
 const setImagePreview = (url) => {
@@ -276,26 +346,39 @@ const initForm = () => {
         }
 
         const isCreate = formMode !== "edit";
-        const payload = {
-            action: formMode === "edit" ? "update" : "create",
-            sheetName: MENU_SHEET_NAME,
-            orden: cleanText(data.get("orden")),
-            idproducto: cleanText(data.get("idproducto")),
-            Categoria: cleanText(data.get("categoria")),
-            Producto: cleanText(data.get("producto")),
-            Descripcion: cleanText(data.get("descripcion")),
-            Precio: cleanText(data.get("precio")),
-            Imagen: imageUrl,
-            "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
-            "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
-            stock: cleanText(data.get("stock")),
-            habilitado: isCreate ? "SI" : undefined,
-            Habilitado: isCreate ? "SI" : undefined
-        };
-
-        if (!payload.Categoria || !payload.Producto || !payload.Precio) {
-            alert("Completá Categoría, Producto y Precio.");
-            return;
+        let payload;
+        if (isCreate) {
+            const idproducto = cleanText(data.get("idproducto"));
+            if (!idproducto) {
+                alert("Completá ID Producto (ej. PROD-BASE-xxx del producto creado en productos-base).");
+                return;
+            }
+            payload = {
+                action: "create",
+                sheetName: MENU_SHEET_NAME,
+                idmenu: generateIdMenu(),
+                idproducto: idproducto
+            };
+        } else {
+            payload = {
+                action: "update",
+                sheetName: MENU_SHEET_NAME,
+                orden: cleanText(data.get("orden")),
+                idproducto: cleanText(data.get("idproducto")),
+                Categoria: cleanText(data.get("categoria")),
+                Producto: cleanText(data.get("producto")),
+                Descripcion: cleanText(data.get("descripcion")),
+                Precio: cleanText(data.get("precio")),
+                Imagen: imageUrl,
+                "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
+                "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
+                stock: cleanText(data.get("stock")),
+                Habilitado: cleanText(data.get("habilitado")) || "SI"
+            };
+            if (!payload.Categoria || !payload.Producto || !payload.Precio) {
+                alert("Completá Categoría, Producto y Precio.");
+                return;
+            }
         }
 
         try {

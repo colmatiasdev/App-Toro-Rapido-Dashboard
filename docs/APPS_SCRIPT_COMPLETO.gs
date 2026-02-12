@@ -9,8 +9,8 @@
  * doPost (body JSON):
  *   - action=delete: marca Habilitado/Habilitada = NO en la fila del ID.
  *   - action=update: actualiza la fila (productos por idproductoOld; opciones por idopcionesOld+grupoOld+opcionOld; menú por idmenu-unico).
- *   - action=create: agrega una fila nueva. Acepta cualquier hoja (productos-base, opciones-base, menu-toro-rapido-web-simple, menu-toro-rapido-web-compuesto, etc.).
- *     Para menu-toro-rapido-web-simple: la hoja debe existir con ese nombre exacto y la fila 1 con los headers (ej. idmenu, idproducto, orden, Categoria, Producto, Descripcion, Precio, Imagen, etc.).
+ *   - action=create: agrega una fila nueva. Acepta cualquier hoja (productos-base, opciones-base, menu-toro-rapido-web-compuesto, menu-compuesto-detalle, etc.).
+ *     La hoja menu-toro-rapido-web-simple ya no se usa; si sheetName apunta a una hoja inexistente, el Script devuelve error "Hoja no encontrada".
  */
 
 // ========== doGet ==========
@@ -174,7 +174,7 @@ function findRowById(sheet, headers, idProductoOrData) {
   if (idCol === -1) idCol = findHeaderIndex(headers, "idopciones");
   if (idCol === -1) idCol = findHeaderIndex(headers, "idmenu-unico");
   if (idCol === -1) idCol = findHeaderIndex(headers, "idmenuunico");
-  if (idCol === -1) idCol = findHeaderIndex(headers, "idmenu");  // hoja menu-toro-rapido-web-simple
+  if (idCol === -1) idCol = findHeaderIndex(headers, "idmenu");
   if (idCol === -1) idCol = findHeaderIndex(headers, "id");
   if (idCol === -1) return -1;
 

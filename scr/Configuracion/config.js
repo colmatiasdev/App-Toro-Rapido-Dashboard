@@ -5,8 +5,10 @@ window.APP_CONFIG = {
     // ========== GENERAL Y DEBUG ==========
     /** true: en la página pública (inicio-publico.html) se muestran botones por cada versión de menú para pruebas. false: solo el menú activo. */
     debug: true,
-    /** Lista de versiones de menú disponibles. Solo se usa cuando debug es true. */
-    menuVersiones: ["menu-simple", "menu-compuesto"],
+    /** true: la sección de vista previa debug (pasos de envío) se muestra expandida. false: hay que expandir cada paso manualmente. */
+    debugFull: true,
+    /** Lista de versiones de menú disponibles. Solo se usa cuando debug es true. (Hoja menu-simple ya no existe.) */
+    menuVersiones: ["menu-compuesto"],
     /** Menú público activo cuando debug es false. Debe coincidir con un valor de menuVersiones. */
     menuActivo: "menu-compuesto",
     /** Límite máximo de productos a mostrar por categoría en el menú (0 = sin límite). */
@@ -37,11 +39,11 @@ window.APP_CONFIG = {
     appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbxtFDv6ee-JnHSCRBMOI6_H4h6YdRvwLlLxBP7BzMGd0TZIDeqcVDC4fFkxizXFW1f90Q/exec",
 
     // ========== MENÚ – HOJAS DE CÁLCULO ==========
-    /** URL CSV de la hoja del menú simple (opcional). Si no está, se usa Apps Script. */
-    googleSheetUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRTNEWKO90itVxMNkeLNQn3wfoScs6t4mGHh9DKJz4fMsdCf4xOj72cSSJfkTKopOuIEfqJawOjbB8X/pub?gid=1924165913&single=true&output=csv",
-    /** Nombre de la hoja en el Sheet para menú simple. */
-    menuSimpleSheetName: "menu-toro-rapido-web-simple",
-    /** Nombre de la hoja para menú compuesto. Columnas: orden, idmenu-unico, Tipo Menu, idmenu-variable, idproducto, Categoria, Producto, Descripcion Producto, Precio Actual, Precio Regular, Monto Descuento, Porcentaje Descuento, Mostar Descuento, Imagen, Es Destacado, Producto Agotado, Stock, Habilitado. */
+    /** URL CSV de la hoja del menú simple (opcional). La hoja menu-simple ya no existe; dejar vacío o usar solo menú compuesto. */
+    googleSheetUrl: "",
+    /** Nombre de la hoja en el Sheet para menú simple. Ya no existe; dejar vacío. Si está vacío, en menú compuesto no se escribe en esta hoja. */
+    menuSimpleSheetName: "",
+    /** Nombre de la hoja para el registro del menú compuesto (paso 3 al guardar MENU-SIMPLE). Columnas: orden, idmenu-unico, Tipo Menu, etc. */
     menuCompuestoSheetName: "menu-toro-rapido-web-compuesto",
     /** URL CSV de la hoja del menú compuesto (opcional). Si está vacío, se usa solo Apps Script. */
     googleSheetUrlMenuCompuesto: "",
@@ -51,7 +53,7 @@ window.APP_CONFIG = {
     googleSheetUrlMenuCompuestoDetalle: "",
     /** Nombre de la hoja de opciones/agregados por producto (ej. "menu-opciones" o "opciones-base"). Columnas: idproducto, Grupo, Tipo, Obligatorio, Opcion, Recargo. Ver docs/MENU_OPCIONES_SHEET.md */
     menuOpcionesSheetName: "opciones-base",
-    /** Nombre de la hoja de productos. Columnas esperadas: ID Producto, Nombre, Habilitada (SI/NO). */
+    /** Nombre de la hoja de productos. Columnas: ID Producto, Categoria, Producto, Descripcion, Precio Actual, Precio Regular, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado, Mostar Monto Descuento, Mostar Descuento. */
     menuProductosSheetName: "productos-base",
 
     // ========== HORARIO DE ATENCIÓN ==========

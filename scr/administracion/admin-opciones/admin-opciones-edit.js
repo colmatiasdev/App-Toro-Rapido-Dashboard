@@ -275,7 +275,12 @@ const updateDebugPayloadOpciones = () => {
         grupoOld: editKey.grupo || grupo,
         opcionOld: editKey.opcion || opcion
     };
-    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+    window.renderDebugPayloadSection("debug-payload-wrap", [{
+        sheetName: SHEET_NAME,
+        actionType: "update",
+        actionDescription: "Actualización de un registro existente en la hoja de Google Sheet (opciones/agregados por producto).",
+        payload
+    }]);
 };
 
 const initForm = () => {

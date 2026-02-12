@@ -28,8 +28,8 @@
                     <input type="number" name="orden" id="orden-input" placeholder="Auto" readonly>
                 </label>
                 <label>
-                    <span class="label-title">ID Producto (automático)</span>
-                    <input type="text" name="idproducto" id="idproducto-input" placeholder="PROD-..." readonly>
+                    <span class="label-title">ID Producto <span class="req">*</span></span>
+                    <input type="text" name="idproducto" id="idproducto-input" placeholder="PROD-BASE-xxx (del producto en productos-base)" title="Solo al crear se guardan idmenu e idproducto en menu-simple">
                 </label>
                 <label>
                     <span class="label-title">Categoría <span class="req">*</span></span>
@@ -96,8 +96,8 @@
         </div>
     </footer>
 
-    <script src="../../../config.js"></script>
-    <script src="../admin-common.js"></script>
-    <script src="admin-menu-simple-crear.js"></script>
+    <script src="../../Configuracion/config.js" defer></script>
+    <script src="../admin-common.js" defer></script>
+    <script src="admin-menu-simple-crear.js" defer></script>
 </body>
 </html>
