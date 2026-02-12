@@ -220,12 +220,17 @@ const updateDebugPayloadSimple = () => {
     const actionDescription = formMode === "edit"
         ? "Actualización de un registro existente en la hoja de Google Sheet del menú simple."
         : "Al guardar (Crear) solo se envían idmenu e idproducto. El resto de campos de la hoja se muestran abajo pero no se usarán en esta acción.";
+    const fieldFormats = isCreate ? {
+        idmenu: "Fijo «MENU-SIMPLE-» + 13 caracteres alfanuméricos aleatorios",
+        idproducto: "Del producto elegido (ej. PROD-BASE-xxx)"
+    } : {};
     window.renderDebugPayloadSection("debug-payload-wrap", [{
         sheetName: MENU_SHEET_NAME,
         actionType: actionType,
         actionDescription: actionDescription,
         payload: payload,
-        allFieldsForDebug: allFieldsForDebug
+        allFieldsForDebug: allFieldsForDebug,
+        fieldFormats: fieldFormats
     }]);
 };
 

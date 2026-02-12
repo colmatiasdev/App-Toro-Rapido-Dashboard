@@ -36,7 +36,7 @@ window.APP_CONFIG = {
     /** URL del despliegue de Google Apps Script para envío de pedidos. */
     appsScriptPedidosUrl: "https://script.google.com/macros/s/AKfycbzzCRn0wQHHNg9PRQAprtyFXdAvRJT0iTFv_x3GlzZ5PFNpEcFzfvNJJBM5SxNL6TH4xw/exec",
     /** URL del despliegue de Apps Script para menú, opciones, horarios, productos. */
-    appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbxtFDv6ee-JnHSCRBMOI6_H4h6YdRvwLlLxBP7BzMGd0TZIDeqcVDC4fFkxizXFW1f90Q/exec",
+    appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbyoSntXO12SW21iSqyGGnWnAJ4fZGTNVUFyLJT8poq9SPptjrZZ9HYjWPbeqLHxjUHGwA/exec",
 
     // ========== MENÚ – HOJAS DE CÁLCULO ==========
     /** URL CSV de la hoja del menú simple (opcional). La hoja menu-simple ya no existe; dejar vacío o usar solo menú compuesto. */

@@ -1,9 +1,7 @@
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
-/** Hoja para el registro del menú compuesto (paso 3 al guardar MENU-SIMPLE). */
+/** Hoja para el registro del menú compuesto. */
 const MENU_SHEET_NAME = window.APP_CONFIG?.menuCompuestoSheetName || "menu-toro-rapido-web-compuesto";
-/** Hoja para menú simple (opción MENU-SIMPLE del combo). Vacío si la hoja ya no existe. */
-const MENU_SIMPLE_SHEET_NAME = (window.APP_CONFIG?.menuSimpleSheetName || "").toString().trim();
-/** Hoja para ítems MENU-COMPUESTO (opción MENU-COMPUESTO del combo). */
+/** Hoja para ítems MENU-COMPUESTO (menu-compuesto-detalle). */
 const MENU_COMPUESTO_DETALLE_SHEET_NAME = window.APP_CONFIG?.menuCompuestoDetalleSheetName || "menu-compuesto-detalle";
 const PRODUCTOS_SHEET_NAME = window.APP_CONFIG?.menuProductosSheetName || "productos-base";
 
@@ -104,23 +102,7 @@ const fetchSheetList = async () => {
     }
 };
 
-const fetchSheetListSimple = async () => {
-    if (!MENU_SCRIPT_URL || !MENU_SIMPLE_SHEET_NAME) return [];
-    const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
-    const url = `${MENU_SCRIPT_URL}${sep}action=list&sheetName=${encodeURIComponent(MENU_SIMPLE_SHEET_NAME)}&_ts=${Date.now()}`;
-    try {
-        const response = await fetch(url, { cache: "no-store" });
-        if (!response.ok) return [];
-        const data = await response.json();
-        if (data?.error || data?.result === "error") return [];
-        return rowsFromSheetData(data);
-    } catch (e) {
-        console.error(e);
-        return [];
-    }
-};
-
-/** Lista de filas de la hoja menu-compuesto-detalle (para panel MENU-COMPUESTO: orden, categorías). */
+/** Lista de filas de la hoja menu-compuesto-detalle (orden, categorías). */
 const fetchSheetListCompuestoDetalle = async () => {
     if (!MENU_SCRIPT_URL) return [];
     const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
@@ -159,25 +141,6 @@ const setAutoOrder = async () => {
     input.value = "";
     const rows = await fetchSheetListCompuestoDetalle();
     fillCategoriaDatalist("categoria-datalist-compuesto", rows);
-    let max = 0;
-    rows.forEach((row) => {
-        const v = cleanText(getValue(row, ["orden", "order"]));
-        const num = Number(v);
-        if (!Number.isNaN(num)) max = Math.max(max, num);
-    });
-    input.value = max + 1;
-};
-
-const setAutoOrderSimple = async () => {
-    const input = document.getElementById("orden-simple-input");
-    if (!input) return;
-    input.value = "";
-    if (!MENU_SIMPLE_SHEET_NAME) {
-        input.value = "1";
-        return;
-    }
-    const rows = await fetchSheetListSimple();
-    fillCategoriaDatalist("categoria-datalist-simple", rows);
     let max = 0;
     rows.forEach((row) => {
         const v = cleanText(getValue(row, ["orden", "order"]));
@@ -239,7 +202,9 @@ const renderProductosBaseCards = (rows) => {
         const esDestacado = (cleanText(getValue(row, ["Es Destacado", "esdestacado"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const productoAgotado = (cleanText(getValue(row, ["Producto Agotado", "productoagotado"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const stock = cleanText(getValue(row, ["Stock", "stock"]));
-        card.addEventListener("click", () => selectProductoBase({ idproducto, categoria, producto, descripcion, precio: getValue(row, ["Precio", "Precio Actual", "precioactual"]), imagen, esDestacado, productoAgotado, stock }, row));
+        const mostarMontoDescuento = (cleanText(getValue(row, ["Mostar Monto Descuento", "mostarmontodescuento"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarDescuento = (cleanText(getValue(row, ["Mostar Descuento", "Mostrar Descuento", "mostardescuento"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        card.addEventListener("click", () => selectProductoBase({ idproducto, categoria, producto, descripcion, precio: getValue(row, ["Precio", "Precio Actual", "precioactual"]), imagen, esDestacado, productoAgotado, stock, mostarMontoDescuento, mostarDescuento }, row));
         fragment.appendChild(card);
     });
     return fragment;
@@ -247,40 +212,7 @@ const renderProductosBaseCards = (rows) => {
 
 const selectProductoBase = (item, rowFromSheet) => {
     selectedProductoBaseRow = rowFromSheet || null;
-    const tipo = document.getElementById("tipomenu-select")?.value || "";
-
-    if (tipo === "MENU-COMPUESTO") {
-        fillFormFromProductoBaseCompuesto(item);
-    } else {
-        const idproductoInput = document.getElementById("idproducto-input");
-        const catInput = document.getElementById("categoria-input-simple");
-        const prodInput = document.getElementById("producto-input-simple");
-        const descInput = document.getElementById("descripcion-input-simple");
-        const precioInput = document.getElementById("precio-input-simple");
-        const esDestacadoInput = document.getElementById("esdestacado-input-simple");
-        const productoAgotadoInput = document.getElementById("productoagotado-input-simple");
-        const stockInput = document.getElementById("stock-input-simple");
-        const displayEsDestacado = document.getElementById("display-esdestacado-simple");
-        const displayProductoAgotado = document.getElementById("display-productoagotado-simple");
-        const displayStock = document.getElementById("display-stock-simple");
-        if (idproductoInput) idproductoInput.value = item.idproducto || "";
-        if (catInput) catInput.value = item.categoria || "";
-        if (prodInput) prodInput.value = item.producto || "";
-        if (descInput) descInput.value = (item.descripcion ?? item.desc) || "";
-        const precioVal = (item.precio ?? "").toString().trim();
-        if (precioInput) precioInput.value = precioVal.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".") || "";
-        currentImageUrlSimple = item.imagen || "";
-        const esDestacado = (item.esDestacado || "NO").toString().toUpperCase() === "SI" ? "SI" : "NO";
-        const productoAgotado = (item.productoAgotado || "NO").toString().toUpperCase() === "SI" ? "SI" : "NO";
-        const stock = (item.stock ?? "").toString().trim();
-        if (esDestacadoInput) esDestacadoInput.value = esDestacado;
-        if (productoAgotadoInput) productoAgotadoInput.value = productoAgotado;
-        if (stockInput) stockInput.value = stock;
-        if (displayEsDestacado) displayEsDestacado.textContent = esDestacado;
-        if (displayProductoAgotado) displayProductoAgotado.textContent = productoAgotado;
-        if (displayStock) displayStock.textContent = stock || "—";
-    }
-
+    fillFormFromProductoBaseCompuesto(item);
     document.querySelectorAll(".producto-base-card").forEach((c) => {
         c.classList.remove("selected");
         if ((c.dataset.idproducto || "") === (item.idproducto || "")) c.classList.add("selected");
@@ -288,21 +220,13 @@ const selectProductoBase = (item, rowFromSheet) => {
     updateDebugPayloadCompuesto();
 };
 
-const setProductoBaseReadonlyDisplay = (esDestacado, productoAgotado, stock) => {
-    const d1 = document.getElementById("display-esdestacado-simple");
-    const d2 = document.getElementById("display-productoagotado-simple");
-    const d3 = document.getElementById("display-stock-simple");
-    if (d1) d1.textContent = esDestacado ?? "—";
-    if (d2) d2.textContent = productoAgotado ?? "—";
-    if (d3) d3.textContent = (stock !== undefined && stock !== "") ? stock : "—";
-};
-
-/** Actualiza el bloque de solo lectura del panel MENU-COMPUESTO (labels). Igual que MENU-SIMPLE. */
-const setProductoBaseReadonlyDisplayCompuesto = (categoria, producto, descripcion, precioActual, precioRegular, imagenUrl, esDestacado, productoAgotado, stock) => {
+/** Actualiza el bloque de solo lectura del panel MENU-COMPUESTO (labels). */
+const setProductoBaseReadonlyDisplayCompuesto = (idProducto, categoria, producto, descripcion, precioActual, precioRegular, imagenUrl, esDestacado, productoAgotado, stock, mostarMontoDescuento, mostarDescuento) => {
     const set = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.textContent = (val !== undefined && val !== null && String(val).trim() !== "") ? String(val).trim() : "—";
     };
+    set("display-idproducto-compuesto", idProducto);
     set("display-categoria-compuesto", categoria);
     set("display-producto-compuesto", producto);
     set("display-descripcion-compuesto", descripcion);
@@ -311,6 +235,8 @@ const setProductoBaseReadonlyDisplayCompuesto = (categoria, producto, descripcio
     set("display-esdestacado-compuesto", esDestacado);
     set("display-productoagotado-compuesto", productoAgotado);
     set("display-stock-compuesto", (stock !== undefined && stock !== null && String(stock).trim() !== "") ? stock : "—");
+    set("display-mostar-monto-descuento-compuesto", mostarMontoDescuento);
+    set("display-mostar-descuento-compuesto", mostarDescuento);
     const previewWrap = document.getElementById("image-preview-compuesto");
     const previewImg = document.getElementById("image-preview-img-compuesto");
     const sinImagen = document.getElementById("display-imagen-sin-compuesto");
@@ -328,7 +254,7 @@ const setProductoBaseReadonlyDisplayCompuesto = (categoria, producto, descripcio
     }
 };
 
-/** Rellena el formulario compuesto con los datos del producto base seleccionado (misma lógica que MENU-SIMPLE). */
+/** Rellena el formulario compuesto con los datos del producto base seleccionado. */
 const fillFormFromProductoBaseCompuesto = (item) => {
     const form = document.getElementById("add-item-form");
     if (!form) return;
@@ -357,15 +283,11 @@ const fillFormFromProductoBaseCompuesto = (item) => {
     if (stockInput) stockInput.value = stock;
     currentImageUrl = item.imagen || "";
     const precioDisplay = precioNum ? Number.parseFloat(precioNum).toLocaleString("es-AR") : "";
-    setProductoBaseReadonlyDisplayCompuesto(item.categoria, item.producto, (item.descripcion ?? item.desc), precioDisplay, precioDisplay, currentImageUrl, esDestacado, productoAgotado, stock);
-};
-
-const setAutoIdSimple = () => {
-    const idmenuInput = document.getElementById("idmenu-simple-input");
-    const idproductoInput = document.getElementById("idproducto-input");
-    const unique = () => Date.now().toString(36) + randomAlphanumeric(6);
-    if (idmenuInput) idmenuInput.value = "MENU-SIMPLE-" + unique();
-    if (idproductoInput) idproductoInput.value = "";
+    const mostarDescuento = (item.mostarDescuento || "NO").toString().toUpperCase() === "SI" ? "SI" : "NO";
+    const mostarMontoDescuento = (item.mostarMontoDescuento || "NO").toString().toUpperCase() === "SI" ? "SI" : "NO";
+    const mostrardescuentoInput = document.getElementById("mostrardescuento-input");
+    if (mostrardescuentoInput) mostrardescuentoInput.value = mostarDescuento;
+    setProductoBaseReadonlyDisplayCompuesto(item.idproducto ?? "", item.categoria, item.producto, (item.descripcion ?? item.desc), precioDisplay, precioDisplay, currentImageUrl, esDestacado, productoAgotado, stock, mostarMontoDescuento, mostarDescuento);
 };
 
 const setAutoId = () => {
@@ -375,152 +297,154 @@ const setAutoId = () => {
 };
 
 const switchPanelsByTipo = () => {
-    const tipo = document.getElementById("tipomenu-select")?.value || "";
-    const panelProductosBase = document.getElementById("form-panel-productos-base");
-    const panelSimple = document.getElementById("form-panel-simple");
-    const panelCompuesto = document.getElementById("form-panel-compuesto");
-    const actionsWrap = document.getElementById("form-actions-wrap");
-
-    if (panelProductosBase) panelProductosBase.style.display = "none";
-    if (panelSimple) panelSimple.style.display = "none";
-    if (panelCompuesto) panelCompuesto.style.display = "none";
-    if (actionsWrap) actionsWrap.style.display = "none";
-
-    if (tipo === "MENU-SIMPLE") {
-        if (panelProductosBase) panelProductosBase.style.display = "block";
-        if (panelSimple) panelSimple.style.display = "grid";
-        if (actionsWrap) actionsWrap.style.display = "flex";
-        setAutoIdSimple();
-        setAutoOrderSimple();
-        loadAndShowProductosBase();
-        selectedProductoBaseRow = null;
-    } else if (tipo === "MENU-COMPUESTO") {
-        if (panelProductosBase) panelProductosBase.style.display = "block";
-        if (panelCompuesto) panelCompuesto.style.display = "grid";
-        if (actionsWrap) actionsWrap.style.display = "flex";
-        setAutoId();
-        setAutoOrder();
-        loadAndShowProductosBase();
-        selectedProductoBaseRow = null;
-        setProductoBaseReadonlyDisplayCompuesto("—", "—", "—", "—", "—", "", "—", "—", "—");
-    }
+    setAutoId();
+    setAutoOrder();
+    loadAndShowProductosBase();
+    selectedProductoBaseRow = null;
+    setProductoBaseReadonlyDisplayCompuesto("—", "—", "—", "—", "—", "—", "", "—", "—", "—", "—", "—");
+    const mostrardescuentoInput = document.getElementById("mostrardescuento-input");
+    if (mostrardescuentoInput) mostrardescuentoInput.value = "NO";
     updateDebugPayloadCompuesto();
+};
+
+/**
+ * Configuración por valor del combo "Forma de generar el menú".
+ * Cada opción define: panelId (contenedor a mostrar), onEnter (opcional, se ejecuta al mostrar).
+ * Para agregar una nueva opción: añadir <option> en el HTML, un div con data-tipo-panel="VALOR"
+ * y una entrada aquí.
+ */
+const OPCIONES_TIPO_GENERACION = {
+    "": {
+        panelId: "wrap-tipo-generacion-empty",
+        onEnter: null
+    },
+    "MENU-CLASICO": {
+        panelId: "wrap-menu-clasico",
+        onEnter: switchPanelsByTipo
+    },
+    "MENU-CON-SUBPRODUTO": {
+        panelId: "wrap-menu-subproducto",
+        onEnter: null
+    }
+};
+
+/** Lista de IDs de paneles que controla el combo (se ocultan todos antes de mostrar el activo). */
+const PANELES_TIPO_GENERACION = Object.values(OPCIONES_TIPO_GENERACION).map((o) => o.panelId);
+
+/** Muestra u oculta el contenido según la opción seleccionada en el combo. Extensible vía OPCIONES_TIPO_GENERACION. */
+const switchTipoGeneracion = () => {
+    const select = document.getElementById("tipo-generacion-select");
+    const tipo = (select?.value ?? "").toString().trim();
+    const config = OPCIONES_TIPO_GENERACION[tipo] ?? OPCIONES_TIPO_GENERACION[""];
+
+    PANELES_TIPO_GENERACION.forEach((panelId) => {
+        const panel = document.getElementById(panelId);
+        if (panel) panel.style.display = "none";
+    });
+
+    const panelId = config?.panelId;
+    if (panelId) {
+        const panel = document.getElementById(panelId);
+        if (panel) panel.style.display = panelId === "wrap-menu-subproducto" ? "block" : "";
+    }
+
+    const tipomenuVal = tipo === "MENU-CLASICO" ? "MENU-CLASICO" : "MENU-COMPUESTO";
+    const tipomenuHidden = document.getElementById("tipomenu-select");
+    const tipomenuDisplay = document.getElementById("tipomenu-display-compuesto");
+    if (tipomenuHidden) tipomenuHidden.value = tipomenuVal;
+    if (tipomenuDisplay) tipomenuDisplay.value = tipomenuVal;
+
+    if (typeof config?.onEnter === "function") config.onEnter();
 };
 
 const updateDebugPayloadCompuesto = () => {
     if (typeof window.renderDebugPayloadSection !== "function") return;
-    const tipo = document.getElementById("tipomenu-select")?.value || "";
     const form = document.getElementById("add-item-form");
     if (!form) return;
+    const tipoGeneracion = (document.getElementById("tipo-generacion-select")?.value ?? "").toString().trim();
     const data = new FormData(form);
     const blocks = [];
-    if (tipo === "MENU-SIMPLE") {
-        const payloadCompuesto = {
-            action: "create",
-            sheetName: MENU_SHEET_NAME,
-            orden: "(siguiente al guardar)",
-            "idmenu-unico": "(se generará al guardar)",
-            "Tipo Menu": "MENU-SIMPLE",
-            idproducto: cleanText(data.get("idproducto"))
-        };
-        blocks.push({
-            title: "Paso 1 - Hoja productos-base (Datos de los Productos)",
-            sheetName: PRODUCTOS_SHEET_NAME,
-            actionType: "read",
-            actionDescription: "Lectura de la hoja de Google Sheet. Se obtienen los productos base para que el usuario elija uno; con ese dato se rellenan automáticamente los campos del formulario.",
-            payload: selectedProductoBaseRow || { "(ningún producto seleccionado)": "Elegí un producto de la lista arriba" }
-        });
-        if (MENU_SIMPLE_SHEET_NAME) {
-            const payloadSimple = {
-                action: "create",
-                sheetName: MENU_SIMPLE_SHEET_NAME,
-                idmenu: cleanText(data.get("idmenu_simple")),
-                orden: cleanText(data.get("orden_simple")),
-                idproducto: cleanText(data.get("idproducto")),
-                Categoria: cleanText(data.get("categoria_simple")),
-                Producto: cleanText(data.get("producto_simple")),
-                Descripcion: cleanText(data.get("descripcion_simple")),
-                Precio: cleanText(data.get("precio_simple")),
-                Imagen: currentImageUrlSimple ? "(imagen)" : "",
-                "Es Destacado": cleanText(data.get("esdestacado_simple")) || "NO",
-                "Producto Agotado": cleanText(data.get("productoagotado_simple")) || "NO",
-                stock: cleanText(data.get("stock_simple")),
-                Habilitado: "SI"
-            };
-            blocks.push({
-                title: "Paso 2 - Hoja menu-simple (Registro del menú)",
-                sheetName: MENU_SIMPLE_SHEET_NAME,
-                actionType: "create",
-                actionDescription: "Escritura en la hoja de Google Sheet. Se crea un nuevo registro en el menú simple (idmenu, idproducto, categoría, producto, precio, etc.).",
-                payload: payloadSimple
-            });
-            blocks.push({
-                title: "Paso 3 - Hoja menu-toro-rapido-web-compuesto (Registro del Menú Compuesto)",
-                sheetName: MENU_SHEET_NAME,
-                actionType: "create",
-                actionDescription: "Escritura en la hoja de Google Sheet. Se crea el registro del menú compuesto con orden, idmenu-unico y Tipo Menu (MENU-SIMPLE).",
-                payload: payloadCompuesto
-            });
-        } else {
-            blocks.push({
-                title: "Paso 2 - Hoja menu-toro-rapido-web-compuesto (Registro del Menú Compuesto)",
-                sheetName: MENU_SHEET_NAME,
-                actionType: "create",
-                actionDescription: "La hoja menu-simple ya no existe. Solo se escribe en menu-compuesto: orden, idmenu-unico, Tipo Menu (MENU-SIMPLE) e idproducto (referencia al producto base).",
-                payload: payloadCompuesto
-            });
-        }
-    } else if (tipo === "MENU-COMPUESTO") {
-        const idproductoComp = cleanText(data.get("idproducto_compuesto"));
-        const payloadDetalle = {
-            action: "create",
-            sheetName: MENU_COMPUESTO_DETALLE_SHEET_NAME,
-            orden: cleanText(data.get("orden")),
-            "idmenu-unico": cleanText(data.get("idmenu-unico")),
-            "Tipo Menu": "MENU-COMPUESTO",
-            "idmenu-variable": cleanText(data.get("idmenu-variable")),
-            ...(idproductoComp ? { idproducto: idproductoComp } : {}),
-            Categoria: cleanText(data.get("categoria")),
-            Producto: cleanText(data.get("producto")),
-            "Descripcion Producto": cleanText(data.get("descripcionproducto")),
-            "Precio Actual": cleanText(data.get("precioactual")),
-            "Precio Regular": cleanText(data.get("precioregular")),
-            "Mostar Descuento": cleanText(data.get("mostrardescuento")) || "NO",
-            Imagen: currentImageUrl ? "(imagen)" : "",
-            "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
-            "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
-            Stock: cleanText(data.get("stock")),
-            Habilitado: "SI"
-        };
-        const payloadPaso3 = {
-            action: "create",
-            sheetName: MENU_SHEET_NAME,
-            orden: "(siguiente al guardar)",
-            "idmenu-unico": "(se generará al guardar)",
-            "Tipo Menu": "MENU-COMPUESTO"
-        };
-        blocks.push({
-            title: "Paso 1 - Hoja productos-base (Datos de los Productos)",
-            sheetName: PRODUCTOS_SHEET_NAME,
-            actionType: "read",
-            actionDescription: "Lectura de la hoja de Google Sheet. Se obtienen los productos base para que el usuario elija uno; con ese dato se rellenan automáticamente los campos del formulario.",
-            payload: selectedProductoBaseRow || { "(ningún producto seleccionado)": "Elegí un producto de la lista arriba" }
-        });
+
+    const idproductoComp = cleanText(data.get("idproducto_compuesto"));
+    const payloadDetalle = {
+        action: "create",
+        sheetName: MENU_COMPUESTO_DETALLE_SHEET_NAME,
+        orden: cleanText(data.get("orden")),
+        "idmenu-unico": cleanText(data.get("idmenu-unico")),
+        "Tipo Menu": cleanText(data.get("tipomenu")) || "MENU-DEFAULT",
+        ...(idproductoComp ? { idproducto: idproductoComp } : {}),
+        Categoria: cleanText(data.get("categoria")),
+        Producto: cleanText(data.get("producto")),
+        "Descripcion Producto": cleanText(data.get("descripcionproducto")),
+        "Precio Actual": cleanText(data.get("precioactual")),
+        "Precio Regular": cleanText(data.get("precioregular")),
+        "Mostar Descuento": cleanText(data.get("mostrardescuento")) || "NO",
+        Imagen: currentImageUrl ? "(imagen)" : "",
+        "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
+        "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
+        Stock: cleanText(data.get("stock")),
+        Habilitado: "SI"
+    };
+    const mostarMontoDescuentoFromRow = selectedProductoBaseRow
+        ? ((cleanText(getValue(selectedProductoBaseRow, ["Mostar Monto Descuento", "mostarmontodescuento"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO")
+        : "NO";
+    const payloadCompuesto = {
+        action: "create",
+        sheetName: MENU_SHEET_NAME,
+        orden: "(siguiente al guardar)",
+        "idmenu-unico": "(se generará al guardar)",
+        "Tipo Menu": cleanText(data.get("tipomenu")) || "MENU-DEFAULT",
+        ...(idproductoComp ? { idproducto: idproductoComp } : {}),
+        Categoria: cleanText(data.get("categoria")),
+        Producto: cleanText(data.get("producto")),
+        "Descripcion Producto": cleanText(data.get("descripcionproducto")),
+        Descripcion: cleanText(data.get("descripcionproducto")),
+        "Precio Actual": cleanText(data.get("precioactual")),
+        "Precio Regular": cleanText(data.get("precioregular")),
+        "Mostar Monto Descuento": mostarMontoDescuentoFromRow,
+        "Mostar Descuento": cleanText(data.get("mostrardescuento")) || "NO",
+        Imagen: currentImageUrl ? "(imagen)" : "",
+        "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
+        "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
+        STOCK: cleanText(data.get("stock")),
+        Habilitado: "SI"
+    };
+
+    blocks.push({
+        title: "Paso 1 - Hoja productos-base (Datos de los Productos)",
+        sheetName: PRODUCTOS_SHEET_NAME,
+        actionType: "read",
+        actionDescription: "Lectura de la hoja de Google Sheet. Se obtienen los productos base para que el usuario elija uno; con ese dato se rellenan automáticamente los campos del formulario.",
+        payload: selectedProductoBaseRow || { "(ningún producto seleccionado)": "Elegí un producto de la lista arriba" }
+    });
+
+    if (tipoGeneracion !== "MENU-CLASICO") {
         blocks.push({
             title: "Paso 2 - Hoja menu-compuesto-detalle (Registro del menú compuesto)",
             sheetName: MENU_COMPUESTO_DETALLE_SHEET_NAME,
             actionType: "create",
             actionDescription: "Escritura en la hoja de Google Sheet. Se crea un nuevo registro en el menú compuesto detalle (categoría, producto, precios, imagen, etc.).",
-            payload: payloadDetalle
-        });
-        blocks.push({
-            title: "Paso 3 - Hoja menu-toro-rapido-web-compuesto (Registro del Menú Compuesto)",
-            sheetName: MENU_SHEET_NAME,
-            actionType: "create",
-            actionDescription: "Escritura en la hoja de Google Sheet. Se crea el registro del menú compuesto con orden, idmenu-unico y Tipo Menu (MENU-COMPUESTO).",
-            payload: payloadPaso3
+            payload: payloadDetalle,
+            fieldFormats: {
+                "idmenu-unico": "Del formulario (ya generado en paso anterior o existente)"
+            }
         });
     }
+
+    const pasoCompuestoNum = tipoGeneracion === "MENU-CLASICO" ? 2 : 3;
+    blocks.push({
+        title: `Paso ${pasoCompuestoNum} - Hoja ${MENU_SHEET_NAME} (Registro del Menú Compuesto)`,
+        sheetName: MENU_SHEET_NAME,
+        actionType: "create",
+        actionDescription: "Escritura en la hoja de Google Sheet. Se crea el registro del menú compuesto con todos los datos del producto base (orden, idmenu-unico, Tipo Menu, categoría, producto, precios, imagen, etc.).",
+        payload: payloadCompuesto,
+        fieldFormats: {
+            "idmenu-unico": "Fijo «MENU-» + Date.now().toString(36) + 8 alfanum. aleatorios",
+            orden: "max(orden en hoja) + 1",
+            Imagen: "URL o base64 del producto seleccionado"
+        }
+    });
+
     window.renderDebugPayloadSection("debug-payload-wrap", blocks);
 };
 
@@ -537,9 +461,10 @@ const setFormMode = (mode) => {
     if (changeBtn) changeBtn.style.display = mode === "edit" ? "inline-flex" : "none";
 };
 
-const setDebug = (message) => {
+const setDebug = (message, isError) => {
     const box = document.getElementById("script-debug");
     if (!box) return;
+    box.classList.remove("script-debug-error", "script-debug-success");
     if (!message) {
         box.style.display = "none";
         box.textContent = "";
@@ -547,24 +472,15 @@ const setDebug = (message) => {
     }
     box.style.display = "block";
     box.textContent = message;
+    if (isError === true) box.classList.add("script-debug-error");
+    else box.classList.add("script-debug-success");
 };
 
 let currentImageUrl = "";
-let currentImageUrlSimple = "";
 
 const setImagePreview = (url) => {
     const wrapper = document.getElementById("image-preview");
     const img = document.getElementById("image-preview-img");
-    if (!wrapper || !img) return;
-    wrapper.style.display = "grid";
-    img.src = url || DEFAULT_IMAGE_PLACEHOLDER;
-    img.alt = url ? "" : "Sin imagen";
-    setImageFallback(img);
-};
-
-const setImagePreviewSimple = (url) => {
-    const wrapper = document.getElementById("image-preview-simple");
-    const img = document.getElementById("image-preview-img-simple");
     if (!wrapper || !img) return;
     wrapper.style.display = "grid";
     img.src = url || DEFAULT_IMAGE_PLACEHOLDER;
@@ -577,8 +493,7 @@ const fillForm = (item) => {
     if (!form) return;
     form.querySelector('[name="orden"]').value = item.order || "";
     form.querySelector('[name="idmenu-unico"]').value = item.id || "";
-    form.querySelector('[name="tipomenu"]').value = item.tipoMenu || "MENU-SIMPLE";
-    form.querySelector('[name="idmenu-variable"]').value = item.idmenuVariable || "";
+    form.querySelector('[name="tipomenu"]').value = item.tipoMenu || "MENU-COMPUESTO";
     form.querySelector('[name="categoria"]').value = item.category || "";
     form.querySelector('[name="producto"]').value = item.name || "";
     form.querySelector('[name="descripcionproducto"]').value = item.desc || "";
@@ -604,6 +519,7 @@ const loadForEdit = async (id) => {
         const n = raw.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".");
         return Number.parseFloat(n);
     };
+    const idProducto = cleanText(getValue(row, ["idproducto", "idproducto_compuesto", "idproducto-compuesto"]));
     const category = cleanText(getValue(row, ["Categoria", "categoria"]));
     const name = cleanText(getValue(row, ["Producto", "producto"]));
     const desc = cleanText(getValue(row, ["Descripcion Producto", "descripcionproducto", "Descripcion"]));
@@ -616,8 +532,7 @@ const loadForEdit = async (id) => {
     const item = {
         order: cleanText(getValue(row, ["orden"])),
         id: cleanText(getValue(row, ["idmenu-unico", "idmenuunico"])),
-        tipoMenu: cleanText(getValue(row, ["Tipo Menu", "tipomenu"])) || "MENU-SIMPLE",
-        idmenuVariable: cleanText(getValue(row, ["idmenu-variable", "idmenuvariable"])),
+        tipoMenu: cleanText(getValue(row, ["Tipo Menu", "tipomenu"])) || "MENU-COMPUESTO",
         category,
         name,
         desc,
@@ -630,11 +545,18 @@ const loadForEdit = async (id) => {
         stock
     };
     fillForm(item);
+    const idproductoCompInput = document.getElementById("idproducto-compuesto-input");
+    if (idproductoCompInput) idproductoCompInput.value = idProducto || "";
     const precioDisplayActual = precioActual !== "" && !Number.isNaN(Number(precioActual)) ? Number(precioActual).toLocaleString("es-AR") : "";
     const precioDisplayRegular = precioRegular !== "" && !Number.isNaN(Number(precioRegular)) ? Number(precioRegular).toLocaleString("es-AR") : "";
-    setProductoBaseReadonlyDisplayCompuesto(category, name, desc, precioDisplayActual, precioDisplayRegular, image, esDestacado, productoAgotado, stock);
-    document.getElementById("tipomenu-select").value = "MENU-COMPUESTO";
-    switchPanelsByTipo();
+    const mostarMontoDescuento = (cleanText(getValue(row, ["Mostar Monto Descuento", "mostarmontodescuento"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+    const mostarDescuento = (cleanText(getValue(row, ["Mostar Descuento", "Mostrar Descuento", "mostrardescuento"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+    setProductoBaseReadonlyDisplayCompuesto(idProducto, category, name, desc, precioDisplayActual, precioDisplayRegular, image, esDestacado, productoAgotado, stock, mostarMontoDescuento, mostarDescuento);
+    const tipomenuEl = document.getElementById("tipomenu-select");
+    if (tipomenuEl) tipomenuEl.value = "MENU-COMPUESTO";
+    const tipoGeneracionEl = document.getElementById("tipo-generacion-select");
+    if (tipoGeneracionEl) tipoGeneracionEl.value = "MENU-CLASICO";
+    switchTipoGeneracion();
     setFormMode("edit");
 };
 
@@ -643,11 +565,6 @@ const initForm = () => {
 
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const tipo = document.getElementById("tipomenu-select")?.value || "";
-        if (!tipo) {
-            alert("Elegí el tipo de menú (MENU-SIMPLE o MENU-COMPUESTO) para continuar.");
-            return;
-        }
         if (!MENU_SCRIPT_URL) {
             alert("Falta configurar appsScriptMenuUrl en config.js.");
             return;
@@ -659,88 +576,11 @@ const initForm = () => {
             submitBtn.textContent = "Guardando...";
         }
         try {
-        setDebug("Enviando datos al Apps Script...");
+        setDebug("Enviando datos al Apps Script...", false);
 
         const formMode = document.getElementById("form-mode")?.value || "create";
         const data = new FormData(form);
         const isCreate = formMode !== "edit";
-
-        if (tipo === "MENU-SIMPLE") {
-            const idproducto = cleanText(data.get("idproducto"));
-            if (!idproducto) {
-                alert("Elegí un producto de la lista de productos base.");
-                return;
-            }
-            try {
-                if (MENU_SIMPLE_SHEET_NAME) {
-                    const imageUrl = currentImageUrlSimple;
-                    const payload = {
-                        action: "create",
-                        sheetName: MENU_SIMPLE_SHEET_NAME,
-                        idmenu: cleanText(data.get("idmenu_simple")),
-                        orden: cleanText(data.get("orden_simple")),
-                        idproducto: idproducto,
-                        Categoria: cleanText(data.get("categoria_simple")),
-                        Producto: cleanText(data.get("producto_simple")),
-                        Descripcion: cleanText(data.get("descripcion_simple")),
-                        Precio: cleanText(data.get("precio_simple")),
-                        Imagen: imageUrl,
-                        "Es Destacado": cleanText(data.get("esdestacado_simple")) || "NO",
-                        "Producto Agotado": cleanText(data.get("productoagotado_simple")) || "NO",
-                        stock: cleanText(data.get("stock_simple")),
-                        habilitado: "SI",
-                        Habilitado: "SI"
-                    };
-                    if (!payload.idmenu) {
-                        alert("Falta ID Menú. Recargá la página y volvé a elegir MENU-SIMPLE.");
-                        return;
-                    }
-                    await fetch(MENU_SCRIPT_URL, {
-                        method: "POST",
-                        mode: "no-cors",
-                        headers: { "Content-Type": "text/plain;charset=utf-8" },
-                        body: JSON.stringify(payload)
-                    });
-                }
-                const compuestoRows = await fetchSheetList();
-                let nextOrden = 1;
-                compuestoRows.forEach((row) => {
-                    const v = cleanText(getValue(row, ["orden", "order"]));
-                    const num = Number(v);
-                    if (!Number.isNaN(num)) nextOrden = Math.max(nextOrden, num + 1);
-                });
-                const idmenuUnico = "MENU-" + Date.now().toString(36) + randomAlphanumeric(8);
-                const payloadCompuesto = {
-                    action: "create",
-                    sheetName: MENU_SHEET_NAME,
-                    orden: nextOrden,
-                    "idmenu-unico": idmenuUnico,
-                    "Tipo Menu": "MENU-SIMPLE",
-                    idproducto: idproducto
-                };
-                await fetch(MENU_SCRIPT_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(payloadCompuesto)
-                });
-                setDebug(MENU_SIMPLE_SHEET_NAME
-                    ? "Enviado a menú simple y a menú compuesto (idmenu-unico: " + idmenuUnico + ")."
-                    : "Hoja menu-simple no existe. Enviado solo a menú compuesto (idmenu-unico: " + idmenuUnico + ", idproducto: " + idproducto + ").");
-                alert(MENU_SIMPLE_SHEET_NAME
-                    ? "Ítem creado en menú simple y en menú compuesto (idmenu-unico: " + idmenuUnico + ")."
-                    : "Ítem creado en menú compuesto (idmenu-unico: " + idmenuUnico + "). La hoja menu-simple ya no existe.");
-                form.reset();
-                currentImageUrlSimple = "";
-                setProductoBaseReadonlyDisplay("—", "—", "—");
-                switchPanelsByTipo();
-            } catch (error) {
-                console.error(error);
-                setDebug(`Error: ${error?.message || error}`);
-                alert("No se pudo enviar. Revisá el Apps Script.");
-            }
-            return;
-        }
 
         const fileInput = document.getElementById("imagen-file");
         let imageUrl = "";
@@ -754,7 +594,7 @@ const initForm = () => {
             setImagePreview(imageUrl);
         }
         if (!imageUrl && formMode === "edit") imageUrl = currentImageUrl;
-        if (!imageUrl && tipo === "MENU-COMPUESTO") imageUrl = currentImageUrl;
+        if (!imageUrl) imageUrl = currentImageUrl;
 
         const idproductoComp = cleanText(data.get("idproducto_compuesto"));
         const payload = {
@@ -762,8 +602,7 @@ const initForm = () => {
             sheetName: MENU_COMPUESTO_DETALLE_SHEET_NAME,
             orden: cleanText(data.get("orden")),
             "idmenu-unico": cleanText(data.get("idmenu-unico")),
-            "Tipo Menu": cleanText(data.get("tipomenu")) || "MENU-COMPUESTO",
-            "idmenu-variable": cleanText(data.get("idmenu-variable")),
+            "Tipo Menu": cleanText(data.get("tipomenu")) || "MENU-DEFAULT",
             ...(idproductoComp ? { idproducto: idproductoComp } : {}),
             Categoria: cleanText(data.get("categoria")),
             Producto: cleanText(data.get("producto")),
@@ -800,12 +639,29 @@ const initForm = () => {
                     if (!Number.isNaN(num)) nextOrden = Math.max(nextOrden, num + 1);
                 });
                 const idmenuUnico = "MENU-" + Date.now().toString(36) + randomAlphanumeric(8);
+                const mostarMontoDescuentoCompuesto = selectedProductoBaseRow
+                    ? ((cleanText(getValue(selectedProductoBaseRow, ["Mostar Monto Descuento", "mostarmontodescuento"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO")
+                    : "NO";
                 const payloadPaso3 = {
                     action: "create",
                     sheetName: MENU_SHEET_NAME,
                     orden: nextOrden,
                     "idmenu-unico": idmenuUnico,
-                    "Tipo Menu": "MENU-COMPUESTO"
+                    "Tipo Menu": cleanText(data.get("tipomenu")) || "MENU-DEFAULT",
+                    ...(idproductoComp ? { idproducto: idproductoComp } : {}),
+                    Categoria: cleanText(data.get("categoria")),
+                    Producto: cleanText(data.get("producto")),
+                    "Descripcion Producto": cleanText(data.get("descripcionproducto")),
+                    Descripcion: cleanText(data.get("descripcionproducto")),
+                    "Precio Actual": cleanText(data.get("precioactual")),
+                    "Precio Regular": cleanText(data.get("precioregular")),
+                    "Mostar Monto Descuento": mostarMontoDescuentoCompuesto,
+                    "Mostar Descuento": cleanText(data.get("mostrardescuento")) || "NO",
+                    Imagen: imageUrl,
+                    "Es Destacado": cleanText(data.get("esdestacado")) || "NO",
+                    "Producto Agotado": cleanText(data.get("productoagotado")) || "NO",
+                    STOCK: cleanText(data.get("stock")),
+                    Habilitado: "SI"
                 };
                 await fetch(MENU_SCRIPT_URL, {
                     method: "POST",
@@ -813,10 +669,10 @@ const initForm = () => {
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payloadPaso3)
                 });
-                setDebug("Enviado a menu-compuesto-detalle y a menú compuesto (idmenu-unico: " + idmenuUnico + ").");
+                setDebug("Enviado a menu-compuesto-detalle y a menú compuesto (idmenu-unico: " + idmenuUnico + ").", false);
                 alert("Ítem creado en menu-compuesto-detalle y en menú compuesto (idmenu-unico: " + idmenuUnico + ").");
             } else {
-                setDebug("Enviado. Revisá el Sheet para confirmar.");
+                setDebug("Enviado. Revisá el Sheet para confirmar.", false);
                 alert("Ítem enviado para actualizar.");
             }
             form.reset();
@@ -826,10 +682,12 @@ const initForm = () => {
             const idproductoCompInput = document.getElementById("idproducto-compuesto-input");
             if (idproductoCompInput) idproductoCompInput.value = "";
             setFormMode("create");
-            switchPanelsByTipo();
+            const tipoGeneracionSelect = document.getElementById("tipo-generacion-select");
+            if (tipoGeneracionSelect) tipoGeneracionSelect.value = "";
+            switchTipoGeneracion();
         } catch (error) {
             console.error(error);
-            setDebug(`Error al enviar: ${error?.message || error}`);
+            setDebug(`Error al enviar: ${error?.message || error}`, true);
             alert("No se pudo enviar el ítem. Revisá el Apps Script.");
         }
         } finally {
@@ -844,17 +702,24 @@ const initForm = () => {
 document.addEventListener("DOMContentLoaded", async () => {
     initForm();
     setFormMode("create");
+    const tipoGeneracionSelect = document.getElementById("tipo-generacion-select");
+    if (tipoGeneracionSelect) {
+        tipoGeneracionSelect.addEventListener("change", switchTipoGeneracion);
+    }
+    switchTipoGeneracion();
     const id = new URLSearchParams(window.location.search).get("id");
     if (id) {
-        loadForEdit(id);
-        switchPanelsByTipo();
+        await loadForEdit(id);
     } else {
-        const [rowsCompuesto, rowsSimple] = await Promise.all([fetchSheetListCompuestoDetalle(), fetchSheetListSimple()]);
+        const rowsCompuesto = await fetchSheetListCompuestoDetalle();
         fillCategoriaDatalist("categoria-datalist-compuesto", rowsCompuesto);
-        fillCategoriaDatalist("categoria-datalist-simple", rowsSimple);
-        switchPanelsByTipo();
     }
-    document.getElementById("tipomenu-select")?.addEventListener("change", switchPanelsByTipo);
+    const btnCrearSubproducto = document.getElementById("btn-crear-menu-subproducto");
+    if (btnCrearSubproducto) {
+        btnCrearSubproducto.addEventListener("click", () => {
+            window.location.href = "../admin-menu-subproductos/admin-menu-subproductos.html";
+        });
+    }
     const form = document.getElementById("add-item-form");
     form?.addEventListener("input", updateDebugPayloadCompuesto);
     form?.addEventListener("change", updateDebugPayloadCompuesto);
