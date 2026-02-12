@@ -1,0 +1,36 @@
+/* Productos compuestos: página de gestión */
+.admin-productos-compuestos .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* Bloque última inserción (datos pasados desde subproductos) */
+.ultima-insercion-wrap {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+}
+.ultima-insercion-title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #166534;
+}
+.ultima-insercion-title i {
+    margin-right: 0.35rem;
+}
+.ultima-insercion-resumen {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: #15803d;
+}
+.ultima-insercion-table {
+    font-size: 0.85rem;
+}
+.ultima-insercion-wrap .table-wrap {
+    margin-top: 0.5rem;
+}

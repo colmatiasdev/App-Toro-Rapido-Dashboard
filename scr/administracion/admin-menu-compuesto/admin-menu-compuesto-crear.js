@@ -333,6 +333,7 @@ const PANELES_TIPO_GENERACION = Object.values(OPCIONES_TIPO_GENERACION).map((o) 
 
 /** Muestra u oculta el contenido según la opción seleccionada en el combo. Extensible vía OPCIONES_TIPO_GENERACION. */
 const switchTipoGeneracion = () => {
+    setDebug("");
     const select = document.getElementById("tipo-generacion-select");
     const tipo = (select?.value ?? "").toString().trim();
     const config = OPCIONES_TIPO_GENERACION[tipo] ?? OPCIONES_TIPO_GENERACION[""];
@@ -717,7 +718,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnCrearSubproducto = document.getElementById("btn-crear-menu-subproducto");
     if (btnCrearSubproducto) {
         btnCrearSubproducto.addEventListener("click", () => {
-            window.location.href = "../admin-menu-subproductos/admin-menu-subproductos.html";
+            window.location.href = "../admin-productos-compuestos-detalle/admin-productos-compuestos-detalle.html";
         });
     }
     const form = document.getElementById("add-item-form");

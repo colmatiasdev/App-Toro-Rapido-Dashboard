@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Detalle producto compuesto - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="../admin-menu-compuesto/admin-menu-compuesto.css">
+    <link rel="stylesheet" href="admin-productos-compuestos-detalle.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>Creá un menú que incluye subproductos.</p>
+        </header>
+
+        <section class="admin-card" id="admin-productos-compuestos-detalle">
+            <div class="card-title">
+                <i class="fa-solid fa-layer-group"></i> Detalle producto compuesto
+            </div>
+            <p class="field-hint">Desde acá podés definir menús compuestos por varios subproductos. Marcá con el check los productos base que formarán parte del menú; debajo se muestra el resumen de lo que vas agregando.</p>
+
+            <div class="subproductos-tabla-wrap">
+                <div class="subproductos-tabla-header">
+                    <h3 class="subproductos-section-title">Productos base disponibles</h3>
+                    <a href="../admin-productos/admin-productos.html" class="primary-btn"><i class="fa-solid fa-box-open" aria-hidden="true"></i> Ir a productos</a>
+                </div>
+                <div id="subproductos-max-leyenda" class="subproductos-max-leyenda" style="display: none;" role="status" aria-live="polite">
+                    <i class="fa-solid fa-info-circle" aria-hidden="true"></i>
+                    <span id="subproductos-max-leyenda-texto">Se alcanzó el máximo de ítems en el resumen. No se pueden agregar más.</span>
+                </div>
+                <div id="productos-base-loading" class="productos-base-loading" style="display: none;" role="status" aria-live="polite">
+                    <span class="productos-base-spinner" aria-hidden="true"></span>
+                    <span>Cargando productos...</span>
+                </div>
+                <div id="productos-base-empty" class="productos-base-empty" style="display: none;">No hay productos en productos-base. Creá uno desde Administración de productos.</div>
+                <div class="table-wrap" id="productos-base-table-wrap" style="display: none;">
+                    <table class="menu-table subproductos-table" aria-label="Listado de productos base">
+                        <thead>
+                            <tr>
+                                <th class="th-check"><span class="sr-only">Agregar</span></th>
+                                <th class="cell-destacado-th" title="Destacado"><i class="fa-solid fa-crown" aria-hidden="true"></i></th>
+                                <th class="cell-imagen-th">Imagen</th>
+                                <th>Producto</th>
+                                <th>Descripción</th>
+                                <th>Habilitado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productos-base-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="subproductos-resumen-wrap" id="subproductos-resumen-wrap" style="display: none;">
+                <h3 class="subproductos-section-title">Resumen de ítems agregados <span id="subproductos-resumen-count" class="subproductos-count">0</span></h3>
+                <div class="table-wrap">
+                    <table class="menu-table subproductos-resumen-table" aria-label="Resumen de productos seleccionados">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th class="cell-destacado-th" title="Destacado"><i class="fa-solid fa-crown" aria-hidden="true"></i></th>
+                                <th class="cell-imagen-th">Imagen</th>
+                                <th class="cell-cantidad-th">Cantidad</th>
+                                <th>Producto</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subproductos-resumen-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
+            <div class="form-actions form-actions-end" style="margin-top: 1rem;">
+                <button type="button" id="btn-agregar-item-compuesto" class="primary-btn" disabled title="Agregá al menos un producto al resumen para poder guardar"><i class="fa-solid fa-save" aria-hidden="true"></i> Agregar ítem al producto compuesto</button>
+                <a href="../admin-menu-compuesto/admin-menu-compuesto-crear.html" class="secondary-btn">Volver a agregar ítem</a>
+            </div>
+            <div class="script-debug" id="script-debug" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../Configuracion/config.js" defer></script>
+    <script src="../admin-common.js" defer></script>
+    <script src="admin-productos-compuestos-detalle.js" defer></script>
+</body>
+</html>

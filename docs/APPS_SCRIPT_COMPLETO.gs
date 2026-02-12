@@ -2,15 +2,22 @@
  * Apps Script para Toro Rápido (menú simple, menú compuesto, opciones, productos, etc.).
  * Publicar como "Aplicación web": Ejecutar como "Yo", Quién puede acceder "Cualquier persona".
  *
+ * Trabaja con todas las tablas (hojas) del libro: usa siempre la fila 1 como encabezados y empareja
+ * columnas por nombre (insensible a mayúsculas, espacios y guiones). No hay hojas fijas: cualquier
+ * pestaña del Sheet es válida si se indica por sheetName.
+ *
  * doGet:
+ *   - action=listSheets: devuelve { result: "success", sheetNames: ["nombre1", "nombre2", ...] } con todas las pestañas del libro.
+ *   - action=listSheetsWithHeaders: devuelve { result: "success", sheets: [{ name, headers }, ...] } (todas las tablas y sus columnas).
  *   - action=updateHabilitada & sheetName & (idproducto | idopciones | idmenu-unico) & habilitado: actualiza columna Habilitado/Habilitada.
- *   - Sin action o listar: ?sheetName=... devuelve { headers, rows } de la hoja.
+ *   - Sin action o listar: ?sheetName=... devuelve { headers, rows } de esa hoja.
  *
  * doPost (body JSON):
  *   - action=delete: marca Habilitado/Habilitada = NO en la fila del ID.
- *   - action=update: actualiza la fila (productos por idproductoOld; opciones por idopcionesOld+grupoOld+opcionOld; menú por idmenu-unico).
- *   - action=create: agrega una fila nueva. Acepta cualquier hoja (productos-base, opciones-base, menu-toro-rapido-web-compuesto, menu-compuesto-detalle, etc.).
- *     La hoja menu-toro-rapido-web-simple ya no se usa; si sheetName apunta a una hoja inexistente, el Script devuelve error "Hoja no encontrada".
+ *   - action=update: actualiza la fila según el ID de la hoja (idproducto, idopciones, idmenu-unico, etc.).
+ *   - action=create: agrega una fila. Acepta cualquier hoja del libro (productos-base, productos-compuesto-detalle,
+ *     menu-compuesto-detalle, opciones-base, menu-toro-rapido-web-compuesto, etc.). Las columnas se rellenan por nombre.
+ *     Si sheetName no existe, devuelve error "Hoja no encontrada".
  */
 
 // ========== doGet ==========
@@ -18,6 +25,29 @@ function doGet(e) {
   try {
     var params = e.parameter || {};
     var action = (params.action || "").toString().toLowerCase();
+
+    // Listar todas las tablas (pestañas) del libro
+    if (action === "listsheets") {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sheetNames = [];
+      var sheets = ss.getSheets();
+      for (var i = 0; i < sheets.length; i++) {
+        sheetNames.push(sheets[i].getName());
+      }
+      return jsonOut({ result: "success", sheetNames: sheetNames });
+    }
+
+    // Listar todas las tablas con sus columnas (headers de la fila 1)
+    if (action === "listsheetswithheaders") {
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      var sheets = ss.getSheets();
+      var out = [];
+      for (var i = 0; i < sheets.length; i++) {
+        var sh = sheets[i];
+        out.push({ name: sh.getName(), headers: getHeaders(sh) });
+      }
+      return jsonOut({ result: "success", sheets: out });
+    }
 
     if (action === "updatehabilitada") {
       var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -142,9 +172,11 @@ function doPost(e) {
   }
 }
 
-// Fila 1 como array de strings (evita problemas con tipos en la hoja)
+// Fila 1 como array de strings (evita problemas con tipos en la hoja). Hoja vacía devuelve [].
 function getHeaders(sheet) {
-  var raw = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var lastCol = sheet.getLastColumn();
+  if (lastCol < 1) return [];
+  var raw = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   return raw.map(function (h) {
     return h != null ? String(h).trim() : "";
   });

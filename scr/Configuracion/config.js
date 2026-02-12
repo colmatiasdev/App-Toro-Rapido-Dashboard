@@ -36,7 +36,7 @@ window.APP_CONFIG = {
     /** URL del despliegue de Google Apps Script para envío de pedidos. */
     appsScriptPedidosUrl: "https://script.google.com/macros/s/AKfycbzzCRn0wQHHNg9PRQAprtyFXdAvRJT0iTFv_x3GlzZ5PFNpEcFzfvNJJBM5SxNL6TH4xw/exec",
     /** URL del despliegue de Apps Script para menú, opciones, horarios, productos. */
-    appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbyoSntXO12SW21iSqyGGnWnAJ4fZGTNVUFyLJT8poq9SPptjrZZ9HYjWPbeqLHxjUHGwA/exec",
+    appsScriptMenuUrl: "https://script.google.com/macros/s/AKfycbxh_ucFIx-ws6qOxNKg4HKgIuEjTtBfkq-G_A0imelISxakGRQAi9Doiz61wL48fMNmNA/exec",
 
     // ========== MENÚ – HOJAS DE CÁLCULO ==========
     /** URL CSV de la hoja del menú simple (opcional). La hoja menu-simple ya no existe; dejar vacío o usar solo menú compuesto. */
@@ -55,6 +55,10 @@ window.APP_CONFIG = {
     menuOpcionesSheetName: "opciones-base",
     /** Nombre de la hoja de productos. Columnas: ID Producto, Categoria, Producto, Descripcion, Precio Actual, Precio Regular, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado, Mostar Monto Descuento, Mostar Descuento. */
     menuProductosSheetName: "productos-base",
+    /** Nombre de la hoja donde se guardan los ítems del producto compuesto (módulo menú con subproductos). idproducto = PROD-COMPUESTO- + único aleatorio; idproducto-base = ID del producto seleccionado (productos-base). Columnas: idproducto, idproducto-base, Cantidad, Producto, Precio Unitario Actual, Precio Total Actual, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado. */
+    productosCompuestoDetalleSheetName: "productos-compuesto-detalle",
+    /** Máximo de ítems que se pueden cargar en el resumen de subproductos (menú con subproductos). Al llegar al máximo se muestra una leyenda y se deshabilitan los checks restantes. */
+    menuSubproductosMaxItems: 5,
 
     // ========== HORARIO DE ATENCIÓN ==========
     /** Nombre de la hoja de horarios en el Sheet. Columnas: IDHORARIO, DIA, HORA DESDE, MINUTO DESDE, HORA HASTA, MINUTO HASTA. DIA: Lunes, Martes, etc. Horas 0-23, minutos 0-59. */
