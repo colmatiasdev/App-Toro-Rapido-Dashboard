@@ -39,9 +39,59 @@
                             </tr>
                         </thead>
                         <tbody id="ultima-insercion-tbody"></tbody>
+                        <tfoot id="ultima-insercion-tfoot" class="ultima-insercion-tfoot" style="display: none;">
+                            <tr>
+                                <td colspan="4" class="ultima-insercion-total-label">Total</td>
+                                <td id="ultima-insercion-total-precio" class="ultima-insercion-total-valor">—</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
+
+            <section id="form-productos-compuesto-wrap" class="admin-card form-productos-compuesto-wrap" style="display: none;">
+                <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Datos del producto compuesto (hoja productos-compuesto)</div>
+                <p class="field-hint">Completá los datos del producto compuesto y guardalos en la hoja <strong>productos-compuesto</strong>. El <strong>idproducto</strong> es el mismo que el detalle (PROD-COMPUESTO-xxx).</p>
+                <div class="form-productos-compuesto-inner">
+                    <div class="form-row">
+                        <label for="pc-idproducto">idproducto</label>
+                        <input type="text" id="pc-idproducto" readonly class="input-readonly" aria-describedby="pc-idproducto-hint">
+                        <span id="pc-idproducto-hint" class="field-hint-inline">Solo lectura (viene del detalle)</span>
+                    </div>
+                    <div class="form-row">
+                        <label for="pc-categoria">Categoria</label>
+                        <input type="text" id="pc-categoria" placeholder="Ej. Combos">
+                    </div>
+                    <div class="form-row">
+                        <label for="pc-producto">Producto</label>
+                        <input type="text" id="pc-producto" placeholder="Nombre del producto compuesto">
+                    </div>
+                    <div class="form-row">
+                        <label for="pc-descripcion">Descripcion</label>
+                        <textarea id="pc-descripcion" rows="2" placeholder="Descripción opcional"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <label for="pc-precio-actual">Precio Actual</label>
+                        <input type="text" id="pc-precio-actual" placeholder="Ej. 0 o dejar vacío si se calcula del detalle">
+                    </div>
+                    <div class="form-row">
+                        <label for="pc-imagen">Imagen</label>
+                        <input type="text" id="pc-imagen" placeholder="URL de imagen">
+                    </div>
+                    <div class="form-row form-row-inline">
+                        <label><input type="checkbox" id="pc-es-destacado" value="SI"> Es Destacado</label>
+                    </div>
+                    <div class="form-row form-row-inline">
+                        <label><input type="checkbox" id="pc-habilitado" value="SI" checked> Habilitado</label>
+                    </div>
+                    <div class="form-actions form-actions-end" style="margin-top: 1rem;">
+                        <button type="button" id="btn-guardar-productos-compuesto" class="primary-btn"><i class="fa-solid fa-save" aria-hidden="true"></i> Guardar en productos-compuesto</button>
+                    </div>
+                </div>
+                <div class="script-debug" id="script-debug-compuesto" aria-live="polite"></div>
+            </section>
+
+            <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
 
             <div class="form-actions form-actions-end" style="margin-top: 1rem;">
                 <a href="../admin-productos-compuestos-detalle/admin-productos-compuestos-detalle.html" class="primary-btn"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i> Agregar ítem al producto compuesto</a>

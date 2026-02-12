@@ -2,6 +2,12 @@
  * Apps Script para Toro Rápido (menú simple, menú compuesto, opciones, productos, etc.).
  * Publicar como "Aplicación web": Ejecutar como "Yo", Quién puede acceder "Cualquier persona".
  *
+ * Probar en el navegador (debe devolver JSON, no página de login):
+ *   .../exec?sheetName=productos-compuesto-detalle
+ *   .../exec?sheetName=productos-compuesto-detalle&idproducto=PROD-COMPUESTO-xxx
+ *
+ * Para productos-compuesto-detalle la fila 1 debe tener una columna "idproducto" (o "ID Producto").
+ *
  * Trabaja con todas las tablas (hojas) del libro: usa siempre la fila 1 como encabezados y empareja
  * columnas por nombre (insensible a mayúsculas, espacios y guiones). No hay hojas fijas: cualquier
  * pestaña del Sheet es válida si se indica por sheetName.
@@ -10,13 +16,14 @@
  *   - action=listSheets: devuelve { result: "success", sheetNames: ["nombre1", "nombre2", ...] } con todas las pestañas del libro.
  *   - action=listSheetsWithHeaders: devuelve { result: "success", sheets: [{ name, headers }, ...] } (todas las tablas y sus columnas).
  *   - action=updateHabilitada & sheetName & (idproducto | idopciones | idmenu-unico) & habilitado: actualiza columna Habilitado/Habilitada.
- *   - Sin action o listar: ?sheetName=... devuelve { headers, rows } de esa hoja.
+ *   - Sin action: ?sheetName=... devuelve { headers, rows } de esa hoja.
+ *   - Opcional: ?sheetName=...&idproducto=PROD-COMPUESTO-xxx filtra las filas donde la columna idproducto coincide (para productos-compuesto-detalle).
  *
  * doPost (body JSON):
  *   - action=delete: marca Habilitado/Habilitada = NO en la fila del ID.
  *   - action=update: actualiza la fila según el ID de la hoja (idproducto, idopciones, idmenu-unico, etc.).
- *   - action=create: agrega una fila. Acepta cualquier hoja del libro (productos-base, productos-compuesto-detalle,
- *     menu-compuesto-detalle, opciones-base, menu-toro-rapido-web-compuesto, etc.). Las columnas se rellenan por nombre.
+ *   - action=create: agrega una fila. Acepta cualquier hoja del libro (productos-base, productos-compuesto,
+ *     productos-compuesto-detalle, menu-compuesto-detalle, opciones-base, menu-toro-rapido-web-compuesto, etc.). Las columnas se rellenan por nombre.
  *     Si sheetName no existe, devuelve error "Hoja no encontrada".
  */
 
@@ -70,15 +77,32 @@ function doGet(e) {
     }
 
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheetName = (params.sheetName || "menu-toro-rapido-web").toString().trim();
+    var sheetName = (params.sheetName || params.sheetname || "menu-toro-rapido-web").toString().trim();
     var sheet = ss.getSheetByName(sheetName);
     if (!sheet) return jsonOut({ result: "error", error: "Hoja no encontrada: " + sheetName });
 
     var headers = getHeaders(sheet);
     var lastRow = sheet.getLastRow();
-    var rows = lastRow > 1
-      ? sheet.getRange(2, 1, lastRow, sheet.getLastColumn()).getValues()
-      : [];
+    var lastCol = sheet.getLastColumn();
+    var rows = [];
+    if (lastRow > 1 && lastCol >= 1) {
+      rows = sheet.getRange(2, 1, lastRow, lastCol).getValues();
+    }
+
+    var idproductoFilter = (params.idproducto || "").toString().trim();
+    if (idproductoFilter && headers.length > 0) {
+      var idCol = findHeaderIndex(headers, "idproducto");
+      if (idCol >= 0) {
+        var filtered = [];
+        for (var r = 0; r < rows.length; r++) {
+          var cellVal = rows[r][idCol];
+          if (String(cellVal != null ? cellVal : "").trim() === idproductoFilter) {
+            filtered.push(rows[r]);
+          }
+        }
+        rows = filtered;
+      }
+    }
 
     return jsonOut({ headers: headers, rows: rows });
   } catch (err) {
