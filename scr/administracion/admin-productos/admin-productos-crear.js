@@ -281,6 +281,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const stockNumRaw = stockRaw === "" ? 0 : (Number(stockRaw.replace(",", ".")) || 0);
         const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
         const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
+        const mostarMontoDescuento = (cleanText(data.get("mostar_monto_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarDescuento = (cleanText(data.get("mostar_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const payload = {
             action: "create",
             sheetName: SHEET_NAME,
@@ -295,10 +297,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             "Es Destacado": esDestacado,
             "Producto Agotado": "NO",
             STOCK: stock,
-            Habilitada: "NO",
-            Habilitado: "NO"
+            Habilitado: "NO",
+            "Mostar Monto Descuento": mostarMontoDescuento,
+            "Mostar Descuento": mostarDescuento
         };
-        window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+        window.renderDebugPayloadSection("debug-payload-wrap", [{
+            sheetName: SHEET_NAME,
+            actionType: "create",
+            actionDescription: "Escritura en la hoja de Google Sheet. Se crea un nuevo producto base (ID, categoría, producto, descripción, precio, imagen, etc.).",
+            payload
+        }]);
     };
 
     const form = document.getElementById("producto-form");
@@ -338,6 +346,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
         const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
 
+        const mostarMontoDescuento = (cleanText(data.get("mostar_monto_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarDescuento = (cleanText(data.get("mostar_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const payload = {
             action: "create",
             sheetName: SHEET_NAME,
@@ -352,8 +362,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             "Es Destacado": esDestacado,
             "Producto Agotado": "NO",
             STOCK: stock,
-            Habilitada: "NO",
-            Habilitado: "NO"
+            Habilitado: "NO",
+            "Mostar Monto Descuento": mostarMontoDescuento,
+            "Mostar Descuento": mostarDescuento
         };
 
         try {

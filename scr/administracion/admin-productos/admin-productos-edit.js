@@ -302,6 +302,21 @@ const loadRecordAndShowForm = async () => {
     const stockVal = stockLoaded === "" ? "" : Math.min(VALIDATION.stockMax, Math.max(0, Number(stockLoaded) || 0));
     form.querySelector('[name="stock"]').value = stockVal === "" ? "" : stockVal;
 
+    const habilitado = (cleanText(getValue(row, ["Habilitado", "habilitado"])) || "NO").toUpperCase();
+    const habilitadoVal = habilitado === "SI" ? "SI" : "NO";
+    const habilitadoSelect = form.querySelector('[name="habilitado"]');
+    if (habilitadoSelect) habilitadoSelect.value = habilitadoVal;
+
+    const mostarMontoDescuentoLoaded = (cleanText(getValue(row, ["Mostar Monto Descuento", "mostarmontodescuento"])) || "NO").toUpperCase();
+    const mostarMontoDescuentoVal = mostarMontoDescuentoLoaded === "SI" ? "SI" : "NO";
+    const mostarMontoDescuentoSelect = form.querySelector('[name="mostar_monto_descuento"]');
+    if (mostarMontoDescuentoSelect) mostarMontoDescuentoSelect.value = mostarMontoDescuentoVal;
+
+    const mostarDescuentoLoaded = (cleanText(getValue(row, ["Mostar Descuento", "mostardescuento"])) || "NO").toUpperCase();
+    const mostarDescuentoVal = mostarDescuentoLoaded === "SI" ? "SI" : "NO";
+    const mostarDescuentoSelect = form.querySelector('[name="mostar_descuento"]');
+    if (mostarDescuentoSelect) mostarDescuentoSelect.value = mostarDescuentoVal;
+
     const idInput = document.getElementById("id-producto-input");
     if (idInput) idInput.readOnly = true;
 
@@ -348,6 +363,9 @@ const initForm = () => {
         const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
         const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
         const precioRegularNum = (loadedPrecioActual !== "" && loadedPrecioActual != null) ? (Number(loadedPrecioActual) || 0) : precioNum;
+        const habilitado = (cleanText(data.get("habilitado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarMontoDescuento = (cleanText(data.get("mostar_monto_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarDescuento = (cleanText(data.get("mostar_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
         const payload = {
             action: "update",
             sheetName: SHEET_NAME,
@@ -362,9 +380,17 @@ const initForm = () => {
             Imagen: imagen && imagen.length > 60 ? "(imagen)" : imagen,
             "Es Destacado": esDestacado,
             "Producto Agotado": loadedProductoAgotado,
-            STOCK: stock
+            STOCK: stock,
+            Habilitado: habilitado,
+            "Mostar Monto Descuento": mostarMontoDescuento,
+            "Mostar Descuento": mostarDescuento
         };
-        window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+        window.renderDebugPayloadSection("debug-payload-wrap", [{
+            sheetName: SHEET_NAME,
+            actionType: "update",
+            actionDescription: "Actualización de un registro existente en la hoja de Google Sheet (productos base).",
+            payload
+        }]);
     };
     form?.addEventListener("input", updateDebugPayloadProductos);
     form?.addEventListener("change", updateDebugPayloadProductos);
@@ -402,6 +428,9 @@ const initForm = () => {
         const stock = String(Math.min(VALIDATION.stockMax, Math.max(0, stockNumRaw)));
         const precioNum = precioActual === "" ? "" : Number(precioActual) || 0;
         const precioRegularNum = (loadedPrecioActual !== "" && loadedPrecioActual != null) ? (Number(loadedPrecioActual) || 0) : precioNum;
+        const habilitado = (cleanText(data.get("habilitado")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarMontoDescuento = (cleanText(data.get("mostar_monto_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
+        const mostarDescuento = (cleanText(data.get("mostar_descuento")) || "NO").toUpperCase() === "SI" ? "SI" : "NO";
 
         const payload = {
             action: "update",
@@ -417,7 +446,10 @@ const initForm = () => {
             Imagen: imagen,
             "Es Destacado": esDestacado,
             "Producto Agotado": loadedProductoAgotado,
-            STOCK: stock
+            STOCK: stock,
+            Habilitado: habilitado,
+            "Mostar Monto Descuento": mostarMontoDescuento,
+            "Mostar Descuento": mostarDescuento
         };
 
         try {

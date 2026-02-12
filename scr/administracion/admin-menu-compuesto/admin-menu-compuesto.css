@@ -346,6 +346,28 @@ body {
     font-weight: 800;
     color: var(--toro-dark);
 }
+.readonly-image-wrap {
+    margin-top: 10px;
+}
+.readonly-image-wrap .label-title {
+    display: block;
+    margin-bottom: 6px;
+}
+.image-preview-readonly {
+    max-width: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+.image-preview-readonly img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+#display-imagen-sin-compuesto {
+    font-style: italic;
+    color: var(--toro-muted);
+}
 .productos-base-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

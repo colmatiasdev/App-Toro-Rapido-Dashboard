@@ -244,7 +244,11 @@ const updateDebugPayloadOpciones = () => {
         payload.grupoOld = params.get("grupo") ?? grupo;
         payload.opcionOld = params.get("opcion") ?? opcion;
     }
-    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, payload }]);
+    const actionType = formMode === "edit" ? "update" : "create";
+    const actionDescription = formMode === "edit"
+        ? "Actualización de un registro existente en la hoja de Google Sheet (opciones/agregados por producto)."
+        : "Escritura en la hoja de Google Sheet. Se crea un nuevo registro de opción (grupo, tipo, obligatorio, opción, recargo).";
+    window.renderDebugPayloadSection("debug-payload-wrap", [{ sheetName: SHEET_NAME, actionType, actionDescription, payload }]);
 };
 
 const initForm = () => {

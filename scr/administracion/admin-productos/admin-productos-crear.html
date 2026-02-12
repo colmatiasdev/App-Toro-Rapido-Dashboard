@@ -54,6 +54,20 @@
                     <span class="label-title">STOCK</span>
                     <input type="number" name="stock" min="0" max="999" step="1" placeholder="0 (por defecto)" inputmode="numeric">
                 </label>
+                <label>
+                    <span class="label-title">Mostar Monto Descuento</span>
+                    <select name="mostar_monto_descuento" id="mostar-monto-descuento-input" aria-label="Mostar monto descuento">
+                        <option value="NO" selected>NO</option>
+                        <option value="SI">SI</option>
+                    </select>
+                </label>
+                <label>
+                    <span class="label-title">Mostar Descuento</span>
+                    <select name="mostar_descuento" id="mostar-descuento-input" aria-label="Mostar descuento">
+                        <option value="NO" selected>NO</option>
+                        <option value="SI">SI</option>
+                    </select>
+                </label>
                 <div class="imagen-preview-wrap span-2">
                     <div class="imagen-preview-label">Imagen del producto</div>
                     <div class="imagen-preview" id="imagen-preview">
@@ -89,8 +103,8 @@
         </div>
     </footer>
 
-    <script src="../../../config.js"></script>
-    <script src="../admin-common.js"></script>
-    <script src="admin-productos-crear.js"></script>
+    <script src="../../Configuracion/config.js" defer></script>
+    <script src="../admin-common.js" defer></script>
+    <script src="admin-productos-crear.js" defer></script>
 </body>
 </html>

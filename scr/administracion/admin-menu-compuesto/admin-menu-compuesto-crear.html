@@ -36,11 +36,11 @@
                     </label>
                 </div>
 
-                <!-- Panel MENU-SIMPLE: insertar en hoja menu-simple (idmenu = clave única; idproducto = de productos-base) -->
-                <div id="form-panel-simple" class="form-panel" style="display: none;">
+                <!-- Listado de productos base: visible para MENU-SIMPLE y MENU-COMPUESTO -->
+                <div id="form-panel-productos-base" class="form-panel productos-base-panel" style="display: none;">
                     <div class="productos-base-selector">
                         <span class="label-title">Seleccionar producto base <span class="req">*</span></span>
-                        <p class="field-hint">Elegí un producto de la lista. Los datos que se usaran automáticamente en el menú.</p>
+                        <p class="field-hint">Elegí un producto de la lista. Los datos se usarán automáticamente en el menú.</p>
                         <div id="productos-base-loading" class="productos-base-loading" style="display: none;" role="status" aria-live="polite">
                             <span class="productos-base-spinner" aria-hidden="true"></span>
                             <span>Cargando productos...</span>
@@ -48,6 +48,10 @@
                         <div id="productos-base-list" class="productos-base-list"></div>
                         <div id="productos-base-empty" class="productos-base-empty" style="display: none;">No hay productos en productos-base. Creá uno desde Administración de productos.</div>
                     </div>
+                </div>
+
+                <!-- Panel MENU-SIMPLE: si menuSimpleSheetName está configurado se escribe en esa hoja; si no, solo en menu-compuesto con idproducto -->
+                <div id="form-panel-simple" class="form-panel" style="display: none;">
                     <input type="hidden" name="categoria_simple" id="categoria-input-simple">
                     <input type="hidden" name="producto_simple" id="producto-input-simple">
                     <input type="hidden" name="descripcion_simple" id="descripcion-input-simple">
@@ -69,28 +73,40 @@
                     <input type="hidden" name="stock_simple" id="stock-input-simple" value="">
                 </div>
 
-                <!-- Panel MENU-COMPUESTO: insertar en hoja menu-compuesto -->
+                <!-- Panel MENU-COMPUESTO: insertar en hoja menu-compuesto-detalle. Datos del producto = solo lectura (igual que MENU-SIMPLE). -->
                 <div id="form-panel-compuesto" class="form-panel" style="display: none;">
+                    <input type="hidden" name="idproducto_compuesto" id="idproducto-compuesto-input" value="">
                     <label><span class="label-title">Orden (automático)</span><input type="number" name="orden" id="orden-input" placeholder="Auto" readonly></label>
                     <label><span class="label-title">ID Menú único (automático)</span><input type="text" name="idmenu-unico" id="idmenu-unico-input" placeholder="MENU-..." readonly></label>
                     <label><span class="label-title">ID Menú variable</span><input type="text" name="idmenu-variable" placeholder="Para MENU-COMPUESTO"></label>
-                    <label class="label-categoria">
-                        <span class="label-title">Categoría <span class="req">*</span></span>
-                        <input type="text" name="categoria" id="categoria-input-compuesto" list="categoria-datalist-compuesto" placeholder="Elegí una o escribí una nueva" autocomplete="off">
-                        <datalist id="categoria-datalist-compuesto"></datalist>
-                        <span class="field-hint">Se cargan las categorías de la hoja menú compuesto; podés elegir una o escribir una nueva.</span>
-                    </label>
-                    <label><span class="label-title">Producto <span class="req">*</span></span><input type="text" name="producto" placeholder="Doble Cheese"></label>
-                    <label><span class="label-title">Descripción Producto</span><input type="text" name="descripcionproducto" placeholder="Carne doble y cheddar"></label>
-                    <label><span class="label-title">Precio Actual <span class="req">*</span></span><input type="number" name="precioactual" placeholder="9500"></label>
-                    <label><span class="label-title">Precio Regular</span><input type="number" name="precioregular" placeholder="11000"></label>
                     <label><span class="label-title">Mostrar Descuento</span><select name="mostrardescuento"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
-                    <div class="image-upload" id="upload-image-block"><span class="label-title">Subir Imagen</span><button type="button" class="secondary-btn" id="upload-image-btn">Seleccionar imagen</button></div>
-                    <input type="file" name="imagenFile" id="imagen-file" accept="image/*" class="image-input-hidden">
-                    <div class="image-preview" id="image-preview" style="display:none;"><span class="label-title">Previsualización</span><img id="image-preview-img" alt=""><button type="button" class="secondary-btn change-image-btn" id="change-image-btn">Cambiar imagen</button></div>
-                    <label><span class="label-title">Es Destacado</span><select name="esdestacado"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
-                    <label><span class="label-title">Producto Agotado</span><select name="productoagotado"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
-                    <label><span class="label-title">Stock</span><input type="number" name="stock" placeholder="10"></label>
+                    <div class="producto-base-readonly-block" id="producto-base-readonly-block-compuesto">
+                        <span class="label-title">Datos del producto (solo lectura)</span>
+                        <p class="field-hint">Estos valores vienen de la tabla productos-base. Elegí un producto de la lista arriba.</p>
+                        <div class="readonly-fields-row">
+                            <span class="readonly-field"><strong>Categoría:</strong> <span id="display-categoria-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Producto:</strong> <span id="display-producto-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Descripción:</strong> <span id="display-descripcion-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Precio Actual:</strong> <span id="display-precioactual-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Precio Regular:</strong> <span id="display-precioregular-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Es Destacado:</strong> <span id="display-esdestacado-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Producto Agotado:</strong> <span id="display-productoagotado-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><strong>Stock:</strong> <span id="display-stock-compuesto" class="readonly-value">—</span></span>
+                        </div>
+                        <div class="readonly-image-wrap">
+                            <span class="label-title">Imagen</span>
+                            <div class="image-preview image-preview-readonly" id="image-preview-compuesto" style="display:none;"><img id="image-preview-img-compuesto" alt=""></div>
+                            <span id="display-imagen-sin-compuesto" class="readonly-value">—</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="categoria" id="categoria-input-compuesto" value="">
+                    <input type="hidden" name="producto" id="producto-input-compuesto" value="">
+                    <input type="hidden" name="descripcionproducto" id="descripcionproducto-input-compuesto" value="">
+                    <input type="hidden" name="precioactual" id="precioactual-input-compuesto" value="">
+                    <input type="hidden" name="precioregular" id="precioregular-input-compuesto" value="">
+                    <input type="hidden" name="esdestacado" id="esdestacado-input-compuesto" value="NO">
+                    <input type="hidden" name="productoagotado" id="productoagotado-input-compuesto" value="NO">
+                    <input type="hidden" name="stock" id="stock-input-compuesto" value="">
                 </div>
 
                 <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
@@ -112,8 +128,8 @@
         </div>
     </footer>
 
-    <script src="../../../config.js"></script>
-    <script src="../admin-common.js"></script>
-    <script src="admin-menu-compuesto-crear.js"></script>
+    <script src="../../Configuracion/config.js" defer></script>
+    <script src="../admin-common.js" defer></script>
+    <script src="admin-menu-compuesto-crear.js" defer></script>
 </body>
 </html>

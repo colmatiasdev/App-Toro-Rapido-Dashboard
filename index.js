@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try { sessionStorage.removeItem("toro_pedido"); } catch (e) {}
 
     const config = window.APP_CONFIG || {};
-    const menuActivo = config.menuActivo || "menu-simple";
+    const menuActivo = config.menuActivo || "menu-compuesto";
     const container = document.getElementById("hero-btns-menu");
 
     if (config.debug && Array.isArray(config.menuVersiones) && config.menuVersiones.length > 0 && container) {

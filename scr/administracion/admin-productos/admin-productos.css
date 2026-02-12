@@ -21,6 +21,8 @@ body {
     padding-left: var(--safe-left);
     padding-right: var(--safe-right);
     padding-bottom: var(--safe-bottom);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .admin-footer {
@@ -48,7 +50,8 @@ body {
 
 .admin-menu {
     max-width: 1100px;
-    margin: 0 auto;
+    margin: 0;
+    margin-right: auto;
     padding: 16px 16px 40px;
     display: grid;
     gap: 18px;
@@ -437,7 +440,7 @@ body {
     border-radius: 50%;
     cursor: pointer;
     font-size: 1.25rem;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, color 0.2s ease;
 }
 .habilitada-btn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .habilitada-btn:active:not(:disabled) { transform: scale(0.98); }
@@ -452,6 +455,36 @@ body {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
 }
+
+/* Mostar Monto Descuento / Mostar Descuento: botón SI/NO sutil (verde/rojo) */
+.cell-toggle { text-align: center; vertical-align: middle; }
+.toggle-si-no-btn {
+    display: inline-block;
+    min-width: 42px;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+.toggle-si-no-btn:active:not(:disabled) { transform: scale(0.96); }
+.toggle-si-no-btn:hover:not(:disabled) { filter: brightness(0.97); }
+.toggle-si-no-btn:disabled { cursor: not-allowed; opacity: 0.85; }
+.toggle-si-no-btn.toggle-si-no-si {
+    color: #166534;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+.toggle-si-no-btn.toggle-si-no-si:hover:not(:disabled) { background: #d1fae5; }
+.toggle-si-no-btn.toggle-si-no-no {
+    color: #991b1b;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+.toggle-si-no-btn.toggle-si-no-no:hover:not(:disabled) { background: #fee2e2; }
+.toggle-si-no-btn-loading { opacity: 0.75; pointer-events: none; }
 
 /* ========== Tableta y móvil (≤ 768px) ========== */
 @media (max-width: 768px) {
@@ -509,6 +542,7 @@ body {
     .menu-table { min-width: 380px; font-size: 0.8rem; }
     .menu-table th, .menu-table td { padding: 10px 8px; }
     .habilitada-btn { width: 40px; height: 40px; font-size: 1.1rem; min-width: 40px; min-height: 40px; }
+    .toggle-si-no-btn { min-width: 38px; padding: 5px 8px; font-size: 0.75rem; }
     .action-btn { min-height: 40px; padding: 0 12px; font-size: 0.75rem; }
     .menu-table .cell-desc { max-width: 120px; }
 }
