@@ -320,3 +320,25 @@ body.admin-has-topbar {
     border: 1px solid rgba(120, 113, 108, 0.4);
     border-radius: 4px;
 }
+/* Formato / partes fijas + aleatorias (debug) */
+.debug-payload-wrap .debug-payload-li {
+    margin-bottom: 0.35rem;
+}
+.debug-payload-wrap .debug-payload-format-hint {
+    display: inline-block;
+    margin-left: 0.25rem;
+    padding: 0.15rem 0.4rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #57534e;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px dashed #a8a29e;
+    border-radius: 4px;
+    white-space: normal;
+    max-width: 100%;
+}
+.debug-payload-wrap .debug-payload-format-hint::before {
+    content: "Formato: ";
+    font-weight: 700;
+    color: #78716c;
+}

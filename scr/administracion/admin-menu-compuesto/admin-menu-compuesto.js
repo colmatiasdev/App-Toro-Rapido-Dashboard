@@ -79,7 +79,7 @@ const loadMenu = async () => {
         const mapped = rawRows.map((row, index) => {
             const id = cleanText(getValue(row, ["idmenu-unico", "idmenuunico", "idproducto", "id"]));
             const order = cleanText(getValue(row, ["orden", "order"])) || index + 1;
-            const tipoMenu = cleanText(getValue(row, ["Tipo Menu", "tipomenu", "tipo"])) || "MENU-SIMPLE";
+            const tipoMenu = cleanText(getValue(row, ["Tipo Menu", "tipomenu", "tipo"])) || "MENU-COMPUESTO";
             const category = cleanText(getValue(row, ["Categoria", "categoria"])) || "Otros";
             const name = cleanText(getValue(row, ["Producto", "producto", "nombre"]));
             const price = parsePrice(getValue(row, ["Precio Actual", "precioactual", "precio", "Precio"]));

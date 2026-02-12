@@ -3,7 +3,7 @@
  * Cada paso es colapsable: se abre el detalle al hacer clic en el título.
  * Si un bloque tiene allFieldsForDebug (array de { key, value, used }), se muestran todos los campos de la hoja y se marcan visualmente los que no se envían en esta acción.
  * @param {string} wrapId - ID del contenedor (ej. "debug-payload-wrap")
- * @param {Array<{ sheetName: string, title?: string, payload: Object, actionType?: string, actionDescription?: string, allFieldsForDebug?: Array<{ key: string, value: any, used: boolean }> }>} blocks - Lista de envíos
+ * @param {Array<{ sheetName: string, title?: string, payload: Object, actionType?: string, actionDescription?: string, allFieldsForDebug?: Array<{ key: string, value: any, used: boolean }>, fieldFormats?: Object.<string, string> }>} blocks - Lista de envíos. fieldFormats: opcional, mapa de nombre de campo → texto que describe el formato (partes fijas + aleatorias) para depuración.
  */
 window.renderDebugPayloadSection = function (wrapId, blocks) {
     const wrap = document.getElementById(wrapId);
@@ -54,10 +54,13 @@ window.renderDebugPayloadSection = function (wrapId, blocks) {
         if (allFields && allFields.length > 0) {
             const usedFields = allFields.filter(function (f) { return f.used; });
             const ignoredFields = allFields.filter(function (f) { return !f.used; });
+            var fieldFormatsAll = b.fieldFormats || {};
             html += '<p class="debug-payload-fields-subtitle debug-payload-fields-used-title">Campos que se envían en esta acción</p>';
             html += '<ul class="debug-payload-list debug-payload-list-used">';
             usedFields.forEach(function (f) {
-                html += '<li class="debug-payload-field-used"><strong>' + escapeHtml(f.key) + ":</strong> " + escapeHtml(formatVal(f.value)) + "</li>";
+                html += '<li class="debug-payload-field-used debug-payload-li"><strong>' + escapeHtml(f.key) + ":</strong> " + escapeHtml(formatVal(f.value));
+                if (fieldFormatsAll[f.key]) html += " <span class=\"debug-payload-format-hint\" title=\"Formato o partes estáticas/aleatorias al guardar\">" + escapeHtml(fieldFormatsAll[f.key]) + "</span>";
+                html += "</li>";
             });
             html += "</ul>";
             if (ignoredFields.length > 0) {
@@ -71,9 +74,15 @@ window.renderDebugPayloadSection = function (wrapId, blocks) {
         } else {
             html += '<ul class="debug-payload-list">';
             const keys = Object.keys(b.payload || {});
+            const fieldFormats = b.fieldFormats || {};
             for (let i = 0; i < keys.length; i++) {
                 const k = keys[i];
-                html += "<li><strong>" + escapeHtml(k) + ":</strong> " + escapeHtml(formatVal(b.payload[k])) + "</li>";
+                const val = formatVal(b.payload[k]);
+                html += "<li class=\"debug-payload-li\"><strong>" + escapeHtml(k) + ":</strong> " + escapeHtml(val);
+                if (fieldFormats[k]) {
+                    html += " <span class=\"debug-payload-format-hint\" title=\"Formato o partes estáticas/aleatorias al guardar\">" + escapeHtml(fieldFormats[k]) + "</span>";
+                }
+                html += "</li>";
             }
             html += "</ul>";
         }
@@ -103,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isDashboard = (path.includes("dashboard") || path.endsWith("administracion/")) && !path.includes("admin-menu") && !path.includes("admin-opciones") && !path.includes("admin-productos");
     const isCrear = path.includes("crear");
     const isMenuSimple = path.includes("admin-menu-simple");
+    const isMenuSubproductos = path.includes("admin-menu-subproductos");
     const isOpciones = path.includes("admin-opciones");
     const isProductos = path.includes("admin-productos");
     const depth = isDashboard ? 0 : 1;
@@ -141,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const titleEl = document.getElementById("admin-topbar-title");
     if (titleEl) {
         if (isDashboard) titleEl.textContent = "Panel de Administración";
+        else if (isMenuSubproductos) titleEl.textContent = "Menú con subproductos";
         else if (isOpciones) titleEl.textContent = isCrear ? "Agregar opción" : "Administrador de opciones";
         else if (isProductos) titleEl.textContent = path.includes("edit") ? "Editar producto" : (isCrear ? "Agregar producto" : "Administrador de productos");
         else if (isCrear) titleEl.textContent = isMenuSimple ? "Agregar ítem - Menú simple" : "Agregar ítem - Menú compuesto";
@@ -160,6 +171,9 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (isOpciones && path.includes("edit")) {
             backLink.href = "admin-opciones.html";
             backText.textContent = "Volver al listado";
+        } else if (isMenuSubproductos) {
+            backLink.href = "../admin-menu-compuesto/admin-menu-compuesto-crear.html";
+            backText.textContent = "Volver a agregar ítem";
         } else if (isCrear) {
             backLink.href = isMenuSimple ? "admin-menu-simple.html" : "admin-menu-compuesto.html";
             backText.textContent = "Volver al listado";

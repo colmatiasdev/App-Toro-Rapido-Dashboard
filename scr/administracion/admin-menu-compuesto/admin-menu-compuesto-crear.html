@@ -22,22 +22,35 @@
                 <i class="fa-solid fa-circle-plus"></i> Agregar nuevo ítem
             </div>
             <div id="form-validation-errors" class="validation-errors" role="alert" style="display: none;"></div>
-            <form class="admin-form" id="add-item-form" novalidate>
-                <input type="hidden" name="mode" id="form-mode" value="create">
-                <div class="form-step-tipomenu">
-                    <label class="form-row-full">
-                        <span class="label-title">Elegir el tipo de menú <span class="req">*</span></span>
-                        <select name="tipomenu" id="tipomenu-select">
-                            <option value="">— Elegí una opción —</option>
-                            <option value="MENU-SIMPLE">MENU-SIMPLE (hoja menú simple)</option>
-                            <option value="MENU-COMPUESTO">MENU-COMPUESTO (hoja menú compuesto)</option>
-                        </select>
-                        <span class="field-hint">Seleccioná si el ítem se guarda en la hoja menú simple o en la hoja menú compuesto.</span>
-                    </label>
-                </div>
 
-                <!-- Listado de productos base: visible para MENU-SIMPLE y MENU-COMPUESTO -->
-                <div id="form-panel-productos-base" class="form-panel productos-base-panel" style="display: none;">
+            <div class="form-step-tipomenu" id="wrap-tipo-generacion">
+                <div class="form-step-tipomenu-inner">
+                    <span class="form-step-tipomenu-label">
+                        <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+                        Forma de generar el menú <span class="req">*</span>
+                    </span>
+                    <select id="tipo-generacion-select" name="tipo_generacion" class="form-step-tipomenu-select" aria-label="Forma de generar el menú">
+                        <option value="" selected>Seleccionar opción</option>
+                        <option value="MENU-CLASICO">Menú clásico</option>
+                        <option value="MENU-CON-SUBPRODUTO">Menú con subproductos</option>
+                    </select>
+                    <p class="form-step-tipomenu-hint">Elegí cómo querés generar el menú; debajo se mostrará el contenido correspondiente.</p>
+                </div>
+            </div>
+
+            <!-- Contenido cuando aún no se eligió tipo (Seleccionar opción) -->
+            <div id="wrap-tipo-generacion-empty" class="wrap-tipo-menu wrap-tipo-generacion-placeholder" data-tipo-panel="">
+                <p class="field-hint">Elegí una opción en el selector de arriba para continuar.</p>
+            </div>
+
+            <!-- Contenido para MENU-CLASICO: todos los pasos actuales -->
+            <div id="wrap-menu-clasico" class="wrap-tipo-menu" data-tipo-panel="MENU-CLASICO" style="display: none;">
+                <form class="admin-form" id="add-item-form" novalidate>
+                    <input type="hidden" name="mode" id="form-mode" value="create">
+                    <input type="hidden" name="tipomenu" id="tipomenu-select" value="MENU-COMPUESTO">
+
+                    <!-- Listado de productos base para elegir el producto que se insertará en menu-compuesto-detalle -->
+                    <div id="form-panel-productos-base" class="form-panel productos-base-panel">
                     <div class="productos-base-selector">
                         <span class="label-title">Seleccionar producto base <span class="req">*</span></span>
                         <p class="field-hint">Elegí un producto de la lista. Los datos se usarán automáticamente en el menú.</p>
@@ -50,55 +63,35 @@
                     </div>
                 </div>
 
-                <!-- Panel MENU-SIMPLE: si menuSimpleSheetName está configurado se escribe en esa hoja; si no, solo en menu-compuesto con idproducto -->
-                <div id="form-panel-simple" class="form-panel" style="display: none;">
-                    <input type="hidden" name="categoria_simple" id="categoria-input-simple">
-                    <input type="hidden" name="producto_simple" id="producto-input-simple">
-                    <input type="hidden" name="descripcion_simple" id="descripcion-input-simple">
-                    <input type="hidden" name="precio_simple" id="precio-input-simple">
-                    <label><span class="label-title">Orden (automático)</span><input type="number" name="orden_simple" id="orden-simple-input" placeholder="Auto" readonly></label>
-                    <label><span class="label-title">ID Menú (clave en hoja menú simple)</span><input type="text" name="idmenu_simple" id="idmenu-simple-input" placeholder="MENU-SIMPLE-..." readonly></label>
-                    <label><span class="label-title">ID Producto (de productos-base)</span><input type="text" name="idproducto" id="idproducto-input" placeholder="Elegí un producto de la lista" readonly></label>
-                    <div class="producto-base-readonly-block" id="producto-base-readonly-block">
-                        <span class="label-title">Datos del producto (solo lectura)</span>
-                        <p class="field-hint">Estos valores vienen de la tabla productos-base y no se modifican aquí.</p>
-                        <div class="readonly-fields-row">
-                            <span class="readonly-field"><strong>Es Destacado:</strong> <span id="display-esdestacado-simple" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Producto Agotado:</strong> <span id="display-productoagotado-simple" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Stock:</strong> <span id="display-stock-simple" class="readonly-value">—</span></span>
-                        </div>
-                    </div>
-                    <input type="hidden" name="esdestacado_simple" id="esdestacado-input-simple" value="NO">
-                    <input type="hidden" name="productoagotado_simple" id="productoagotado-input-simple" value="NO">
-                    <input type="hidden" name="stock_simple" id="stock-input-simple" value="">
-                </div>
-
-                <!-- Panel MENU-COMPUESTO: insertar en hoja menu-compuesto-detalle. Datos del producto = solo lectura (igual que MENU-SIMPLE). -->
-                <div id="form-panel-compuesto" class="form-panel" style="display: none;">
+                <!-- Panel MENU-COMPUESTO: insertar en hoja menu-compuesto-detalle. -->
+                <div id="form-panel-compuesto" class="form-panel">
                     <input type="hidden" name="idproducto_compuesto" id="idproducto-compuesto-input" value="">
                     <label><span class="label-title">Orden (automático)</span><input type="number" name="orden" id="orden-input" placeholder="Auto" readonly></label>
                     <label><span class="label-title">ID Menú único (automático)</span><input type="text" name="idmenu-unico" id="idmenu-unico-input" placeholder="MENU-..." readonly></label>
-                    <label><span class="label-title">ID Menú variable</span><input type="text" name="idmenu-variable" placeholder="Para MENU-COMPUESTO"></label>
-                    <label><span class="label-title">Mostrar Descuento</span><select name="mostrardescuento"><option value="NO" selected>NO</option><option value="SI">SI</option></select></label>
+                    <label><span class="label-title">Tipo Menu</span><input type="text" id="tipomenu-display-compuesto" value="MENU-CLASICO" readonly aria-label="Tipo Menu"></label>
                     <div class="producto-base-readonly-block" id="producto-base-readonly-block-compuesto">
-                        <span class="label-title">Datos del producto (solo lectura)</span>
+                        <p class="producto-readonly-block-title">Datos del producto seleccionado</p>
                         <p class="field-hint">Estos valores vienen de la tabla productos-base. Elegí un producto de la lista arriba.</p>
-                        <div class="readonly-fields-row">
-                            <span class="readonly-field"><strong>Categoría:</strong> <span id="display-categoria-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Producto:</strong> <span id="display-producto-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Descripción:</strong> <span id="display-descripcion-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Precio Actual:</strong> <span id="display-precioactual-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Precio Regular:</strong> <span id="display-precioregular-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Es Destacado:</strong> <span id="display-esdestacado-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Producto Agotado:</strong> <span id="display-productoagotado-compuesto" class="readonly-value">—</span></span>
-                            <span class="readonly-field"><strong>Stock:</strong> <span id="display-stock-compuesto" class="readonly-value">—</span></span>
+                        <div class="readonly-fields-grid">
+                            <span class="readonly-field"><span class="readonly-field-label">ID Producto</span><span id="display-idproducto-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Categoría</span><span id="display-categoria-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Producto</span><span id="display-producto-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field readonly-field-full"><span class="readonly-field-label">Descripción</span><span id="display-descripcion-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Precio Actual</span><span id="display-precioactual-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Precio Regular</span><span id="display-precioregular-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Es Destacado</span><span id="display-esdestacado-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Producto Agotado</span><span id="display-productoagotado-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Stock</span><span id="display-stock-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Mostar Monto Descuento</span><span id="display-mostar-monto-descuento-compuesto" class="readonly-value">—</span></span>
+                            <span class="readonly-field"><span class="readonly-field-label">Mostar Descuento</span><span id="display-mostar-descuento-compuesto" class="readonly-value">—</span></span>
                         </div>
                         <div class="readonly-image-wrap">
-                            <span class="label-title">Imagen</span>
+                            <span class="readonly-field-label">Imagen</span>
                             <div class="image-preview image-preview-readonly" id="image-preview-compuesto" style="display:none;"><img id="image-preview-img-compuesto" alt=""></div>
                             <span id="display-imagen-sin-compuesto" class="readonly-value">—</span>
                         </div>
                     </div>
+                    <input type="hidden" name="mostrardescuento" id="mostrardescuento-input" value="NO">
                     <input type="hidden" name="categoria" id="categoria-input-compuesto" value="">
                     <input type="hidden" name="producto" id="producto-input-compuesto" value="">
                     <input type="hidden" name="descripcionproducto" id="descripcionproducto-input-compuesto" value="">
@@ -109,13 +102,25 @@
                     <input type="hidden" name="stock" id="stock-input-compuesto" value="">
                 </div>
 
-                <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
-                <div id="form-actions-wrap" class="form-actions form-actions-end" style="display: none;">
-                    <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
+                    <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
+                    <div id="form-actions-wrap" class="form-actions form-actions-end">
+                        <button type="submit" class="primary-btn" id="submit-btn">Guardar</button>
+                        <a href="admin-menu-compuesto.html" class="secondary-btn">Cancelar</a>
+                    </div>
+                    <span class="hint">* Los campos con * son obligatorios. Se inserta en la hoja menu-compuesto-detalle y en menu-toro-rapido-web-compuesto.</span>
+                </form>
+            </div>
+
+            <!-- Contenido para MENU-CON-SUBPRODUTO: botón Crear menu con subproductos -->
+            <div id="wrap-menu-subproducto" class="wrap-tipo-menu" data-tipo-panel="MENU-CON-SUBPRODUTO" style="display: none;">
+                <p class="field-hint">Creá un menú que incluye subproductos. Usá el botón para abrir el asistente.</p>
+                <div class="form-actions form-actions-end">
+                    <button type="button" class="primary-btn" id="btn-crear-menu-subproducto" aria-label="Crear menú con subproductos">
+                        <i class="fa-solid fa-layer-group"></i> Crear menu con subproductos
+                    </button>
                     <a href="admin-menu-compuesto.html" class="secondary-btn">Cancelar</a>
                 </div>
-                <span class="hint">* Los campos con * son obligatorios. Según Tipo Menú se inserta en la hoja menú simple o menú compuesto.</span>
-            </form>
+            </div>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
         </section>
     </main>
