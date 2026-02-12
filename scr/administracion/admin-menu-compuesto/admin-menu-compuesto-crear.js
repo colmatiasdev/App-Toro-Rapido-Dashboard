@@ -718,7 +718,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnCrearSubproducto = document.getElementById("btn-crear-menu-subproducto");
     if (btnCrearSubproducto) {
         btnCrearSubproducto.addEventListener("click", () => {
-            window.location.href = "../admin-menu-subproductos/admin-menu-subproductos.html";
+            window.location.href = "../admin-productos-compuestos-detalle/admin-productos-compuestos-detalle.html";
         });
     }
     const form = document.getElementById("add-item-form");

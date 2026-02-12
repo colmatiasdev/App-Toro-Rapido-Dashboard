@@ -10,6 +10,7 @@
         deprecated: "active",
         fields: [
             "idproducto",
+            "idproducto-base",
             "Cantidad",
             "Producto",
             "Precio Unitario Actual",

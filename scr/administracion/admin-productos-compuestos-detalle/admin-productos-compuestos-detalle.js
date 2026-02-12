@@ -1,5 +1,5 @@
 /**
- * Módulo Menú con subproductos.
+ * Módulo Detalle producto compuesto.
  * Tabla de productos-base con check para agregar ítems; resumen dinámico de lo seleccionado.
  */
 const MENU_SCRIPT_URL = window.APP_CONFIG?.appsScriptMenuUrl || "";
@@ -8,6 +8,14 @@ const PRODUCTOS_SHEET_NAME = window.APP_CONFIG?.menuProductosSheetName || "produ
 const PRODUCTOS_COMPUESTO_DETALLE_SHEET_NAME = window.APP_CONFIG?.productosCompuestoDetalleSheetName || "productos-compuesto-detalle";
 /** Máximo de ítems en el resumen (configurable en APP_CONFIG.menuSubproductosMaxItems). Al llegar al máximo se muestra leyenda y se deshabilitan los checks no seleccionados. */
 const MAX_ITEMS_RESUMEN = Math.max(1, parseInt(window.APP_CONFIG?.menuSubproductosMaxItems, 10) || 5);
+
+const ALPHANUM = "0123456789abcdefghijklmnopqrstuvwxyz";
+/** Genera un idproducto único para productos-compuesto-detalle: PROD-COMPUESTO- + valor aleatorio único. */
+const generarIdProductoCompuesto = () => {
+    let s = Date.now().toString(36);
+    for (let i = 0; i < 12; i++) s += ALPHANUM[Math.floor(Math.random() * ALPHANUM.length)];
+    return "PROD-COMPUESTO-" + s;
+};
 
 const normalizeKey = (value) => (value ?? "")
     .toString()
@@ -349,6 +357,7 @@ const renderResumen = () => {
     if (selectedSubproductos.length === 0) {
         wrap.style.display = "none";
         updateDebugPayload();
+        updateBtnAgregarCompuesto();
         return;
     }
     wrap.style.display = "block";
@@ -373,15 +382,27 @@ const renderResumen = () => {
         tbody.appendChild(tr);
     });
     updateDebugPayload();
+    updateBtnAgregarCompuesto();
 };
 
-/** Actualiza la sección debug (vista previa de envío) según APP_CONFIG.debug y APP_CONFIG.debugFull. */
+/** Habilita o deshabilita el botón «Agregar ítem al producto compuesto» según haya ítems en el resumen. */
+const updateBtnAgregarCompuesto = () => {
+    const btn = document.getElementById("btn-agregar-item-compuesto");
+    if (!btn) return;
+    const tieneItems = selectedSubproductos.length > 0;
+    btn.disabled = !tieneItems;
+    btn.title = tieneItems ? "Guardar los ítems del resumen en productos-compuesto-detalle" : "Agregá al menos un producto al resumen para poder guardar";
+};
+
+/** Actualiza la sección debug (vista previa de envío) según APP_CONFIG.debug y APP_CONFIG.debugFull. Un único idproducto para todo el detalle. */
 const updateDebugPayload = () => {
     if (typeof window.renderDebugPayloadSection !== "function") return;
+    const idproductoUnico = selectedSubproductos.length > 0 ? generarIdProductoCompuesto() : "";
     const blocks = selectedSubproductos.map((item, index) => {
         const row = item.row;
         const cantidad = item.cantidad || 1;
-        const idproducto = cleanText(getValue(row, ["ID Producto", "idproducto"]));
+        const idproductoBase = cleanText(getValue(row, ["ID Producto", "idproducto"]));
+        const idproducto = idproductoUnico;
         const producto = cleanText(getValue(row, ["Producto", "producto"]));
         const precioStr = cleanText(getValue(row, ["Precio Actual", "precioactual", "Precio Unitario Actual"]));
         const precioUnit = parseFloat(String(precioStr).replace(",", ".")) || 0;
@@ -390,6 +411,7 @@ const updateDebugPayload = () => {
             action: "create",
             sheetName: PRODUCTOS_COMPUESTO_DETALLE_SHEET_NAME,
             idproducto,
+            "idproducto-base": idproductoBase,
             Cantidad: cantidad,
             Producto: producto,
             "Precio Unitario Actual": precioStr || precioUnit,
@@ -404,14 +426,14 @@ const updateDebugPayload = () => {
             title: "Ítem " + (index + 1) + " → " + PRODUCTOS_COMPUESTO_DETALLE_SHEET_NAME,
             sheetName: PRODUCTOS_COMPUESTO_DETALLE_SHEET_NAME,
             actionType: "create",
-            actionDescription: "Se enviará este registro a la hoja productos-compuesto-detalle al hacer clic en «Agregar ítem al producto compuesto».",
+            actionDescription: "Se enviará este registro a la hoja productos-compuesto-detalle. idproducto se genera automático (PROD-COMPUESTO-xxx), idproducto-base es el ID del producto seleccionado.",
             payload
         };
     });
     window.renderDebugPayloadSection("debug-payload-wrap", blocks);
 };
 
-/** Guarda los ítems del resumen en productos-compuesto-detalle y redirige a admin-productos-compuestos. */
+/** Guarda los ítems del resumen en productos-compuesto-detalle (un único idproducto por menú) y redirige pasando los datos de la inserción. */
 const saveSubproductosToDetalleAndGo = async () => {
     if (!selectedSubproductos.length) {
         alert("No hay ítems en el resumen. Agregá al menos un producto.");
@@ -423,12 +445,15 @@ const saveSubproductosToDetalleAndGo = async () => {
         btn.textContent = "Guardando...";
     }
     const sheetName = PRODUCTOS_COMPUESTO_DETALLE_SHEET_NAME;
+    /** Un único idproducto para todo el detalle del menú (se repite en cada fila insertada). */
+    const idproducto = generarIdProductoCompuesto();
+    const datosInsercion = { idproducto, numItems: selectedSubproductos.length, items: [] };
 
     try {
         for (const item of selectedSubproductos) {
             const row = item.row;
             const cantidad = item.cantidad || 1;
-            const idproducto = cleanText(getValue(row, ["ID Producto", "idproducto"]));
+            const idproductoBase = cleanText(getValue(row, ["ID Producto", "idproducto"]));
             const producto = cleanText(getValue(row, ["Producto", "producto"]));
             const precioStr = cleanText(getValue(row, ["Precio Actual", "precioactual", "Precio Unitario Actual"]));
             const precioUnit = parseFloat(String(precioStr).replace(",", ".")) || 0;
@@ -438,6 +463,7 @@ const saveSubproductosToDetalleAndGo = async () => {
                 action: "create",
                 sheetName,
                 idproducto,
+                "idproducto-base": idproductoBase,
                 Cantidad: cantidad,
                 Producto: producto,
                 "Precio Unitario Actual": precioStr || precioUnit,
@@ -448,6 +474,14 @@ const saveSubproductosToDetalleAndGo = async () => {
                 STOCK: cleanText(getValue(row, ["STOCK", "stock"])),
                 Habilitado: (cleanText(getValue(row, ["Habilitado", "habilitado"])) || "SI").toUpperCase() === "SI" ? "SI" : "NO"
             };
+
+            datosInsercion.items.push({
+                "idproducto-base": idproductoBase,
+                Cantidad: cantidad,
+                Producto: producto,
+                "Precio Unitario Actual": precioStr || precioUnit,
+                "Precio Total Actual": precioTotal
+            });
 
             await fetch(MENU_SCRIPT_URL, {
                 method: "POST",
@@ -462,7 +496,11 @@ const saveSubproductosToDetalleAndGo = async () => {
             scriptDebug.classList.remove("script-debug-error");
             scriptDebug.classList.add("script-debug-success");
         }
-        window.location.href = "../admin-productos-compuestos/admin-productos-compuestos.html";
+        try {
+            sessionStorage.setItem("ultimaInsercionCompuesto", JSON.stringify(datosInsercion));
+        } catch (e) {}
+        const params = new URLSearchParams({ idproducto, numItems: String(datosInsercion.numItems) });
+        window.location.href = "../admin-productos-compuestos/admin-productos-compuestos.html?" + params.toString();
     } catch (err) {
         console.error(err);
         const scriptDebug = document.getElementById("script-debug");

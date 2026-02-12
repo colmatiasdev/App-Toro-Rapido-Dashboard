@@ -55,7 +55,7 @@ window.APP_CONFIG = {
     menuOpcionesSheetName: "opciones-base",
     /** Nombre de la hoja de productos. Columnas: ID Producto, Categoria, Producto, Descripcion, Precio Actual, Precio Regular, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado, Mostar Monto Descuento, Mostar Descuento. */
     menuProductosSheetName: "productos-base",
-    /** Nombre de la hoja donde se guardan los ítems del producto compuesto (módulo menú con subproductos). Sin idmenu-variable. Columnas: idproducto, Cantidad, Producto, Precio Unitario Actual, Precio Total Actual, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado. */
+    /** Nombre de la hoja donde se guardan los ítems del producto compuesto (módulo menú con subproductos). idproducto = PROD-COMPUESTO- + único aleatorio; idproducto-base = ID del producto seleccionado (productos-base). Columnas: idproducto, idproducto-base, Cantidad, Producto, Precio Unitario Actual, Precio Total Actual, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado. */
     productosCompuestoDetalleSheetName: "productos-compuesto-detalle",
     /** Máximo de ítems que se pueden cargar en el resumen de subproductos (menú con subproductos). Al llegar al máximo se muestra una leyenda y se deshabilitan los checks restantes. */
     menuSubproductosMaxItems: 5,

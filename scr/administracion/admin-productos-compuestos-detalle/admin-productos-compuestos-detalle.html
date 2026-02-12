@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Menú con subproductos - Toro Rápido</title>
+    <title>Detalle producto compuesto - Toro Rápido</title>
     <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../admin-header.css">
     <link rel="stylesheet" href="../admin-menu-compuesto/admin-menu-compuesto.css">
-    <link rel="stylesheet" href="admin-menu-subproductos.css">
+    <link rel="stylesheet" href="admin-productos-compuestos-detalle.css">
 </head>
 <body>
     <div id="admin-header-slot"></div>
@@ -18,9 +18,9 @@
             <p>Creá un menú que incluye subproductos.</p>
         </header>
 
-        <section class="admin-card" id="admin-menu-subproductos">
+        <section class="admin-card" id="admin-productos-compuestos-detalle">
             <div class="card-title">
-                <i class="fa-solid fa-layer-group"></i> Menú con subproductos
+                <i class="fa-solid fa-layer-group"></i> Detalle producto compuesto
             </div>
             <p class="field-hint">Desde acá podés definir menús compuestos por varios subproductos. Marcá con el check los productos base que formarán parte del menú; debajo se muestra el resumen de lo que vas agregando.</p>
 
@@ -76,7 +76,7 @@
 
             <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
             <div class="form-actions form-actions-end" style="margin-top: 1rem;">
-                <button type="button" id="btn-agregar-item-compuesto" class="primary-btn"><i class="fa-solid fa-save" aria-hidden="true"></i> Agregar ítem al producto compuesto</button>
+                <button type="button" id="btn-agregar-item-compuesto" class="primary-btn" disabled title="Agregá al menos un producto al resumen para poder guardar"><i class="fa-solid fa-save" aria-hidden="true"></i> Agregar ítem al producto compuesto</button>
                 <a href="../admin-menu-compuesto/admin-menu-compuesto-crear.html" class="secondary-btn">Volver a agregar ítem</a>
             </div>
             <div class="script-debug" id="script-debug" aria-live="polite"></div>
@@ -93,6 +93,6 @@
 
     <script src="../../Configuracion/config.js" defer></script>
     <script src="../admin-common.js" defer></script>
-    <script src="admin-menu-subproductos.js" defer></script>
+    <script src="admin-productos-compuestos-detalle.js" defer></script>
 </body>
 </html>

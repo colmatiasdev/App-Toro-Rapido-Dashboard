@@ -24,8 +24,27 @@
             </div>
             <p class="field-hint">Desde acá podés agregar ítems al producto compuesto (se guardan en la hoja productos-compuesto-detalle) o gestionar el menú compuesto.</p>
 
+            <div id="ultima-insercion-wrap" class="ultima-insercion-wrap" style="display: none;" role="status" aria-live="polite">
+                <h3 class="ultima-insercion-title"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Última inserción</h3>
+                <p id="ultima-insercion-resumen" class="ultima-insercion-resumen"></p>
+                <div id="ultima-insercion-tabla-wrap" class="table-wrap" style="display: none;">
+                    <table class="menu-table ultima-insercion-table" aria-label="Detalle de la última inserción">
+                        <thead>
+                            <tr>
+                                <th>idproducto-base</th>
+                                <th>Cantidad</th>
+                                <th>Producto</th>
+                                <th>Precio Unitario Actual</th>
+                                <th>Precio Total Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ultima-insercion-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="form-actions form-actions-end" style="margin-top: 1rem;">
-                <a href="../admin-menu-subproductos/admin-menu-subproductos.html" class="primary-btn"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i> Agregar ítem al producto compuesto</a>
+                <a href="../admin-productos-compuestos-detalle/admin-productos-compuestos-detalle.html" class="primary-btn"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i> Agregar ítem al producto compuesto</a>
                 <a href="../admin-menu-compuesto/admin-menu-compuesto.html" class="secondary-btn"><i class="fa-solid fa-list" aria-hidden="true"></i> Ver menú compuesto</a>
             </div>
         </section>
