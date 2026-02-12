@@ -53,14 +53,22 @@
                 <div class="card-title"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Datos del producto compuesto (hoja productos-compuesto)</div>
                 <p class="field-hint">Completá los datos del producto compuesto y guardalos en la hoja <strong>productos-compuesto</strong>. El <strong>idproducto</strong> es el mismo que el detalle (PROD-COMPUESTO-xxx).</p>
                 <div class="form-productos-compuesto-inner">
-                    <div class="form-row">
-                        <label for="pc-idproducto">idproducto</label>
-                        <input type="text" id="pc-idproducto" readonly class="input-readonly" aria-describedby="pc-idproducto-hint">
-                        <span id="pc-idproducto-hint" class="field-hint-inline">Solo lectura (viene del detalle)</span>
+                    <input type="hidden" id="pc-orden">
+                    <input type="hidden" id="pc-idproducto">
+                    <div class="form-row form-row-informativo">
+                        <span class="form-label-informativo">Orden</span>
+                        <span id="pc-orden-value" class="form-value-informativo" aria-live="polite">—</span>
                     </div>
+                    <div class="form-row form-row-informativo">
+                        <span class="form-label-informativo">idproducto</span>
+                        <span id="pc-idproducto-value" class="form-value-informativo" aria-live="polite">—</span>
+                    </div>
+                    <p class="field-hint-inline" style="margin-top: -0.5rem; margin-bottom: 1rem;">Estos valores se asignan automáticamente (no se cargan manualmente).</p>
                     <div class="form-row">
                         <label for="pc-categoria">Categoria</label>
-                        <input type="text" id="pc-categoria" placeholder="Ej. Combos">
+                        <input type="text" id="pc-categoria" list="pc-categoria-datalist" placeholder="Elegí uno o escribí uno nuevo" autocomplete="off" aria-describedby="pc-categoria-hint">
+                        <datalist id="pc-categoria-datalist"></datalist>
+                        <span id="pc-categoria-hint" class="field-hint-inline">Valores de la hoja productos-compuesto. Elegí uno o escribí uno nuevo.</span>
                     </div>
                     <div class="form-row">
                         <label for="pc-producto">Producto</label>
@@ -72,14 +80,53 @@
                     </div>
                     <div class="form-row">
                         <label for="pc-precio-actual">Precio Actual</label>
-                        <input type="text" id="pc-precio-actual" placeholder="Ej. 0 o dejar vacío si se calcula del detalle">
+                        <input type="text" id="pc-precio-actual" placeholder="Ej. 0 o dejar vacío">
+                    </div>
+                    <div class="form-row form-row-informativo">
+                        <span class="form-label-informativo">Precio Regular</span>
+                        <span id="pc-precio-regular-value" class="form-value-informativo" aria-live="polite">—</span>
+                        <input type="hidden" id="pc-precio-regular">
+                    </div>
+                    <p class="field-hint-inline" style="margin-top: -0.5rem; margin-bottom: 0.5rem;">Total del resumen (Precio Total Actual de los ítems). No editable.</p>
+                    <div class="form-row">
+                        <label for="pc-mostar-monto-descuento">Mostar Monto Descuento</label>
+                        <select id="pc-mostar-monto-descuento">
+                            <option value="NO" selected>NO</option>
+                            <option value="SI">SI</option>
+                        </select>
                     </div>
                     <div class="form-row">
-                        <label for="pc-imagen">Imagen</label>
-                        <input type="text" id="pc-imagen" placeholder="URL de imagen">
+                        <label for="pc-mostar-descuento">Mostar Descuento</label>
+                        <select id="pc-mostar-descuento">
+                            <option value="NO">NO</option>
+                            <option value="SI" selected>SI</option>
+                        </select>
+                    </div>
+                    <div class="form-row form-row-imagen">
+                        <label for="pc-imagen-file">Imagen</label>
+                        <input type="hidden" id="pc-imagen">
+                        <div class="imagen-controls">
+                            <label class="imagen-file-btn">
+                                <input type="file" id="pc-imagen-file" accept="image/*" aria-label="Elegir imagen" class="imagen-file-input">
+                                <i class="fa-solid fa-image" aria-hidden="true"></i>
+                                <span>Elegir imagen</span>
+                            </label>
+                            <input type="text" id="pc-imagen-url" placeholder="O pegá una URL de imagen" autocomplete="off">
+                        </div>
+                        <div id="pc-imagen-preview-wrap" class="imagen-preview-wrap" aria-live="polite">
+                            <img id="pc-imagen-preview" class="imagen-preview" src="" alt="Vista previa" style="display: none;">
+                            <span id="pc-imagen-preview-placeholder" class="imagen-preview-placeholder">Sin imagen</span>
+                        </div>
                     </div>
                     <div class="form-row form-row-inline">
-                        <label><input type="checkbox" id="pc-es-destacado" value="SI"> Es Destacado</label>
+                        <label><input type="checkbox" id="pc-es-destacado" value="SI"> <i class="fa-solid fa-crown icon-crown-gold" aria-hidden="true"></i> Es Destacado</label>
+                    </div>
+                    <div class="form-row form-row-inline" style="display: none;" aria-hidden="true">
+                        <label><input type="checkbox" id="pc-producto-agotado" value="SI"> Producto Agotado</label>
+                    </div>
+                    <div class="form-row" style="display: none;" aria-hidden="true">
+                        <label for="pc-stock">STOCK</label>
+                        <input type="text" id="pc-stock" value="99">
                     </div>
                     <div class="form-row form-row-inline">
                         <label><input type="checkbox" id="pc-habilitado" value="SI" checked> Habilitado</label>

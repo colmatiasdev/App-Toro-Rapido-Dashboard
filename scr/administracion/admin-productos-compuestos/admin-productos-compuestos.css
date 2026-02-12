@@ -78,13 +78,21 @@
     font-size: 0.9rem;
 }
 .form-productos-compuesto-inner input[type="text"],
-.form-productos-compuesto-inner textarea {
+.form-productos-compuesto-inner textarea,
+.form-productos-compuesto-inner select {
     width: 100%;
     max-width: 400px;
     padding: 0.5rem 0.75rem;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-size: 0.95rem;
+}
+.form-productos-compuesto-inner select {
+    cursor: pointer;
+    background-color: #fff;
+}
+.form-productos-compuesto-inner .form-row-nueva-categoria input {
+    max-width: 400px;
 }
 .form-productos-compuesto-inner input.input-readonly {
     background: #f1f5f9;
@@ -95,11 +103,97 @@
     align-items: center;
     gap: 0.5rem;
 }
+.form-productos-compuesto-inner .icon-crown-gold {
+    color: #c9a227;
+    margin-right: 0.15rem;
+}
+.form-productos-compuesto-inner .form-row-informativo {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.form-productos-compuesto-inner .form-label-informativo {
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 6rem;
+    color: #475569;
+}
+.form-productos-compuesto-inner .form-value-informativo {
+    font-size: 0.95rem;
+    color: #0f172a;
+    font-family: ui-monospace, monospace;
+}
 .form-productos-compuesto-inner .field-hint-inline {
     display: block;
     font-size: 0.8rem;
     color: #64748b;
     margin-top: 0.25rem;
+}
+.form-productos-compuesto-inner .form-row-imagen .imagen-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.form-productos-compuesto-inner .imagen-file-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+}
+.form-productos-compuesto-inner .imagen-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1e40af;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.form-productos-compuesto-inner .imagen-file-btn:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+}
+.form-productos-compuesto-inner .imagen-file-btn:focus-within {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+.form-productos-compuesto-inner .imagen-file-btn i {
+    font-size: 1.1rem;
+}
+.form-productos-compuesto-inner .form-row-imagen .imagen-controls input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+}
+.form-productos-compuesto-inner .imagen-preview-wrap {
+    margin-top: 0.5rem;
+    min-height: 80px;
+    padding: 0.75rem;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.form-productos-compuesto-inner .imagen-preview {
+    max-width: 200px;
+    max-height: 200px;
+    object-fit: contain;
+}
+.form-productos-compuesto-inner .imagen-preview-placeholder {
+    font-size: 0.9rem;
+    color: #94a3b8;
 }
 .form-productos-compuesto-wrap .script-debug {
     margin-top: 0.75rem;

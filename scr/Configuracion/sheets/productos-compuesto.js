@@ -9,19 +9,20 @@
         configKey: "productosCompuestoSheetName",
         deprecated: "active",
         fields: [
+            "orden",
             "idproducto",
             "Categoria",
             "Producto",
             "Descripcion",
             "Precio Actual",
             "Precio Regular",
+            "Mostar Monto Descuento",
+            "Mostar Descuento",
             "Imagen",
             "Es Destacado",
             "Producto Agotado",
             "STOCK",
-            "Habilitado",
-            "Mostar Monto Descuento",
-            "Mostar Descuento"
+            "Habilitado"
         ]
     };
 })(typeof window !== "undefined" ? window : this);

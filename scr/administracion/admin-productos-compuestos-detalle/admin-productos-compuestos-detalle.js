@@ -480,7 +480,10 @@ const saveSubproductosToDetalleAndGo = async () => {
                 Cantidad: cantidad,
                 Producto: producto,
                 "Precio Unitario Actual": precioStr || precioUnit,
-                "Precio Total Actual": precioTotal
+                "Precio Total Actual": precioTotal,
+                Descripcion: cleanText(getValue(row, ["Descripcion", "descripcion", "Descripción"])),
+                Imagen: cleanText(getValue(row, ["Imagen", "imagen"])),
+                "Es Destacado": (cleanText(getValue(row, ["Es Destacado", "esdestacado"])) || "NO").toUpperCase() === "SI" ? "SI" : "NO"
             });
 
             await fetch(MENU_SCRIPT_URL, {
@@ -500,6 +503,12 @@ const saveSubproductosToDetalleAndGo = async () => {
             sessionStorage.setItem("ultimaInsercionCompuesto", JSON.stringify(datosInsercion));
         } catch (e) {}
         const params = new URLSearchParams({ idproducto, numItems: String(datosInsercion.numItems) });
+        try {
+            const jsonStr = JSON.stringify(datosInsercion);
+            const datosEncoded = btoa(unescape(encodeURIComponent(jsonStr)))
+                .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+            if (datosEncoded.length <= 2000) params.set("d", datosEncoded);
+        } catch (encodeErr) {}
         window.location.href = "../admin-productos-compuestos/admin-productos-compuestos.html?" + params.toString();
     } catch (err) {
         console.error(err);
