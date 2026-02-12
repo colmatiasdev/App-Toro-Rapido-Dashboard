@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Confirmación - Menú compuesto - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="../admin-menu-compuesto/admin-menu-compuesto.css">
+    <link rel="stylesheet" href="admin-confirmacion-menu-compuesto.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu admin-confirmacion-menu-compuesto">
+        <header class="admin-header">
+            <p>Confirmación: producto compuesto guardado correctamente.</p>
+        </header>
+
+        <section class="admin-card confirmacion-card">
+            <div class="card-title">
+                <i class="fa-solid fa-circle-check confirmacion-icon" aria-hidden="true"></i> Confirmación
+            </div>
+            <p class="field-hint">Revisá el resumen del producto compuesto. Cuando estés listo, finalizá la creación del menú.</p>
+
+            <div id="confirmacion-resumen-wrap" class="confirmacion-resumen-wrap" role="region" aria-labelledby="confirmacion-resumen-title">
+                <h2 id="confirmacion-resumen-title" class="confirmacion-resumen-title">Resumen del producto compuesto</h2>
+                <div id="confirmacion-resumen-body" class="confirmacion-resumen-body"></div>
+            </div>
+
+            <div id="confirmacion-sin-datos" class="confirmacion-sin-datos" style="display: none;" role="alert">
+                <p>No hay datos de confirmación. Guardá un producto compuesto desde <a href="../admin-productos-compuestos/admin-productos-compuestos.html">Productos compuestos</a>.</p>
+            </div>
+
+            <div class="form-actions form-actions-end confirmacion-actions">
+                <button type="button" id="btn-finalizar-menu" class="primary-btn"><i class="fa-solid fa-check-double" aria-hidden="true"></i> Finalizar creación del menú</button>
+                <a href="../admin-productos-compuestos/admin-productos-compuestos.html" class="secondary-btn"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Volver a productos compuestos</a>
+            </div>
+
+            <div id="debug-payload-wrap" class="debug-payload-wrap" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../Configuracion/config.js" defer></script>
+    <script src="../admin-common.js" defer></script>
+    <script src="admin-confirmacion-menu-compuesto.js" defer></script>
+</body>
+</html>

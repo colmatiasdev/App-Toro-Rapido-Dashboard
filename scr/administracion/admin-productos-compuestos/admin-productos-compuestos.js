@@ -13,12 +13,12 @@ function cell(content) {
     return td;
 }
 
-/** Formato moneda Argentina (ej. $ 1.461.879,79). */
+/** Formato moneda Argentina (ej. $ 1.461.879,79). No usa window.formatMoneda para evitar recursión (esta función puede ser la asignada en window). */
 function formatMoneda(val) {
     if (val === undefined || val === null || val === "") return "—";
     const n = typeof val === "number" ? val : parseFloat(String(val).replace(",", "."));
     if (Number.isNaN(n)) return "—";
-    return (window.formatMoneda && typeof window.formatMoneda === "function") ? window.formatMoneda(n) : ("$ " + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    return "$ " + n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 const normalizeKey = (s) => (s ?? "").toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[\s_-]/g, "");
@@ -37,27 +37,29 @@ function rowsToItems(headers, rows) {
     const getVal = (row, keys) => {
         for (let i = 0; i < headers.length; i++) {
             const h = (headers[i] ?? "").toString().trim();
+            const hn = normalizeKey(h);
             for (const k of keys) {
-                if (normalizeKey(h) === normalizeKey(k)) return row[i];
+                if (hn === normalizeKey(k)) return row[i];
             }
         }
         return "";
     };
-    return rows.map((row) => ({
-        "idproducto-base": getVal(row, ["idproducto-base", "idproducto-base"]),
-        Cantidad: (() => {
-            const v = getVal(row, ["Cantidad", "cantidad"]);
-            const n = parseInt(v, 10);
-            return Number.isNaN(n) ? 1 : n;
-        })(),
-        Producto: getVal(row, ["Producto", "producto"]),
-        "Precio Unitario Actual": getVal(row, ["Precio Unitario Actual", "Precio Actual"]),
-        "Precio Total Actual": (() => {
-            const v = getVal(row, ["Precio Total Actual"]);
-            const n = typeof v === "number" ? v : parseFloat(String(v || "").replace(",", "."));
-            return Number.isNaN(n) ? 0 : n;
-        })()
-    }));
+    return rows.map((row) => {
+        const cant = getVal(row, ["Cantidad", "cantidad"]);
+        const nCant = parseInt(cant, 10);
+        const cantidad = Number.isNaN(nCant) ? 1 : nCant;
+        const precioUnitStr = getVal(row, ["Precio Unitario Actual", "Precio Actual", "Precio Unitario"]);
+        const precioTotalVal = getVal(row, ["Precio Total Actual", "Precio Total"]);
+        const precioTotalNum = typeof precioTotalVal === "number" ? precioTotalVal : parseFloat(String(precioTotalVal || "").replace(",", "."));
+        const precioTotal = Number.isNaN(precioTotalNum) ? 0 : precioTotalNum;
+        return {
+            "idproducto-base": getVal(row, ["idproducto-base", "idproducto base", "ID Producto Base"]),
+            Cantidad: cantidad,
+            Producto: getVal(row, ["Producto", "producto"]),
+            "Precio Unitario Actual": precioUnitStr,
+            "Precio Total Actual": precioTotal
+        };
+    });
 }
 
 /**
@@ -78,22 +80,17 @@ async function fetchItemsFromSheet(idproducto) {
     const url = `${MENU_SCRIPT_URL}${sep}sheetName=${encodeURIComponent(PRODUCTOS_COMPUESTO_DETALLE_SHEET_NAME)}&idproducto=${encodeURIComponent(idBuscado)}&_ts=${Date.now()}`;
     try {
         const res = await fetch(url, { cache: "no-store", mode: "cors" });
-        let data;
-        const contentType = res.headers.get("content-type") || "";
         const text = await res.text();
         if (!res.ok) {
             console.warn("[productos-compuestos] GET hoja falló:", res.status, res.statusText, text.slice(0, 200));
             return { items: [], error: "Error " + res.status + " al conectar con la hoja. Revisá la consola (F12)." };
         }
-        if (contentType.indexOf("application/json") !== -1) {
-            try {
-                data = JSON.parse(text);
-            } catch (parseErr) {
-                return { items: [], error: "La respuesta no es JSON válido." };
-            }
-        } else {
-            console.warn("[productos-compuestos] La respuesta no es JSON. Content-Type:", contentType, "Inicio:", text.slice(0, 150));
-            return { items: [], error: "El servidor no devolvió JSON (¿abriste la app desde file://? Probá servir la app por http o usar la URL de Apps Script en el navegador)." };
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseErr) {
+            console.warn("[productos-compuestos] Respuesta no es JSON. Inicio:", text.slice(0, 150));
+            return { items: [], error: "El servidor no devolvió JSON válido. ¿Abriste desde file://? Probá servir por HTTP." };
         }
         if (data && (data.result === "error" || data.error)) {
             const msg = data.error || "Error desconocido";
@@ -103,10 +100,6 @@ async function fetchItemsFromSheet(idproducto) {
         const headers = data?.headers || [];
         const rows = Array.isArray(data?.rows) ? data.rows : [];
         const items = rowsToItems(headers, rows);
-        if (items.length === 0 && idBuscado) {
-            console.warn("[productos-compuestos] No se encontraron filas con idproducto =", idBuscado, ". Headers de la hoja:", headers);
-            return { items: [], error: "No hay filas con idproducto = " + idBuscado + " en la hoja. Revisá que la columna se llame «idproducto» y que existan datos con ese valor." };
-        }
         return { items };
     } catch (e) {
         console.error("[productos-compuestos] Error cargando detalle desde hoja:", e);
@@ -115,33 +108,143 @@ async function fetchItemsFromSheet(idproducto) {
     }
 }
 
+/**
+ * Obtiene de la hoja productos-compuesto los valores únicos de la columna Categoria (ordenados).
+ * @returns {Promise<string[]>}
+ */
+async function fetchCategoriasFromSheet() {
+    if (!MENU_SCRIPT_URL) return [];
+    const sep = MENU_SCRIPT_URL.includes("?") ? "&" : "?";
+    const url = `${MENU_SCRIPT_URL}${sep}sheetName=${encodeURIComponent(PRODUCTOS_COMPUESTO_SHEET_NAME)}&_ts=${Date.now()}`;
+    try {
+        const res = await fetch(url, { cache: "no-store", mode: "cors" });
+        const text = await res.text();
+        if (!res.ok) return [];
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (_) {
+            return [];
+        }
+        if (data?.result === "error" || data?.error) return [];
+        const headers = data?.headers || [];
+        const rows = Array.isArray(data?.rows) ? data.rows : [];
+        const colCategoria = headers.findIndex((h) => normalizeKey(String(h ?? "")) === normalizeKey("Categoria"));
+        if (colCategoria === -1) return [];
+        const set = new Set();
+        rows.forEach((row) => {
+            const v = row[colCategoria];
+            const s = (v != null ? String(v) : "").trim();
+            if (s) set.add(s);
+        });
+        return Array.from(set).sort((a, b) => a.localeCompare(b, "es"));
+    } catch (e) {
+        console.warn("[productos-compuestos] Error cargando categorías:", e);
+        return [];
+    }
+}
+
+/** Devuelve el valor de Categoria (input combobox con datalist). */
+function getCategoriaValue() {
+    const input = document.getElementById("pc-categoria");
+    return (input && (input.value || "").trim()) || "";
+}
+
+/** Escapa HTML para usar en atributos/value. */
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/** Rellena el datalist de categorías con los valores de la hoja (combobox: elegir o escribir nuevo). */
+function fillCategoriaDatalist(categorias) {
+    const datalist = document.getElementById("pc-categoria-datalist");
+    if (!datalist) return;
+    const list = Array.isArray(categorias) ? categorias : [];
+    datalist.innerHTML = list.map((cat) => `<option value="${escapeHtml(cat)}">`).join("");
+}
+
+/** Actualiza la previsualización de la imagen desde el valor de pc-imagen (URL o data URL). */
+function updateImagenPreview() {
+    const hidden = document.getElementById("pc-imagen");
+    const img = document.getElementById("pc-imagen-preview");
+    const placeholder = document.getElementById("pc-imagen-preview-placeholder");
+    const src = (hidden && hidden.value || "").trim();
+    if (!img || !placeholder) return;
+    if (src && (src.startsWith("data:") || src.startsWith("http://") || src.startsWith("https://"))) {
+        img.src = src;
+        img.style.display = "block";
+        img.onerror = () => {
+            img.style.display = "none";
+            placeholder.style.display = "inline";
+        };
+        img.onload = () => {
+            placeholder.style.display = "none";
+        };
+        placeholder.style.display = "none";
+    } else {
+        img.src = "";
+        img.style.display = "none";
+        placeholder.style.display = "inline";
+    }
+}
+
+/** Obtiene valor de un ítem por clave (acepta varias variantes de nombre). */
+function getItemVal(it, keys) {
+    if (!it || typeof it !== "object") return "";
+    const klist = Array.isArray(keys) ? keys : [keys];
+    for (const k of Object.keys(it)) {
+        const n = (k || "").toString().toLowerCase().replace(/\s+/g, "").replace(/-/g, "").replace(/_/g, "");
+        if (klist.some((c) => (c || "").toString().toLowerCase().replace(/\s+/g, "").replace(/-/g, "").replace(/_/g, "") === n)) return it[k];
+    }
+    return "";
+}
+
 /** Pinta la tabla de última inserción y el total con los ítems de datos.items. */
 function renderUltimaInsercionTabla(datos) {
     const tablaWrap = document.getElementById("ultima-insercion-tabla-wrap");
     const tbody = document.getElementById("ultima-insercion-tbody");
     const tfoot = document.getElementById("ultima-insercion-tfoot");
     const totalPrecioEl = document.getElementById("ultima-insercion-total-precio");
-    if (!tablaWrap || !tbody || !datos?.items?.length) return;
+    if (!tablaWrap) return;
+    const tbodyEl = tbody || tablaWrap.querySelector("tbody");
+    if (!tbodyEl) return;
+    const items = Array.isArray(datos?.items) ? datos.items : [];
+    if (items.length === 0) {
+        updatePrecioRegularEnFormulario(0);
+        return;
+    }
     let totalPrecio = 0;
     tablaWrap.style.display = "block";
-    tbody.innerHTML = "";
-    datos.items.forEach((it) => {
-        const precioUnit = it["Precio Unitario Actual"];
-        const precioTotal = it["Precio Total Actual"];
+    tbodyEl.innerHTML = "";
+    items.forEach((it) => {
+        const precioUnit = getItemVal(it, ["Precio Unitario Actual", "Precio Unitario", "precioUnitarioActual"]);
+        const precioTotal = getItemVal(it, ["Precio Total Actual", "Precio Total", "precioTotalActual"]);
         const numTotal = typeof precioTotal === "number" ? precioTotal : parseFloat(String(precioTotal ?? "").replace(",", "."));
         if (!Number.isNaN(numTotal)) totalPrecio += numTotal;
         const tr = document.createElement("tr");
-        tr.appendChild(cell(it["idproducto-base"]));
-        tr.appendChild(cell(String(it.Cantidad)));
-        tr.appendChild(cell(it.Producto || "—"));
+        tr.appendChild(cell(getItemVal(it, ["idproducto-base", "idproducto-base", "idproductobase"])));
+        tr.appendChild(cell(String(getItemVal(it, ["Cantidad", "cantidad"]) || "—")));
+        tr.appendChild(cell(getItemVal(it, ["Producto", "producto"]) || "—"));
         tr.appendChild(cell(formatMoneda(precioUnit)));
         tr.appendChild(cell(formatMoneda(precioTotal)));
-        tbody.appendChild(tr);
+        tbodyEl.appendChild(tr);
     });
     if (tfoot && totalPrecioEl) {
         tfoot.style.display = "table-footer-group";
         totalPrecioEl.textContent = formatMoneda(totalPrecio);
     }
+    updatePrecioRegularEnFormulario(totalPrecio);
+}
+
+/** Actualiza el campo informativo Precio Regular del formulario con el total del resumen. */
+function updatePrecioRegularEnFormulario(totalPrecio) {
+    const hidden = document.getElementById("pc-precio-regular");
+    const display = document.getElementById("pc-precio-regular-value");
+    const num = typeof totalPrecio === "number" && !Number.isNaN(totalPrecio) ? totalPrecio : 0;
+    if (hidden) hidden.value = String(num);
+    if (display) display.textContent = formatMoneda(num);
 }
 
 /** Renderiza la sección debug: pasos de lo guardado en productos-compuesto-detalle y lo que se enviaría a productos-compuesto. */
@@ -177,24 +280,36 @@ function renderDebugSection(datos) {
         });
     }
 
+    const orden = document.getElementById("pc-orden");
     const idproducto = document.getElementById("pc-idproducto");
     const producto = document.getElementById("pc-producto");
     const categoria = document.getElementById("pc-categoria");
     const descripcion = document.getElementById("pc-descripcion");
     const precioActual = document.getElementById("pc-precio-actual");
+    const precioRegular = document.getElementById("pc-precio-regular");
+    const mostarMontoDescuento = document.getElementById("pc-mostar-monto-descuento");
+    const mostarDescuento = document.getElementById("pc-mostar-descuento");
     const imagen = document.getElementById("pc-imagen");
     const esDestacado = document.getElementById("pc-es-destacado");
+    const productoAgotado = document.getElementById("pc-producto-agotado");
+    const stock = document.getElementById("pc-stock");
     const habilitado = document.getElementById("pc-habilitado");
     const payloadCompuesto = {
         action: "create",
         sheetName: PRODUCTOS_COMPUESTO_SHEET_NAME,
+        orden: orden ? orden.value : "",
         idproducto: datos.idproducto,
-        Categoria: categoria ? categoria.value : "",
+        Categoria: getCategoriaValue(),
         Producto: producto ? producto.value : "",
         Descripcion: descripcion ? descripcion.value : "",
         "Precio Actual": precioActual ? precioActual.value : "",
+        "Precio Regular": precioRegular ? precioRegular.value : "",
+        "Mostar Monto Descuento": mostarMontoDescuento ? mostarMontoDescuento.value : "",
+        "Mostar Descuento": mostarDescuento ? mostarDescuento.value : "",
         Imagen: imagen ? imagen.value : "",
         "Es Destacado": esDestacado && esDestacado.checked ? "SI" : "NO",
+        "Producto Agotado": "NO",
+        STOCK: "99",
         Habilitado: habilitado && habilitado.checked ? "SI" : "NO"
     };
     blocks.push({
@@ -217,17 +332,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     const idproductoParam = params.get("idproducto");
     const numItemsParam = params.get("numItems");
+    const datosParam = params.get("d");
 
     let datos = null;
     let hadStored = false;
     try {
-        const stored = sessionStorage.getItem("ultimaInsercionCompuesto");
-        if (stored) {
-            hadStored = true;
-            datos = JSON.parse(stored);
+        if (datosParam) {
+            const base64 = datosParam.replace(/-/g, "+").replace(/_/g, "/");
+            const padLen = (4 - (base64.length % 4)) % 4;
+            const padded = base64 + "====".slice(0, padLen);
+            const decoded = decodeURIComponent(escape(atob(padded)));
+            datos = JSON.parse(decoded);
+            if (datos && !Array.isArray(datos.items)) datos.items = [];
         }
     } catch (e) {}
-
+    if (!datos) {
+        try {
+            const stored = sessionStorage.getItem("ultimaInsercionCompuesto");
+            if (stored) {
+                hadStored = true;
+                datos = JSON.parse(stored);
+            }
+        } catch (e2) {}
+    }
     if (!datos && idproductoParam) {
         datos = {
             idproducto: idproductoParam,
@@ -235,6 +362,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             items: []
         };
     }
+    if (datos && !Array.isArray(datos.items)) datos.items = [];
 
     const wrap = document.getElementById("ultima-insercion-wrap");
     const resumenEl = document.getElementById("ultima-insercion-resumen");
@@ -244,42 +372,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (wrap && resumenEl && datos && datos.idproducto) {
         wrap.style.display = "block";
-        const numItems = datos.items?.length ?? datos.numItems ?? 0;
-        resumenEl.textContent = "Producto compuesto " + datos.idproducto + " con " + numItems + " ítem(s) guardado(s) en productos-compuesto-detalle.";
-
-        if (!datos.items || datos.items.length === 0) {
-            const tablaWrapEl = document.getElementById("ultima-insercion-tabla-wrap");
-            const loadingEl = document.createElement("p");
-            loadingEl.className = "ultima-insercion-loading";
-            loadingEl.setAttribute("aria-live", "polite");
-            loadingEl.textContent = "Cargando ítems desde la hoja…";
-            if (tablaWrapEl) {
-                tablaWrapEl.style.display = "block";
-                tablaWrapEl.appendChild(loadingEl);
-            }
-            const result = await fetchItemsFromSheet(datos.idproducto);
-            if (loadingEl.parentNode) loadingEl.remove();
-            if (result.error) {
-                const errEl = document.createElement("p");
-                errEl.className = "ultima-insercion-error";
-                errEl.setAttribute("role", "alert");
-                errEl.textContent = result.error;
-                if (tablaWrapEl) {
-                    tablaWrapEl.appendChild(errEl);
-                }
-                console.warn("[productos-compuestos] Carga de detalle:", result.error);
-            }
-            if (result.items && result.items.length > 0) {
-                datos.items = result.items;
-                if (typeof datos.numItems !== "number") datos.numItems = result.items.length;
-                resumenEl.textContent = "Producto compuesto " + datos.idproducto + " con " + datos.items.length + " ítem(s) guardado(s) en productos-compuesto-detalle.";
-            }
-        }
+        const tablaWrapEl = document.getElementById("ultima-insercion-tabla-wrap");
+        const numItemsInicial = (datos.items && datos.items.length) || 0;
+        resumenEl.textContent = "Producto compuesto " + datos.idproducto + " con " + (numItemsInicial || datos.numItems || 0) + " ítem(s) guardado(s) en productos-compuesto-detalle.";
+        if (tablaWrapEl) tablaWrapEl.style.display = "block";
         renderUltimaInsercionTabla(datos);
+        if (numItemsInicial > 0) {
+            const loadingP = document.createElement("p");
+            loadingP.className = "ultima-insercion-loading";
+            loadingP.setAttribute("aria-live", "polite");
+            loadingP.textContent = "Actualizando desde la hoja…";
+            wrap.appendChild(loadingP);
+        }
+        const result = await fetchItemsFromSheet(datos.idproducto);
+        const loadingP = wrap.querySelector && wrap.querySelector(".ultima-insercion-loading");
+        if (loadingP && loadingP.parentNode) loadingP.remove();
+        if (result.error) {
+            const errEl = document.createElement("p");
+            errEl.className = "ultima-insercion-error";
+            errEl.setAttribute("role", "alert");
+            errEl.textContent = result.error;
+            wrap.appendChild(errEl);
+            console.warn("[productos-compuestos] Carga de detalle:", result.error);
+            if (!datos.items || datos.items.length === 0) {
+                resumenEl.textContent = "Producto compuesto " + datos.idproducto + " con " + (datos.numItems || 0) + " ítem(s). No se pudieron cargar los ítems desde la hoja.";
+            }
+        } else if (result.items && result.items.length > 0) {
+            datos.items = result.items;
+            datos.numItems = result.items.length;
+            resumenEl.textContent = "Producto compuesto " + datos.idproducto + " con " + datos.items.length + " ítem(s) guardado(s) en productos-compuesto-detalle.";
+            renderUltimaInsercionTabla(datos);
+        } else if (!datos.items || datos.items.length === 0) {
+            resumenEl.textContent = "Producto compuesto " + datos.idproducto + " con 0 ítem(s) en la hoja. Agregá ítems desde «Agregar ítem al producto compuesto».";
+        }
 
         if (formProductosCompuestoWrap && pcIdproducto) {
             formProductosCompuestoWrap.style.display = "block";
+            const ordenInicial = "1";
+            const pcOrden = document.getElementById("pc-orden");
+            if (pcOrden) pcOrden.value = ordenInicial;
             pcIdproducto.value = datos.idproducto;
+            const ordenValueEl = document.getElementById("pc-orden-value");
+            const idproductoValueEl = document.getElementById("pc-idproducto-value");
+            if (ordenValueEl) ordenValueEl.textContent = ordenInicial;
+            if (idproductoValueEl) idproductoValueEl.textContent = datos.idproducto || "—";
+            const categorias = await fetchCategoriasFromSheet();
+            fillCategoriaDatalist(categorias);
         }
         renderDebugSection(datos);
 
@@ -297,24 +435,36 @@ document.addEventListener("DOMContentLoaded", async () => {
                 alert("No hay idproducto. Agregá primero ítems al producto compuesto desde «Agregar ítem al producto compuesto».");
                 return;
             }
-            const categoria = document.getElementById("pc-categoria")?.value?.trim() || "";
+            const orden = document.getElementById("pc-orden")?.value?.trim() || "";
+            const categoria = getCategoriaValue();
             const producto = document.getElementById("pc-producto")?.value?.trim() || "";
             const descripcion = document.getElementById("pc-descripcion")?.value?.trim() || "";
             const precioActual = document.getElementById("pc-precio-actual")?.value?.trim() || "";
+            const precioRegular = document.getElementById("pc-precio-regular")?.value?.trim() || "";
+            const mostarMontoDescuento = document.getElementById("pc-mostar-monto-descuento")?.value?.trim() || "NO";
+            const mostarDescuento = document.getElementById("pc-mostar-descuento")?.value?.trim() || "SI";
             const imagen = document.getElementById("pc-imagen")?.value?.trim() || "";
             const esDestacado = document.getElementById("pc-es-destacado")?.checked ? "SI" : "NO";
+            const productoAgotado = "NO";
+            const stock = "99";
             const habilitado = document.getElementById("pc-habilitado")?.checked ? "SI" : "NO";
 
             const payload = {
                 action: "create",
                 sheetName: PRODUCTOS_COMPUESTO_SHEET_NAME,
+                orden,
                 idproducto,
                 Categoria: categoria,
                 Producto: producto,
                 Descripcion: descripcion,
                 "Precio Actual": precioActual,
+                "Precio Regular": precioRegular,
+                "Mostar Monto Descuento": mostarMontoDescuento,
+                "Mostar Descuento": mostarDescuento,
                 Imagen: imagen,
                 "Es Destacado": esDestacado,
+                "Producto Agotado": productoAgotado,
+                STOCK: stock,
                 Habilitado: habilitado
             };
 
@@ -325,6 +475,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 scriptDebug.textContent = "";
                 scriptDebug.classList.remove("script-debug-success", "script-debug-error");
             }
+            let guardadoOk = false;
             try {
                 await fetch(MENU_SCRIPT_URL, {
                     method: "POST",
@@ -332,12 +483,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                     headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify(payload)
                 });
+                guardadoOk = true;
                 if (scriptDebug) {
-                    scriptDebug.textContent = "Guardado en «" + PRODUCTOS_COMPUESTO_SHEET_NAME + "» con idproducto " + idproducto + ".";
+                    scriptDebug.textContent = "Guardado correctamente. Redirigiendo a confirmación…";
                     scriptDebug.classList.add("script-debug-success");
                 }
                 datos = Object.assign({}, datos || {}, { idproducto, items: datos?.items || [] });
-                renderDebugSection(datos);
+                const datosConfirmacion = {
+                    productoCompuesto: payload,
+                    items: datos?.items || [],
+                    idproducto
+                };
+                try {
+                    sessionStorage.setItem("confirmacionMenuCompuesto", JSON.stringify(datosConfirmacion));
+                } catch (e) {}
+                window.location.href = "../admin-confirmacion-menu-compuesto/admin-confirmacion-menu-compuesto.html";
             } catch (err) {
                 console.error(err);
                 if (scriptDebug) {
@@ -346,17 +506,48 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
                 alert("No se pudo guardar: " + (err?.message || err));
             } finally {
-                btnGuardarCompuesto.disabled = false;
-                btnGuardarCompuesto.innerHTML = '<i class="fa-solid fa-save" aria-hidden="true"></i> Guardar en productos-compuesto';
+                if (!guardadoOk) {
+                    btnGuardarCompuesto.disabled = false;
+                    btnGuardarCompuesto.innerHTML = '<i class="fa-solid fa-save" aria-hidden="true"></i> Guardar en productos-compuesto';
+                }
             }
         });
     }
 
-    document.getElementById("pc-categoria")?.addEventListener("input", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
-    document.getElementById("pc-producto")?.addEventListener("input", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
-    document.getElementById("pc-descripcion")?.addEventListener("input", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
-    document.getElementById("pc-precio-actual")?.addEventListener("input", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
-    document.getElementById("pc-imagen")?.addEventListener("input", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
-    document.getElementById("pc-es-destacado")?.addEventListener("change", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
-    document.getElementById("pc-habilitado")?.addEventListener("change", () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] }));
+    const refreshDebug = () => renderDebugSection({ idproducto: pcIdproducto?.value, items: datos?.items || [] });
+    document.getElementById("pc-categoria")?.addEventListener("input", refreshDebug);
+    document.getElementById("pc-producto")?.addEventListener("input", refreshDebug);
+    document.getElementById("pc-descripcion")?.addEventListener("input", refreshDebug);
+    document.getElementById("pc-precio-actual")?.addEventListener("input", refreshDebug);
+    document.getElementById("pc-mostar-monto-descuento")?.addEventListener("change", refreshDebug);
+    document.getElementById("pc-mostar-descuento")?.addEventListener("change", refreshDebug);
+    const pcImagenHidden = document.getElementById("pc-imagen");
+    const pcImagenFile = document.getElementById("pc-imagen-file");
+    const pcImagenUrl = document.getElementById("pc-imagen-url");
+    pcImagenFile?.addEventListener("change", () => {
+        const file = pcImagenFile.files && pcImagenFile.files[0];
+        if (!file || !file.type.startsWith("image/")) {
+            if (pcImagenHidden) pcImagenHidden.value = "";
+            if (pcImagenUrl) pcImagenUrl.value = "";
+            updateImagenPreview();
+            refreshDebug();
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (pcImagenHidden) pcImagenHidden.value = reader.result;
+            if (pcImagenUrl) pcImagenUrl.value = "";
+            updateImagenPreview();
+            refreshDebug();
+        };
+        reader.readAsDataURL(file);
+    });
+    pcImagenUrl?.addEventListener("input", () => {
+        const url = (pcImagenUrl.value || "").trim();
+        if (pcImagenHidden) pcImagenHidden.value = url;
+        updateImagenPreview();
+        refreshDebug();
+    });
+    document.getElementById("pc-es-destacado")?.addEventListener("change", refreshDebug);
+    document.getElementById("pc-habilitado")?.addEventListener("change", refreshDebug);
 });
