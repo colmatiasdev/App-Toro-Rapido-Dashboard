@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Productos compuestos - Toro Rápido</title>
+    <link rel="icon" href="../../../imagenes/logos/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../admin-header.css">
+    <link rel="stylesheet" href="../admin-menu-compuesto/admin-menu-compuesto.css">
+    <link rel="stylesheet" href="admin-productos-compuestos.css">
+</head>
+<body>
+    <div id="admin-header-slot"></div>
+    <main class="admin-menu">
+        <header class="admin-header">
+            <p>Gestión de productos compuestos (ítems guardados en <strong>productos-compuesto-detalle</strong>).</p>
+        </header>
+
+        <section class="admin-card">
+            <div class="card-title">
+                <i class="fa-solid fa-layer-group"></i> Productos compuestos
+            </div>
+            <p class="field-hint">Desde acá podés agregar ítems al producto compuesto (se guardan en la hoja productos-compuesto-detalle) o gestionar el menú compuesto.</p>
+
+            <div class="form-actions form-actions-end" style="margin-top: 1rem;">
+                <a href="../admin-menu-subproductos/admin-menu-subproductos.html" class="primary-btn"><i class="fa-solid fa-circle-plus" aria-hidden="true"></i> Agregar ítem al producto compuesto</a>
+                <a href="../admin-menu-compuesto/admin-menu-compuesto.html" class="secondary-btn"><i class="fa-solid fa-list" aria-hidden="true"></i> Ver menú compuesto</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="admin-footer">
+        <div class="footer-container">
+            <h2 class="footer-title">Toro Rápido</h2>
+            <div class="footer-meta">San Miguel de Tucumán.</div>
+            <div class="footer-meta">© <span data-admin-year></span> Todos los derechos reservados.</div>
+        </div>
+    </footer>
+
+    <script src="../../Configuracion/config.js" defer></script>
+    <script src="../admin-common.js" defer></script>
+    <script src="admin-productos-compuestos.js" defer></script>
+</body>
+</html>

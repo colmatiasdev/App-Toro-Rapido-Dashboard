@@ -15,6 +15,7 @@
         "menu-simple": "menuSimpleSheetName",
         "menu-compuesto": "menuCompuestoSheetName",
         "menu-compuesto-detalle": "menuCompuestoDetalleSheetName",
+        "productos-compuesto-detalle": "productosCompuestoDetalleSheetName",
         "opciones-base": "menuOpcionesSheetName",
         "horario": "horarioSheetName",
         "feriado": "feriadoSheetName"

@@ -1,0 +1,7 @@
+/* Productos compuestos: página de gestión */
+.admin-productos-compuestos .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+}

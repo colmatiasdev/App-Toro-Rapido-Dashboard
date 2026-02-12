@@ -1,0 +1,345 @@
+/* Menú con subproductos: tabla productos-base y resumen */
+.subproductos-tabla-wrap {
+    margin-top: 1rem;
+}
+.subproductos-tabla-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+.subproductos-tabla-header .subproductos-section-title {
+    margin: 0;
+}
+.subproductos-max-leyenda {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.75rem;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #92400e;
+}
+.subproductos-max-leyenda i {
+    flex-shrink: 0;
+    font-size: 1.1rem;
+}
+.subproductos-resumen-wrap {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.25rem 1.5rem;
+    background: linear-gradient(180deg, #fef7ed 0%, #fff7ed 50%, #fff 100%);
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(180, 83, 9, 0.06);
+}
+.subproductos-resumen-wrap .subproductos-section-title {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--toro-dark);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.subproductos-resumen-wrap .subproductos-section-title::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 1.2em;
+    background: linear-gradient(180deg, var(--toro-red, #dc2626) 0%, #b45309 100%);
+    border-radius: 2px;
+}
+.subproductos-count {
+    font-weight: 700;
+    color: var(--toro-red);
+    font-size: 0.95rem;
+    margin-left: 0.25rem;
+}
+.subproductos-section-title {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--toro-dark);
+}
+
+/* Agrupación por categoría (como módulo productos) */
+.subproductos-table tr.category-header-row,
+.subproductos-resumen-table tr.category-header-row {
+    background: transparent;
+}
+.subproductos-table .category-header-cell,
+.subproductos-resumen-table .category-header-cell {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: var(--toro-dark);
+    background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 100%);
+    padding: 12px 16px;
+    border-top: 2px solid #cbd5e1;
+    border-bottom: 1px solid #e2e8f0;
+    letter-spacing: 0.02em;
+}
+.subproductos-table tbody tr.category-header-row:first-child .category-header-cell,
+.subproductos-resumen-table tbody tr.category-header-row:first-child .category-header-cell {
+    border-top: none;
+}
+
+/* Imagen: alto de fila sin afectar diseño */
+.subproductos-table .cell-imagen-th,
+.subproductos-resumen-table .cell-imagen-th {
+    width: 56px;
+}
+.subproductos-table .cell-imagen,
+.subproductos-resumen-table .cell-imagen {
+    width: 56px;
+    height: 48px;
+    padding: 4px;
+    vertical-align: middle;
+    text-align: center;
+}
+.subproductos-table .cell-imagen .subproductos-img-wrap,
+.subproductos-resumen-table .cell-imagen .subproductos-img-wrap {
+    display: block;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+.subproductos-table .cell-imagen img,
+.subproductos-resumen-table .cell-imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.subproductos-table .cell-imagen .subproductos-img-sin,
+.subproductos-resumen-table .cell-imagen .subproductos-img-sin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    font-size: 0.7rem;
+    color: var(--toro-muted);
+    background: #f1f5f9;
+    border-radius: 8px;
+}
+
+/* Corona destacado */
+.subproductos-table .cell-destacado-th,
+.subproductos-resumen-table .cell-destacado-th,
+.subproductos-table .cell-destacado,
+.subproductos-resumen-table .cell-destacado {
+    width: 2.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+.subproductos-table .cell-destacado .destacado-icon,
+.subproductos-resumen-table .cell-destacado .destacado-icon {
+    color: #b45309;
+    font-size: 1rem;
+}
+
+.subproductos-table .th-check,
+.subproductos-table td:first-child {
+    width: 44px;
+    text-align: center;
+    vertical-align: middle;
+}
+.subproductos-table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--toro-red);
+}
+.subproductos-table input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Fila no habilitada: no se puede agregar, remarcado sutil y atenuación coherente */
+.subproductos-table tr.row-deshabilitado {
+    background: #f8fafc;
+}
+.subproductos-table tr.row-deshabilitado td {
+    color: var(--toro-muted);
+}
+.subproductos-table tr.row-deshabilitado .cell-imagen,
+.subproductos-table tr.row-deshabilitado .cell-imagen img,
+.subproductos-table tr.row-deshabilitado .cell-imagen .subproductos-img-wrap,
+.subproductos-table tr.row-deshabilitado .cell-imagen .subproductos-img-sin {
+    opacity: 0.5;
+}
+.subproductos-table tr.row-deshabilitado .cell-destacado .destacado-icon {
+    opacity: 0.5;
+    color: #94a3b8;
+}
+
+/* Columna Habilitado: icono SI/NO */
+.subproductos-table .cell-habilitado,
+.subproductos-resumen-table .cell-habilitado {
+    width: 2.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+.subproductos-table .habilitado-icon,
+.subproductos-resumen-table .habilitado-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+.subproductos-table .habilitado-icon.habilitado-si,
+.subproductos-resumen-table .habilitado-icon.habilitado-si {
+    color: #15803d;
+}
+.subproductos-table .habilitado-icon.habilitado-no,
+.subproductos-resumen-table .habilitado-icon.habilitado-no {
+    color: #94a3b8;
+}
+
+.subproductos-resumen-table td {
+    font-size: 0.85rem;
+}
+
+/* Tabla resumen: aspecto distinto (panel de selección) */
+.subproductos-resumen-wrap .table-wrap {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #fed7aa;
+    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.06);
+}
+.subproductos-resumen-wrap .subproductos-resumen-table {
+    margin: 0;
+}
+/* Encabezado de la tabla resumen: tono acorde al panel (crema/ámbar) */
+.subproductos-resumen-wrap .subproductos-resumen-table thead th {
+    background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+    color: #92400e;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 10px 12px;
+    border-bottom: 2px solid #fcd34d;
+}
+.subproductos-resumen-wrap .subproductos-resumen-table tbody tr {
+    transition: background 0.15s;
+}
+.subproductos-resumen-wrap .subproductos-resumen-table tbody tr:nth-child(even) {
+    background: #fffbeb;
+}
+.subproductos-resumen-wrap .subproductos-resumen-table tbody tr:hover {
+    background: #fef3c7;
+}
+.subproductos-resumen-wrap .subproductos-resumen-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #fef3c7;
+}
+.subproductos-resumen-wrap .subproductos-resumen-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Columna e icono quitar en resumen */
+.subproductos-resumen-table .cell-quitar-th,
+.subproductos-resumen-table .cell-quitar {
+    width: 2.5rem;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px;
+}
+.subproductos-resumen-table .btn-quitar-resumen {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--toro-muted);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+}
+.subproductos-resumen-table .btn-quitar-resumen:hover {
+    color: var(--toro-red, #dc2626);
+    background: #fef2f2;
+}
+.subproductos-resumen-table .btn-quitar-resumen i {
+    font-size: 1.1rem;
+}
+
+/* Columna Cantidad en resumen: controles +/- */
+.subproductos-resumen-table .cell-cantidad-th,
+.subproductos-resumen-table .cell-cantidad {
+    width: 7rem;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px 8px;
+}
+.subproductos-resumen-table .cantidad-controls {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.subproductos-resumen-table .btn-cantidad {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #fff;
+    color: var(--toro-dark);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.subproductos-resumen-table .btn-cantidad:hover:not(:disabled) {
+    background: #fef3c7;
+    border-color: #fcd34d;
+    color: #92400e;
+}
+/* Cuando cantidad es 1, el botón menos se comporta como "Quitar del resumen" */
+.subproductos-resumen-table .btn-cantidad-quitar {
+    color: var(--toro-muted);
+    border-color: #e2e8f0;
+}
+.subproductos-resumen-table .btn-cantidad-quitar:hover {
+    background: #fef2f2;
+    border-color: var(--toro-red, #dc2626);
+    color: var(--toro-red, #dc2626);
+}
+.subproductos-resumen-table .btn-cantidad:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.subproductos-resumen-table .cantidad-valor {
+    min-width: 1.5rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--toro-dark);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

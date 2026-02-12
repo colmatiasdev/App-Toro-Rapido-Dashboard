@@ -333,6 +333,7 @@ const PANELES_TIPO_GENERACION = Object.values(OPCIONES_TIPO_GENERACION).map((o) 
 
 /** Muestra u oculta el contenido según la opción seleccionada en el combo. Extensible vía OPCIONES_TIPO_GENERACION. */
 const switchTipoGeneracion = () => {
+    setDebug("");
     const select = document.getElementById("tipo-generacion-select");
     const tipo = (select?.value ?? "").toString().trim();
     const config = OPCIONES_TIPO_GENERACION[tipo] ?? OPCIONES_TIPO_GENERACION[""];

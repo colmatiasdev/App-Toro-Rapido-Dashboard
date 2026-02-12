@@ -55,6 +55,10 @@ window.APP_CONFIG = {
     menuOpcionesSheetName: "opciones-base",
     /** Nombre de la hoja de productos. Columnas: ID Producto, Categoria, Producto, Descripcion, Precio Actual, Precio Regular, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado, Mostar Monto Descuento, Mostar Descuento. */
     menuProductosSheetName: "productos-base",
+    /** Nombre de la hoja donde se guardan los ítems del producto compuesto (módulo menú con subproductos). Sin idmenu-variable. Columnas: idproducto, Cantidad, Producto, Precio Unitario Actual, Precio Total Actual, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado. */
+    productosCompuestoDetalleSheetName: "productos-compuesto-detalle",
+    /** Máximo de ítems que se pueden cargar en el resumen de subproductos (menú con subproductos). Al llegar al máximo se muestra una leyenda y se deshabilitan los checks restantes. */
+    menuSubproductosMaxItems: 5,
 
     // ========== HORARIO DE ATENCIÓN ==========
     /** Nombre de la hoja de horarios en el Sheet. Columnas: IDHORARIO, DIA, HORA DESDE, MINUTO DESDE, HORA HASTA, MINUTO HASTA. DIA: Lunes, Martes, etc. Horas 0-23, minutos 0-59. */
