@@ -34,3 +34,88 @@
 .ultima-insercion-wrap .table-wrap {
     margin-top: 0.5rem;
 }
+.ultima-insercion-loading {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    font-style: italic;
+}
+.ultima-insercion-error {
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+}
+.ultima-insercion-tfoot {
+    font-weight: 700;
+    background: #dcfce7;
+    border-top: 2px solid #86efac;
+}
+.ultima-insercion-tfoot .ultima-insercion-total-label {
+    text-align: right;
+    padding: 0.5rem 1rem;
+    color: #166534;
+}
+.ultima-insercion-tfoot .ultima-insercion-total-valor {
+    padding: 0.5rem 1rem;
+    color: #166534;
+}
+
+/* Formulario producto compuesto (hoja productos-compuesto) */
+.form-productos-compuesto-wrap {
+    margin-top: 1.5rem;
+}
+.form-productos-compuesto-inner .form-row {
+    margin-bottom: 0.75rem;
+}
+.form-productos-compuesto-inner .form-row label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+.form-productos-compuesto-inner input[type="text"],
+.form-productos-compuesto-inner textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+.form-productos-compuesto-inner input.input-readonly {
+    background: #f1f5f9;
+    color: #475569;
+}
+.form-productos-compuesto-inner .form-row-inline label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.form-productos-compuesto-inner .field-hint-inline {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+}
+.form-productos-compuesto-wrap .script-debug {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+.form-productos-compuesto-wrap .script-debug.script-debug-success {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #166534;
+}
+.form-productos-compuesto-wrap .script-debug.script-debug-error {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}

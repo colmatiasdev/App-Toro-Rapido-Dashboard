@@ -1,5 +1,9 @@
-/** Formato de moneda compartido en toda la app (es-AR). */
-window.formatMoneda = (valor) => `$ ${Number(valor).toLocaleString("es-AR")}`;
+/** Formato de moneda compartido en toda la app (es-AR). Ej: $ 1.461.879,79 */
+window.formatMoneda = (valor) => {
+    const n = Number(valor);
+    if (Number.isNaN(n)) return "—";
+    return `$ ${n.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
 
 window.APP_CONFIG = {
     // ========== GENERAL Y DEBUG ==========
@@ -55,6 +59,8 @@ window.APP_CONFIG = {
     menuOpcionesSheetName: "opciones-base",
     /** Nombre de la hoja de productos. Columnas: ID Producto, Categoria, Producto, Descripcion, Precio Actual, Precio Regular, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado, Mostar Monto Descuento, Mostar Descuento. */
     menuProductosSheetName: "productos-base",
+    /** Nombre de la hoja del producto compuesto (registro principal por idproducto PROD-COMPUESTO-xxx). Se completa desde admin-productos-compuestos tras agregar ítems en productos-compuesto-detalle. */
+    productosCompuestoSheetName: "productos-compuesto",
     /** Nombre de la hoja donde se guardan los ítems del producto compuesto (módulo menú con subproductos). idproducto = PROD-COMPUESTO- + único aleatorio; idproducto-base = ID del producto seleccionado (productos-base). Columnas: idproducto, idproducto-base, Cantidad, Producto, Precio Unitario Actual, Precio Total Actual, Imagen, Es Destacado, Producto Agotado, STOCK, Habilitado. */
     productosCompuestoDetalleSheetName: "productos-compuesto-detalle",
     /** Máximo de ítems que se pueden cargar en el resumen de subproductos (menú con subproductos). Al llegar al máximo se muestra una leyenda y se deshabilitan los checks restantes. */
